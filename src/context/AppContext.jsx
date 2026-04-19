@@ -2,20 +2,17 @@ import { createContext, useContext, useState } from 'react'
 
 const AppContext = createContext()
 
-export const roles = {
-  fabricante: { id: 'fabricante', label: 'Fabricante', user: { name: 'Martín Larrea', company: 'Lácteos Larrea S.L.', avatar: 'ML' } },
-  comercial:  { id: 'comercial',  label: 'Comercial',  user: { name: 'José Luis Díaz', company: 'FoodBridge Comercial', avatar: 'JL' } },
-  cliente:    { id: 'cliente',    label: 'Cliente',    user: { name: 'Sara Gómez', company: 'Distribuciones SG', avatar: 'SG' } },
-}
-
 export function AppProvider({ children }) {
   const [currentRole, setCurrentRole] = useState(null)
+  const [inPanel, setInPanel] = useState(false)
+  const [fabProfile, setFabProfile] = useState('directivo')
+
   return (
     <AppContext.Provider value={{
-      currentRole,
-      roleData: currentRole ? roles[currentRole] : null,
-      enterAs: (id) => setCurrentRole(id),
-      goHome: () => setCurrentRole(null),
+      currentRole, inPanel, fabProfile,
+      enterAs: (id) => { setCurrentRole(id); setInPanel(false) },
+      enterPanel: (fp) => { if (fp) setFabProfile(fp); setInPanel(true) },
+      goHome: () => { setCurrentRole(null); setInPanel(false); setFabProfile('directivo') },
     }}>
       {children}
     </AppContext.Provider>
