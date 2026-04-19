@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --navy: #1A2F4A;
+  --orange: #E87420;
+  --orange-light: #F5A623;
+  --cream: #FFF8F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--navy);
+  -webkit-font-smoothing: antialiased;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes float3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes dotPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.3} }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(1.5)} }
+@keyframes modalIn { from{opacity:0;transform:scale(.95) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:none} }
+@keyframes gradShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.font-display { font-family: 'Barlow Condensed', sans-serif; }
+.animate-fadeUp { animation: fadeUp .5s ease both; }
+.animate-fadeIn { animation: fadeIn .3s ease both; }
+.animate-float1 { animation: float1 4s ease-in-out infinite; }
+.animate-float2 { animation: float2 4.5s .4s ease-in-out infinite; }
+.animate-float3 { animation: float3 3.8s .8s ease-in-out infinite; }
+.animate-blink { animation: blink .7s step-end infinite; }
+.animate-dotPulse { animation: dotPulse 1.5s infinite; }
+.animate-pulse-icon { animation: pulse 1.8s ease-in-out infinite; }
+.animate-modalIn { animation: modalIn .25s ease both; }
+.animate-slideIn { animation: slideIn .3s ease both; }
+.animate-spin { animation: spin 1s linear infinite; }
+.ia-gradient { background: linear-gradient(270deg,#E87420,#1A2F4A,#E87420); background-size:200% 200%; animation: gradShift 3s ease infinite; }
+
+.scrollable { overflow-y: auto; }
+.scrollable::-webkit-scrollbar { width: 4px; }
+.scrollable::-webkit-scrollbar-thumb { background: rgba(26,47,74,.15); border-radius: 2px; }
