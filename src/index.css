@@ -88,6 +88,19 @@ body {
   /* Login */
   .login-wrap { flex-direction: column !important; }
   .login-left { padding: 24px 16px !important; min-height: 180px !important; }
+
+  /* Tarjetas alertas — 1 columna */
+  .grid-2 { grid-template-columns: 1fr !important; }
+
+  /* Tablas — scroll horizontal interno */
+  table { font-size: .6rem !important; }
+  td, th { padding: 6px 6px !important; white-space: normal !important; word-break: break-word; }
+
+  /* Textos largos no se cortan */
+  .card, [class*="card"] { min-width: 0 !important; overflow: hidden !important; }
+
+  /* KPI — fuente más pequeña en móvil */
+  .kpi-val, [style*="Barlow Condensed"] { font-size: 1.1rem !important; }
 }
 
 @media (min-width: 641px) {
