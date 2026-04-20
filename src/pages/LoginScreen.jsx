@@ -63,14 +63,15 @@ export default function LoginScreen() {
   const handleAcceder = () => enterPanel(fabProfile)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
 
       {/* LEFT — navy panel */}
       <div style={{
         flex: 1, background: '#1A2F4A',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        padding: '64px 72px', position: 'relative', overflow: 'hidden'
-      }}>
+        padding: '64px 72px', position: 'relative', overflow: 'hidden',
+        minHeight: 'min(50vh, 300px)'
+      }} className="login-left">
         {/* Subtle bg glow */}
         <div style={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,116,32,.08), transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,116,32,.05), transparent 70%)', pointerEvents: 'none' }} />
@@ -146,9 +147,9 @@ export default function LoginScreen() {
 
       {/* RIGHT — form panel */}
       <div style={{
-        width: 460, display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        padding: '64px 56px', background: '#fff',
-        borderLeft: '1px solid #E8D5C0', boxShadow: '-20px 0 60px rgba(26,47,74,.08)'
+        width: 'min(460px, 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: 'clamp(28px, 6vw, 64px) clamp(20px, 8vw, 56px)', background: '#fff',
+        borderLeft: '1px solid #E8D5C0', boxShadow: '-20px 0 60px rgba(26,47,74,.08)', flex: '1 0 auto'
       }}>
         <div style={{ fontSize: '.62rem', color: '#8A9BB0', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 8 }}>
           Acceso seguro

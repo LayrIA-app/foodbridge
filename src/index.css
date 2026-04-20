@@ -1,6 +1,5 @@
-@import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
 :root {
   --navy: #1A2F4A;
@@ -81,4 +80,8 @@ body {
 }
 @media (max-width: 900px) {
   .fab-topbar-tagline { display: none !important; }
+}
+@media (max-width: 640px) {
+  .login-left { min-height: 180px !important; padding: 24px 20px !important; }
+  .login-left .login-feats { display: none !important; }
 }

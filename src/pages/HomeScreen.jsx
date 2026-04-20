@@ -146,7 +146,7 @@ export default function HomeScreen() {
 
         {/* Cards */}
         <div
-          style={{ display: 'flex', gap: 20 }}
+          style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}
           onMouseLeave={() => setHovered(null)}
         >
           {[
@@ -199,7 +199,7 @@ export default function HomeScreen() {
                 onClick={() => enterAs(card.id)}
                 onMouseEnter={() => setHovered(card.id)}
                 style={{
-                  width: 200, borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+                  width: 'min(200px, 85vw)', borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
                   background: card.bg, border: card.border,
                   boxShadow: isHov ? '0 28px 60px rgba(0,0,0,.3)' : '0 8px 32px rgba(0,0,0,.15)',
                   opacity: isBlur ? 0.4 : 1,
