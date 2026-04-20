@@ -79,12 +79,12 @@ export default function HomeScreen() {
 
         {/* Logo */}
         <div className="animate-fadeUp" style={{
-          display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10,
-          background: '#1A2F4A', padding: '14px 28px', borderRadius: 50,
+          display: 'flex', alignItems: 'center', gap: 'clamp(8px,3vw,16px)', marginBottom: 10,
+          background: '#1A2F4A', padding: 'clamp(8px,2vw,14px) clamp(14px,4vw,28px)', borderRadius: 50,
           boxShadow: '0 8px 32px rgba(26,47,74,.3)'
         }}>
           <div style={{
-            width: 60, height: 60, borderRadius: '50%',
+            width: 'clamp(36px,8vw,60px)', height: 'clamp(36px,8vw,60px)', borderRadius: '50%',
             background: 'linear-gradient(135deg,#E87420,#F5A623)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 6px 28px rgba(232,116,32,.4)'
@@ -146,7 +146,7 @@ export default function HomeScreen() {
 
         {/* Cards */}
         <div
-          style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', width: '100%', padding: '0 16px' }}
+          style={{ display: 'flex', gap: 16, flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 16px' }}
           onMouseLeave={() => setHovered(null)}
         >
           {[
@@ -199,7 +199,7 @@ export default function HomeScreen() {
                 onClick={() => enterAs(card.id)}
                 onMouseEnter={() => setHovered(card.id)}
                 style={{
-                  width: 'clamp(140px, 42vw, 200px)', borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+                  width: 'min(340px, 90vw)', borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
                   background: card.bg, border: card.border,
                   boxShadow: isHov ? '0 28px 60px rgba(0,0,0,.3)' : '0 8px 32px rgba(0,0,0,.15)',
                   opacity: isBlur ? 0.4 : 1,
