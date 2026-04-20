@@ -58,9 +58,40 @@ function RolePending() {
   )
 }
 
-function Router() {
-  const { initializing, session, profile, currentRole, inPanel } = useApp()
+function ConfigMissing() {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 500,
+      background: SCREEN_BG, color: '#1A2F4A',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24, fontFamily: 'DM Sans'
+    }}>
+      <div style={{
+        maxWidth: 520, padding: 32, borderRadius: 16, background: '#fff',
+        boxShadow: '0 20px 60px rgba(26,47,74,.08)', border: '1px solid #E8D5C0'
+      }}>
+        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.2rem', fontWeight: 900, marginBottom: 10, letterSpacing: '.04em', textTransform: 'uppercase', color: '#E87420' }}>
+          Configuración incompleta
+        </div>
+        <div style={{ fontSize: '.85rem', color: '#3a4a5a', lineHeight: 1.55, marginBottom: 14 }}>
+          Faltan las variables de entorno de Supabase. Añádelas en Vercel → Settings → Environment Variables:
+        </div>
+        <ul style={{ fontSize: '.78rem', color: '#1A2F4A', lineHeight: 1.8, paddingLeft: 18, marginBottom: 14 }}>
+          <li><code>VITE_SUPABASE_URL</code></li>
+          <li><code>VITE_SUPABASE_ANON_KEY</code></li>
+        </ul>
+        <div style={{ fontSize: '.78rem', color: '#3a4a5a', lineHeight: 1.55 }}>
+          Después <strong>Redeploy sin caché de build</strong> (desmarca "Use existing Build Cache") para que las variables entren en el bundle.
+        </div>
+      </div>
+    </div>
+  )
+}
 
+function Router() {
+  const { initializing, session, profile, currentRole, inPanel, supabaseConfigured } = useApp()
+
+  if (!supabaseConfigured) return <ConfigMissing/>
   if (initializing) return <Splash message="Cargando…"/>
 
   // Con sesión: la lógica la manda profile.role

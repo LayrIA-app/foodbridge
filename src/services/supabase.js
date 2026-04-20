@@ -3,19 +3,22 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!url || !key) {
-  // Se detectará al intentar hacer login; el mensaje deja claro qué falta.
-  console.warn(
+export const supabaseConfigured = Boolean(url && key)
+
+if (!supabaseConfigured) {
+  console.error(
     '[supabase] Faltan env vars VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY. ' +
-    'La autenticación no funcionará hasta que se configuren en Vercel (prod) ' +
-    'o en .env.local (desarrollo).'
+    'Añádelas en Vercel (Settings → Environment Variables) y haz Redeploy SIN build cache.'
   )
 }
 
-export const supabase = createClient(url ?? '', key ?? '', {
+// createClient con strings vacios funciona (no tira error sincrono), pero cualquier
+// llamada real fallara. Exponemos supabaseConfigured para que el resto del codigo
+// muestre un mensaje claro en vez de una pantalla de carga infinita.
+export const supabase = createClient(url ?? 'http://localhost', key ?? 'anon', {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
+    persistSession: supabaseConfigured,
+    autoRefreshToken: supabaseConfigured,
+    detectSessionInUrl: supabaseConfigured,
   },
 })

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../services/supabase'
+import { supabase, supabaseConfigured } from '../services/supabase'
 
 const AppContext = createContext()
 
@@ -27,24 +27,43 @@ export function AppProvider({ children }) {
   const [fabProfile, setFabProfile] = useState('directivo')
 
   useEffect(() => {
+    // Si no hay env vars, no intentamos hablar con Supabase — el router mostrará
+    // la pantalla de configuración faltante.
+    if (!supabaseConfigured) {
+      setInitializing(false)
+      return
+    }
+
     let mounted = true
     const bootstrap = async () => {
-      const { data: { session: initial } } = await supabase.auth.getSession()
-      if (!mounted) return
-      setSession(initial)
-      if (initial?.user) {
-        const p = await loadProfile(initial.user.id)
-        if (mounted) setProfile(p)
+      try {
+        const { data, error } = await supabase.auth.getSession()
+        if (error) throw error
+        if (!mounted) return
+        const initial = data?.session ?? null
+        setSession(initial)
+        if (initial?.user) {
+          const p = await loadProfile(initial.user.id)
+          if (mounted) setProfile(p)
+        }
+      } catch (err) {
+        console.error('[supabase] bootstrap error:', err?.message || err)
+      } finally {
+        if (mounted) setInitializing(false)
       }
-      if (mounted) setInitializing(false)
     }
     bootstrap()
 
     const { data: authSub } = supabase.auth.onAuthStateChange(async (_event, next) => {
       setSession(next)
       if (next?.user) {
-        const p = await loadProfile(next.user.id)
-        setProfile(p)
+        try {
+          const p = await loadProfile(next.user.id)
+          setProfile(p)
+        } catch (err) {
+          console.error('[supabase] profile load on auth change:', err?.message || err)
+          setProfile(null)
+        }
       } else {
         setProfile(null)
       }
@@ -74,6 +93,7 @@ export function AppProvider({ children }) {
       session,
       profile,
       initializing,
+      supabaseConfigured,
       signIn,
       signOut,
 
