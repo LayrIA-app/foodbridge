@@ -52,8 +52,8 @@ export default function HomeScreen() {
     <div style={{
       position: 'fixed', inset: 0, zIndex: 500,
       background: 'linear-gradient(160deg,#FFF8F0 55%,#1A2F4A 55%)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      overflow: 'hidden'
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+      overflow: 'auto', paddingTop: 'max(20px, 5vh)', paddingBottom: 20
     }}>
       {/* Diagonal line */}
       <div style={{ position: 'absolute', top: 0, bottom: 0, left: '55%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(232,120,18,.4),transparent)' }} />
@@ -146,7 +146,7 @@ export default function HomeScreen() {
 
         {/* Cards */}
         <div
-          style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}
+          style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', width: '100%', padding: '0 16px' }}
           onMouseLeave={() => setHovered(null)}
         >
           {[
@@ -199,7 +199,7 @@ export default function HomeScreen() {
                 onClick={() => enterAs(card.id)}
                 onMouseEnter={() => setHovered(card.id)}
                 style={{
-                  width: 'min(200px, 85vw)', borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+                  width: 'clamp(140px, 42vw, 200px)', borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
                   background: card.bg, border: card.border,
                   boxShadow: isHov ? '0 28px 60px rgba(0,0,0,.3)' : '0 8px 32px rgba(0,0,0,.15)',
                   opacity: isBlur ? 0.4 : 1,
