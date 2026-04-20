@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
+import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -1572,6 +1573,11 @@ function EnviarCotizModal({ cot, onClose }) {
       {sent==='email_error' && <div style={{ marginTop:6, fontSize:'.62rem', color:'#e03030', fontWeight:600 }}>✗ Error al enviar. Comprueba el email.</div>}
             </div>
 
+            <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+              <button onClick={()=>pdfCotizacion(cot)} style={{ flex:1, padding:10, borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', letterSpacing:'.04em', background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', color:'#fff' }}>
+                📄 Descargar PDF
+              </button>
+            </div>
             <button onClick={onClose} style={{ width:'100%', padding:10, borderRadius:9, border:'1px solid #E8D5C0', background:'transparent', color:'#7a8899', fontSize:'.7rem', cursor:'pointer', fontFamily:'DM Sans' }}>Cerrar</button>
           </div>
         </div>
@@ -1634,6 +1640,7 @@ function buildModal(type, detail, showToast) {
     escanear:{title:`Escanear: ${detail}`,body:`<div style="text-align:center;padding:20px"><div style="font-size:2rem;margin-bottom:12px">📷</div><div style="font-size:.78rem;font-weight:700;color:#1A2F4A;margin-bottom:6px">IA procesando ${detail}...</div><div style="font-size:.65rem;color:#7a8899">OCR extrae importe, concepto y datos fiscales automáticamente.</div></div>`,actions:[{label:'Confirmar registro',type:'primary',fn:()=>showToast('✅ Gasto registrado automáticamente')},{label:'Cancelar',type:'gray'}]},
     liquidar:{title:'Generar liquidación',body:`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:#F8FAFC"><span style="font-size:.68rem">Kilometraje (1.280 km)</span><span style="font-size:.68rem;font-weight:700">243€</span></div><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:#F8FAFC"><span style="font-size:.68rem">Dietas y peajes</span><span style="font-size:.68rem;font-weight:700">156€</span></div><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(232,116,32,.06)"><span style="font-size:.68rem;font-weight:700">TOTAL</span><span style="font-size:.68rem;font-weight:800;color:#E87420">342€</span></div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>showToast('✅ Liquidación PDF descargada')},{label:'Enviar a dirección',type:'blue',fn:()=>showToast('✉️ Enviada a dirección')},{label:'Cerrar',type:'gray'}]},
     filtro:{title:`Filtro: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a">Filtrando mensajes por: <strong>${detail}</strong></div>`,actions:[{label:'Aplicar',type:'primary',fn:()=>showToast(`✅ Filtro ${detail} aplicado`)},{label:'Cerrar',type:'gray'}]},
+    exportar:{title:`Exportar: ${detail}`,body:`<div style="text-align:center;padding:20px"><div style="font-size:.85rem;font-weight:700;color:#1A2F4A;margin-bottom:8px">${detail}</div><div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.62rem;color:#3a4a5a">PDF profesional generado por FoodBridge IA con todos los datos.</div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>{pdfFichaTecnica({nombre:detail,ref:detail});showToast('✅ PDF descargado')}},{label:'Cerrar',type:'gray'}]},
   }
   return m[type]||{title:'FoodBridge IA',body:`<div style="font-size:.75rem;color:#3a4a5a;padding:10px">🧠 ${detail||type}</div>`,actions:[{label:'Cerrar',type:'gray'}]}
 }
