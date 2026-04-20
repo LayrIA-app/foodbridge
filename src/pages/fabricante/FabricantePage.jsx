@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
-import IAChat from '../../components/IAChat'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -1206,7 +1205,6 @@ export default function FabricantePage() {
       <Toast msg={toast} />
       {push && <PushNotif msg={push} onClose={()=>setPush(null)} />}
       {alertsOpen && <AlertsModal alerts={currentAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))} />}
-      <IAChat role="fabricante" accent={ACCENT} collapsed />
     </div>
   )
 }

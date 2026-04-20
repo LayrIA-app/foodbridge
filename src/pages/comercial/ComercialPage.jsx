@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import IAChat from '../../components/IAChat'
 import { useApp } from '../../context/AppContext'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
@@ -1819,7 +1818,6 @@ export default function ComercialPage() {
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
       {alertsOpen&&<AlertsModal alerts={ALERTS} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
-      <IAChat role="comercial" accent={ACCENT} collapsed />
     </div>
   )
 }
