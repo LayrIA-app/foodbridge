@@ -426,6 +426,13 @@ function Catalogo({ act }) {
         <KPI val="47" label="Por actualizar" delta="▼ Revisión pendiente" color="#1A78FF"/>
         <KPI val="12" label="Nuevos este mes" delta="▲ Indexados por IA" up color="#e8a010"/>
       </div>
+      <div style={{ background:'linear-gradient(135deg,#FFF3E8,#FFFBF5)', border:'1.5px solid rgba(232,116,32,.25)', borderRadius:10, padding:'12px 16px', marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+        <div>
+          <div style={{ fontSize:'.68rem', fontWeight:700, color:ACCENT, marginBottom:3 }}>⚡ ACTUALIZACIÓN DE TARIFAS PENDIENTE</div>
+          <div style={{ fontSize:'.62rem', color:'#3a4a5a' }}>IA ha detectado cambios en 47 productos — <strong>2.000 clientes y agentes afectados</strong></div>
+        </div>
+        <BtnSm onClick={()=>act('notificar_tarifas','cambio_tarifas')}>Notificar cambios IA →</BtnSm>
+      </div>
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Productos por categoría</CardTitle>
         <ScrollTable>
@@ -524,6 +531,9 @@ function Comunicaciones({ act }) {
           <button onClick={()=>act('notificar','Todos los agentes')} style={{ width:'100%', padding:11, background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontFamily:'Barlow Condensed', fontWeight:900, fontSize:'.9rem', letterSpacing:'.1em', textTransform:'uppercase', cursor:'pointer' }}>
             Redactar y enviar con IA →
           </button>
+          <button onClick={()=>act('notificar_tarifas','cambio_tarifas')} style={{ width:'100%', padding:11, background:`linear-gradient(135deg,#1A2F4A,#2A4A6A)`, border:'none', borderRadius:8, color:'#fff', fontFamily:'Barlow Condensed', fontWeight:900, fontSize:'.9rem', letterSpacing:'.1em', textTransform:'uppercase', cursor:'pointer', marginTop:8 }}>
+            ⚡ Notificar cambio de tarifas →
+          </button>
         </Card>
       </div>
     </div>
@@ -544,6 +554,34 @@ function buildModal(type, detail, showToast) {
     subir:{title:'Subir documento',body:`<div style="text-align:center;padding:24px"><div style="width:72px;height:72px;border:2px dashed rgba(232,116,32,.3);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;background:#FFFBF5"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E87420" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div style="font-size:.82rem;font-weight:700;color:#1A2F4A;margin-bottom:5px">Arrastra un documento aquí</div><div style="font-size:.7rem;color:#7a8899">PDF, Excel, imagen · La IA extraerá todos los datos automáticamente</div></div>`,actions:[{label:'Seleccionar archivo',type:'primary',fn:()=>showToast('✅ IA extrayendo datos...')},{label:'Cancelar',type:'gray'}]},
     ver:{title:`Ver: ${detail}`,body:`<div style="padding:12px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a;line-height:1.7">Detalles de: <strong>${detail}</strong><br/><br/>Datos actualizados por IA en tiempo real.</div>`,actions:[{label:'Exportar PDF',type:'primary',fn:()=>showToast('✅ PDF exportado')},{label:'Cerrar',type:'gray'}]},
     PDF:{title:`Ficha técnica: ${detail}`,body:`<div style="text-align:center;padding:20px"><div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#1A2F4A,#2A4A6A);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E87420" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div style="font-size:.82rem;font-weight:700;color:#1A2F4A;margin-bottom:5px">${detail}</div><div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.62rem;color:#3a4a5a;text-align:left">✓ Reg. 1169/2011 · ✓ 14 alérgenos · ✓ Datos nutricionales · ✓ Microbiología</div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>showToast('✅ PDF descargado')},{label:'Cerrar',type:'gray'}]},
+    notificar_tarifas:{title:'Notificar cambio de tarifas',body:`
+      <div style="background:#FFF8F0;border:1.5px solid rgba(232,116,32,.25);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:.65rem;font-weight:700;color:#E87420;margin-bottom:8px">⚡ IA HA DETECTADO LOS SIGUIENTES CAMBIOS</div>
+        <table style="width:100%;font-size:.65rem;border-collapse:collapse">
+          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina W-280</td><td style="text-align:right;color:#e03030;font-weight:700">0,85€ → 0,91€ (+7.1%)</td></tr>
+          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina W-380</td><td style="text-align:right;color:#e03030;font-weight:700">1,15€ → 1,22€ (+6.1%)</td></tr>
+          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina Eco T-110</td><td style="text-align:right;color:#e03030;font-weight:700">1,33€ → 1,40€ (+5.3%)</td></tr>
+          <tr><td style="padding:5px 0;color:#7a8899">+ 44 productos más</td><td style="text-align:right;color:#7a8899">Ver todos →</td></tr>
+        </table>
+      </div>
+      <div style="background:#EBF5EF;border-radius:8px;padding:10px;margin-bottom:14px;font-size:.62rem;color:#2D8A30">
+        ✓ IA generará un mensaje personalizado por cliente con solo los productos que compra
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Enviar por WhatsApp (prefijo + número)</div>
+        <div style="display:flex;gap:8px">
+          <input id="fab-wa" placeholder="+34 600 000 000" style="flex:1;padding:9px 12px;border:2px solid rgba(37,211,102,.3);border-radius:8px;font-size:.72rem;font-family:DM Sans,sans-serif;outline:none" />
+          <button onclick="(()=>{const n=document.getElementById('fab-wa').value.replace(/[\s\-+()]/g,'');if(!n)return;const m=encodeURIComponent('Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\nHarina W-280: 0,85€ → 0,91€/kg (+7.1%)\nHarina W-380: 1,15€ → 1,22€/kg (+6.1%)\nHarina Eco T-110: 1,33€ → 1,40€/kg (+5.3%)\n\nSolo se muestran los productos que usted compra.\n\n---\nFoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados');window.open('https://wa.me/'+n+'?text='+m,'_blank')})()" style="padding:9px 14px;background:#25D366;border:none;border-radius:8px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Enviar →</button>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Enviar por Email</div>
+        <div style="display:flex;gap:8px">
+          <input id="fab-em" placeholder="cliente@empresa.com" style="flex:1;padding:9px 12px;border:2px solid rgba(26,120,255,.25);border-radius:8px;font-size:.72rem;font-family:DM Sans,sans-serif;outline:none" />
+          <button onclick="(()=>{const e=document.getElementById('fab-em').value;if(!e)return;const s=encodeURIComponent('Actualización de tarifas — FoodBridge IA');const b=encodeURIComponent('Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\nHarina W-280: 0,85€ → 0,91€/kg (+7.1%)\nHarina W-380: 1,15€ → 1,22€/kg (+6.1%)\nHarina Eco T-110: 1,33€ → 1,40€/kg (+5.3%)\n\nFrom FoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados');window.open('mailto:'+e+'?subject='+s+'&body='+b,'_blank')})()" style="padding:9px 14px;background:#1A78FF;border:none;border-radius:8px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Enviar →</button>
+        </div>
+      </div>
+    `,actions:[{label:'Notificar a todos (2.000)',type:'primary',fn:()=>showToast('✅ Notificaciones enviadas a 2.000 contactos')},{label:'Cerrar',type:'gray'}]},
     comunicar:{title:`Contactar: ${detail}`,body:`<div style="font-size:.72rem;color:#3a4a5a;margin-bottom:12px">Contacto: <strong>${detail}</strong></div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA redacta el mensaje automáticamente según el historial.</div>`,actions:[{label:'Llamar',type:'green',fn:()=>showToast('📞 Llamando...')},{label:'WhatsApp',type:'blue',fn:()=>showToast('💬 WhatsApp abierto')},{label:'Email IA',type:'primary',fn:()=>showToast('✉️ Email redactado por IA')},{label:'Cerrar',type:'gray'}]},
   }
   return modals[type] || {title:'FoodBridge IA',body:`<div style="font-size:.75rem;color:#3a4a5a;padding:10px">🧠 Procesando: <strong>${detail||type}</strong>...</div>`,actions:[{label:'Cerrar',type:'gray'}]}
