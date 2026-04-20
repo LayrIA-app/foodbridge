@@ -92,9 +92,10 @@ body {
   /* Tarjetas alertas — 1 columna */
   .grid-2 { grid-template-columns: 1fr !important; }
 
-  /* Tablas — scroll horizontal interno */
+  /* Tablas — sin scroll horizontal, solo vertical */
   table { font-size: .6rem !important; }
-  td, th { padding: 6px 6px !important; white-space: normal !important; word-break: break-word; }
+  td, th { white-space: normal !important; word-break: break-word; }
+  div[style*='overflowX'] { overflow-x: hidden !important; }
 
   /* Textos largos no se cortan */
   .card, [class*="card"] { min-width: 0 !important; overflow: hidden !important; }
