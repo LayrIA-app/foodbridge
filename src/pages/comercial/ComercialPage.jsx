@@ -1454,14 +1454,7 @@ function EnviarCotizModal({ cot, onClose }) {
   const sendWhatsApp = () => {
     const num = phone.replace(/[\s\-+()]/g,'')
     if (!num) return
-    const url = `https://wa.me/${num}?text=${msg}`
-    const a = document.createElement('a')
-    a.href = url
-    a.target = '_blank'
-    a.rel = 'noopener noreferrer'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    location.href = `https://wa.me/${num}?text=${msg}`
     setSent('whatsapp')
   }
 
