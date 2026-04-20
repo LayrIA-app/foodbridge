@@ -540,6 +540,104 @@ function Comunicaciones({ act }) {
   )
 }
 
+
+/* ══ MODAL NOTIFICAR TARIFAS ══ */
+function NotificarTarifasModal({ open, onClose, showToast }) {
+  const [phone, setPhone] = React.useState('')
+  const [email, setEmail] = React.useState('')
+  const [sentWa, setSentWa] = React.useState(false)
+  const [sentEm, setSentEm] = React.useState(false)
+
+  if (!open) return null
+
+  const CAMBIOS = [
+    {prod:'Harina W-280', antes:'0,85€', despues:'0,91€', pct:'+7.1%'},
+    {prod:'Harina W-380', antes:'1,15€', despues:'1,22€', pct:'+6.1%'},
+    {prod:'Harina Eco T-110', antes:'1,33€', despues:'1,40€', pct:'+5.3%'},
+  ]
+
+  const waMsg = encodeURIComponent(
+    `Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\n` +
+    CAMBIOS.map(c=>`${c.prod}: ${c.antes} → ${c.despues}/kg (${c.pct})`).join('\n') +
+    `\n\nSolo se muestran los productos que usted compra.\n\n---\nFoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados`
+  )
+
+  const sendWa = () => {
+    const num = phone.replace(/[\s\-+()]/g,'')
+    if (!num) return
+    setSentWa(true)
+    setTimeout(() => window.open(`https://wa.me/${num}?text=${waMsg}`, '_blank'), 100)
+  }
+
+  const sendEm = () => {
+    if (!email) return
+    setSentEm(true)
+    const s = encodeURIComponent('Actualización de tarifas — FoodBridge IA')
+    const b = encodeURIComponent(
+      `Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\n` +
+      CAMBIOS.map(c=>`${c.prod}: ${c.antes} → ${c.despues}/kg (${c.pct})`).join('\n') +
+      `\n\nFrom FoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados`
+    )
+    window.open(`mailto:${email}?subject=${s}&body=${b}`, '_blank')
+  }
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div style={{ background:'#fff', borderRadius:18, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(26,47,74,.3)', animation:'modalIn .25s ease both' }}>
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'18px 18px 0 0', padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.1rem', fontWeight:900, color:'#fff', marginBottom:2 }}>Notificar cambio de tarifas</div>
+              <div style={{ fontSize:'.62rem', color:'rgba(255,255,255,.5)' }}>FoodBridge IA · 2.000 contactos afectados</div>
+            </div>
+            <button onClick={onClose} style={{ width:30, height:30, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer', fontSize:'1rem' }}>✕</button>
+          </div>
+          <div style={{ padding:'20px 22px' }}>
+            <div style={{ background:'#FFF8F0', border:'1.5px solid rgba(232,116,32,.25)', borderRadius:10, padding:16, marginBottom:16 }}>
+              <div style={{ fontSize:'.62rem', fontWeight:700, color:ACCENT, marginBottom:10 }}>⚡ IA HA DETECTADO LOS SIGUIENTES CAMBIOS</div>
+              {CAMBIOS.map((c,i)=>(
+                <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'6px 0', borderBottom: i<CAMBIOS.length-1?'1px solid rgba(232,116,32,.1)':'none', fontSize:'.68rem' }}>
+                  <span style={{ color:'#3a4a5a' }}>{c.prod}</span>
+                  <span style={{ color:'#e03030', fontWeight:700 }}>{c.antes} → {c.despues} ({c.pct})</span>
+                </div>
+              ))}
+              <div style={{ fontSize:'.6rem', color:'#7a8899', marginTop:8 }}>+ 44 productos más</div>
+            </div>
+            <div style={{ background:'#EBF5EF', borderRadius:8, padding:'9px 12px', marginBottom:16, fontSize:'.62rem', color:'#2D8A30' }}>
+              ✓ IA generará un mensaje personalizado por cliente con solo los productos que compra
+            </div>
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6 }}>Enviar por WhatsApp (prefijo + número)</div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+34 600 000 000"
+                  style={{ flex:1, padding:'10px 12px', border:'2px solid rgba(37,211,102,.3)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', outline:'none', color:NAVY }}
+                  onFocus={e=>e.target.style.borderColor='#25D366'} onBlur={e=>e.target.style.borderColor='rgba(37,211,102,.3)'} />
+                <button onClick={sendWa} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', background:'#25D366', color:'#fff', whiteSpace:'nowrap' }}>Enviar →</button>
+              </div>
+              {sentWa && <div style={{ marginTop:5, fontSize:'.62rem', color:'#25D366', fontWeight:600 }}>✓ WhatsApp abierto</div>}
+            </div>
+            <div style={{ marginBottom:18 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6 }}>Enviar por Email</div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="cliente@empresa.com"
+                  style={{ flex:1, padding:'10px 12px', border:'2px solid rgba(26,120,255,.25)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', outline:'none', color:NAVY }}
+                  onFocus={e=>e.target.style.borderColor='#1A78FF'} onBlur={e=>e.target.style.borderColor='rgba(26,120,255,.25)'} />
+                <button onClick={sendEm} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', background:'#1A78FF', color:'#fff', whiteSpace:'nowrap' }}>Enviar →</button>
+              </div>
+              {sentEm && <div style={{ marginTop:5, fontSize:'.62rem', color:'#1A78FF', fontWeight:600 }}>✓ Email abierto</div>}
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={()=>{showToast('✅ Notificaciones enviadas a 2.000 contactos');onClose()}} style={{ flex:1, padding:11, background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:9, color:'#fff', fontFamily:'Barlow Condensed', fontWeight:900, fontSize:'.85rem', letterSpacing:'.08em', textTransform:'uppercase', cursor:'pointer' }}>Notificar a todos (2.000)</button>
+              <button onClick={onClose} style={{ padding:'11px 18px', borderRadius:9, border:'1px solid #E8D5C0', background:'transparent', color:'#7a8899', fontSize:'.7rem', cursor:'pointer', fontFamily:'DM Sans,sans-serif' }}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 /* ══ MODAL BUILDER ══ */
 function buildModal(type, detail, showToast) {
   const modals = {
@@ -554,34 +652,6 @@ function buildModal(type, detail, showToast) {
     subir:{title:'Subir documento',body:`<div style="text-align:center;padding:24px"><div style="width:72px;height:72px;border:2px dashed rgba(232,116,32,.3);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;background:#FFFBF5"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E87420" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div style="font-size:.82rem;font-weight:700;color:#1A2F4A;margin-bottom:5px">Arrastra un documento aquí</div><div style="font-size:.7rem;color:#7a8899">PDF, Excel, imagen · La IA extraerá todos los datos automáticamente</div></div>`,actions:[{label:'Seleccionar archivo',type:'primary',fn:()=>showToast('✅ IA extrayendo datos...')},{label:'Cancelar',type:'gray'}]},
     ver:{title:`Ver: ${detail}`,body:`<div style="padding:12px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a;line-height:1.7">Detalles de: <strong>${detail}</strong><br/><br/>Datos actualizados por IA en tiempo real.</div>`,actions:[{label:'Exportar PDF',type:'primary',fn:()=>showToast('✅ PDF exportado')},{label:'Cerrar',type:'gray'}]},
     PDF:{title:`Ficha técnica: ${detail}`,body:`<div style="text-align:center;padding:20px"><div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#1A2F4A,#2A4A6A);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E87420" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div style="font-size:.82rem;font-weight:700;color:#1A2F4A;margin-bottom:5px">${detail}</div><div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.62rem;color:#3a4a5a;text-align:left">✓ Reg. 1169/2011 · ✓ 14 alérgenos · ✓ Datos nutricionales · ✓ Microbiología</div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>showToast('✅ PDF descargado')},{label:'Cerrar',type:'gray'}]},
-    notificar_tarifas:{title:'Notificar cambio de tarifas',body:`
-      <div style="background:#FFF8F0;border:1.5px solid rgba(232,116,32,.25);border-radius:10px;padding:14px;margin-bottom:14px">
-        <div style="font-size:.65rem;font-weight:700;color:#E87420;margin-bottom:8px">⚡ IA HA DETECTADO LOS SIGUIENTES CAMBIOS</div>
-        <table style="width:100%;font-size:.65rem;border-collapse:collapse">
-          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina W-280</td><td style="text-align:right;color:#e03030;font-weight:700">0,85€ → 0,91€ (+7.1%)</td></tr>
-          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina W-380</td><td style="text-align:right;color:#e03030;font-weight:700">1,15€ → 1,22€ (+6.1%)</td></tr>
-          <tr style="border-bottom:1px solid rgba(232,116,32,.1)"><td style="padding:5px 0;color:#7a8899">Harina Eco T-110</td><td style="text-align:right;color:#e03030;font-weight:700">1,33€ → 1,40€ (+5.3%)</td></tr>
-          <tr><td style="padding:5px 0;color:#7a8899">+ 44 productos más</td><td style="text-align:right;color:#7a8899">Ver todos →</td></tr>
-        </table>
-      </div>
-      <div style="background:#EBF5EF;border-radius:8px;padding:10px;margin-bottom:14px;font-size:.62rem;color:#2D8A30">
-        ✓ IA generará un mensaje personalizado por cliente con solo los productos que compra
-      </div>
-      <div style="margin-bottom:10px">
-        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Enviar por WhatsApp (prefijo + número)</div>
-        <div style="display:flex;gap:8px">
-          <input id="fab-wa" placeholder="+34 600 000 000" style="flex:1;padding:9px 12px;border:2px solid rgba(37,211,102,.3);border-radius:8px;font-size:.72rem;font-family:DM Sans,sans-serif;outline:none" />
-          <button onclick="(()=>{const n=document.getElementById('fab-wa').value.replace(/[\s\-+()]/g,'');if(!n)return;const m=encodeURIComponent('Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\nHarina W-280: 0,85€ → 0,91€/kg (+7.1%)\nHarina W-380: 1,15€ → 1,22€/kg (+6.1%)\nHarina Eco T-110: 1,33€ → 1,40€/kg (+5.3%)\n\nSolo se muestran los productos que usted compra.\n\n---\nFoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados');window.open('https://wa.me/'+n+'?text='+m,'_blank')})()" style="padding:9px 14px;background:#25D366;border:none;border-radius:8px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Enviar →</button>
-        </div>
-      </div>
-      <div style="margin-bottom:10px">
-        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Enviar por Email</div>
-        <div style="display:flex;gap:8px">
-          <input id="fab-em" placeholder="cliente@empresa.com" style="flex:1;padding:9px 12px;border:2px solid rgba(26,120,255,.25);border-radius:8px;font-size:.72rem;font-family:DM Sans,sans-serif;outline:none" />
-          <button onclick="(()=>{const e=document.getElementById('fab-em').value;if(!e)return;const s=encodeURIComponent('Actualización de tarifas — FoodBridge IA');const b=encodeURIComponent('Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\nHarina W-280: 0,85€ → 0,91€/kg (+7.1%)\nHarina W-380: 1,15€ → 1,22€/kg (+6.1%)\nHarina Eco T-110: 1,33€ → 1,40€/kg (+5.3%)\n\nFrom FoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados');window.open('mailto:'+e+'?subject='+s+'&body='+b,'_blank')})()" style="padding:9px 14px;background:#1A78FF;border:none;border-radius:8px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Enviar →</button>
-        </div>
-      </div>
-    `,actions:[{label:'Notificar a todos (2.000)',type:'primary',fn:()=>showToast('✅ Notificaciones enviadas a 2.000 contactos')},{label:'Cerrar',type:'gray'}]},
     comunicar:{title:`Contactar: ${detail}`,body:`<div style="font-size:.72rem;color:#3a4a5a;margin-bottom:12px">Contacto: <strong>${detail}</strong></div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA redacta el mensaje automáticamente según el historial.</div>`,actions:[{label:'Llamar',type:'green',fn:()=>showToast('📞 Llamando...')},{label:'WhatsApp',type:'blue',fn:()=>showToast('💬 WhatsApp abierto')},{label:'Email IA',type:'primary',fn:()=>showToast('✉️ Email redactado por IA')},{label:'Cerrar',type:'gray'}]},
   }
   return modals[type] || {title:'FoodBridge IA',body:`<div style="font-size:.75rem;color:#3a4a5a;padding:10px">🧠 Procesando: <strong>${detail||type}</strong>...</div>`,actions:[{label:'Cerrar',type:'gray'}]}
@@ -983,6 +1053,7 @@ export default function FabricantePage() {
   const [active, setActive] = useState(defaultScreen)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modal, setModal] = useState(null)
+  const [tarifasOpen, setTarifasOpen] = useState(false)
   const [push, setPush] = useState(null)
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [readAlerts, setReadAlerts] = useState(new Set())
@@ -1001,6 +1072,7 @@ export default function FabricantePage() {
 
   const act = useCallback((type, detail) => {
     if (type === 'goto') { changeSection(detail); return }
+    if (type === 'notificar_tarifas') { setTarifasOpen(true); return }
     setModal(buildModal(type, detail, showToast))
   }, [showToast, changeSection])
 
@@ -1115,6 +1187,7 @@ export default function FabricantePage() {
       </div>
 
       <Modal modal={modal} onClose={closeModal} />
+      <NotificarTarifasModal open={tarifasOpen} onClose={()=>setTarifasOpen(false)} showToast={showToast} />
       <Toast msg={toast} />
       {push && <PushNotif msg={push} onClose={()=>setPush(null)} />}
       {alertsOpen && <AlertsModal alerts={currentAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))} />}
