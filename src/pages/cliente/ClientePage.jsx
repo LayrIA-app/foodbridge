@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
+import { usePedidos } from '../../hooks'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -343,14 +344,61 @@ function CbuscarScreen({ act }) {
   )
 }
 
+function linesSummary(lines) {
+  if (!lines?.length) return { main: 'Pedido sin líneas', qty: '' }
+  const first = lines[0]
+  const qty = `${Number(first.quantity).toLocaleString('es-ES')}${first.unit || 'kg'}`
+  const main = first.product_name || 'Producto'
+  const extra = lines.length > 1 ? ` + ${lines.length - 1} más` : ''
+  return { main: main + extra, qty }
+}
+
+function formatDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+function isDelayed(p) {
+  if (!p.expected_date) return false
+  if (p.status === 'delivered' || p.status === 'cancelled') return false
+  return new Date(p.expected_date) < new Date()
+}
+
+const STATUS_PCT = { placed: 10, confirmed: 25, in_transit: 70, delivered: 100, cancelled: 0 }
+
 function CpedidosScreen({ act }) {
+  const { profile } = useApp()
+  const { pedidos, loading } = usePedidos({ profile })
+
+  const { kpis, grupos } = useMemo(() => {
+    const delayed = pedidos.filter(isDelayed)
+    const inTransit = pedidos.filter(p => p.status === 'in_transit' && !isDelayed(p))
+    const confirmed = pedidos.filter(p => p.status === 'confirmed')
+    const placed = pedidos.filter(p => p.status === 'placed')
+    const delivered = pedidos.filter(p => p.status === 'delivered')
+    const activos = pedidos.filter(p => ['placed', 'confirmed', 'in_transit'].includes(p.status)).length
+
+    return {
+      kpis: [
+        { v: String(activos),         l: 'Activos',     c: '#E87420', bg: '#FFF8F0', border: 'rgba(232,116,32,.15)' },
+        { v: String(delayed.length),  l: 'Retrasado',   c: '#e8a010', bg: '#FFF3CD', border: 'rgba(232,160,16,.2)' },
+        { v: String(delivered.length),l: 'Entregados',  c: '#2D8A30', bg: '#F0FFF4', border: '#C6F6D5' },
+        { v: String(confirmed.length + placed.length), l: 'Confirmados', c: '#1A78FF', bg: '#F0F7FF', border: '#C4DEFF' },
+      ],
+      grupos: { delayed, inTransit, confirmed, placed, delivered },
+    }
+  }, [pedidos])
+
+  const empty = !loading && pedidos.length === 0
+
   return (
     <div className="animate-fadeIn">
       <PageHdr title="Mis Pedidos" subtitle="Seguimiento completo con trazabilidad Reg. 178/2002" />
       <SearchBar placeholder="Buscar pedido o producto..." />
 
       <div className="grid-4" style={{ marginBottom:13 }}>
-        {[{v:'6',l:'Activos',c:'#E87420',bg:'#FFF8F0',border:'rgba(232,116,32,.15)'},{v:'1',l:'Retrasado',c:'#e8a010',bg:'#FFF3CD',border:'rgba(232,160,16,.2)'},{v:'3',l:'Entregados',c:'#2D8A30',bg:'#F0FFF4',border:'#C6F6D5'},{v:'2',l:'Confirmados',c:'#1A78FF',bg:'#F0F7FF',border:'#C4DEFF'}].map((k,i)=>(
+        {kpis.map((k,i) => (
           <div key={i} style={{ padding:12, borderRadius:10, background:k.bg, border:`1px solid ${k.border}`, textAlign:'center' }}>
             <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:k.c }}>{k.v}</div>
             <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:2 }}>{k.l}</div>
@@ -358,69 +406,107 @@ function CpedidosScreen({ act }) {
         ))}
       </div>
 
-      {/* Retrasado */}
-      <PedGroup dot="#e03030" label="Retrasado" count="1" color="#e03030" defaultOpen={true}>
-        <div style={{ padding:12, borderRadius:8, border:'1px solid rgba(224,48,48,.2)', background:'#FFF5F5' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-            <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>PED-2026-387</span>
-            <Badge type="red" text="Retrasado"/>
-          </div>
-          <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:4 }}><strong>Margarina PF42</strong> × 500kg — Grasas Industriales</div>
-          <div style={{ fontSize:'.58rem', color:'#7a8899', marginBottom:6 }}>Retraso 48h por incidencia logística</div>
-          <Pbar pct={85} color="#e03030"/>
-          <div style={{ display:'flex', gap:6 }}>
-            <BtnSm onClick={()=>act('goto','cpedidos')}>Gestionar</BtnSm>
-            <BtnSm outline onClick={()=>act('trazabilidad','PED-2026-387')}>Trazabilidad</BtnSm>
-          </div>
-        </div>
-      </PedGroup>
+      {loading && (
+        <Card>
+          <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando pedidos…</div>
+        </Card>
+      )}
 
-      {/* En tránsito */}
-      <PedGroup dot={ACCENT} label="En tránsito" count="2" color={ACCENT} defaultOpen={true}>
-        {[{id:'PED-2026-412',prod:'Harina T-110',cant:'2.000kg',prov:'Harinas Mediterráneo',eta:'ETA 17/04',pct:70},{id:'PED-2026-418',prod:'Sémola Trigo Duro',cant:'800kg',prov:'',eta:'',pct:45}].map((p,i)=>(
-          <div key={i} style={{ padding:12, borderRadius:8, border:'1px solid rgba(232,116,32,.15)', background:'#FFF8F0' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-              <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.id}</span>
-              <Badge type="amber" text="En tránsito"/>
+      {empty && (
+        <Card>
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>
+              Aún no tienes pedidos
             </div>
-            <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:4 }}><strong>{p.prod}</strong> × {p.cant}{p.prov?` — ${p.prov}`:''}</div>
-            {p.eta && <div style={{ fontSize:'.58rem', color:'#7a8899', marginBottom:6 }}>{p.eta}</div>}
-            <Pbar pct={p.pct} color={ACCENT}/>
-            <div style={{ display:'flex', gap:6 }}>
-              <BtnSm onClick={()=>act('trazabilidad',p.id)}>Trazabilidad</BtnSm>
-              <BtnSm outline onClick={()=>act('contactar','Proveedor')}>Contactar</BtnSm>
+            <div style={{ fontSize:'.72rem', color:'#7a8899', lineHeight:1.5 }}>
+              Cuando aceptes una cotización o hagas un pedido, aparecerá aquí con trazabilidad completa.
             </div>
           </div>
-        ))}
-      </PedGroup>
+        </Card>
+      )}
 
-      {/* Confirmado */}
-      <PedGroup dot="#1A78FF" label="Confirmado" count="2" color="#1A78FF" defaultOpen={true}>
-        {[{id:'PED-2026-415',prod:'Levadura LV-Pure',cant:'200kg',prov:'Lesaffre Ibérica',pct:25},{id:'PED-2026-420',prod:'Margarina Profesional PF42',cant:'800kg',prov:'',pct:10}].map((p,i)=>(
-          <div key={i} style={{ padding:12, borderRadius:8, border:'1px solid #C4DEFF', background:'#F0F7FF' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-              <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.id}</span>
-              <Badge type="blue" text="Confirmado"/>
-            </div>
-            <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:8 }}><strong>{p.prod}</strong> × {p.cant}{p.prov?` — ${p.prov}`:''}</div>
-            <Pbar pct={p.pct} color="#1A78FF"/>
-          </div>
-        ))}
-      </PedGroup>
+      {!loading && grupos.delayed.length > 0 && (
+        <PedGroup dot="#e03030" label="Retrasado" count={String(grupos.delayed.length)} color="#e03030" defaultOpen>
+          {grupos.delayed.map(p => {
+            const { main, qty } = linesSummary(p.lines)
+            return (
+              <div key={p.id} style={{ padding:12, borderRadius:8, border:'1px solid rgba(224,48,48,.2)', background:'#FFF5F5' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.ref}</span>
+                  <Badge type="red" text="Retrasado"/>
+                </div>
+                <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:4 }}><strong>{main}</strong>{qty && ` × ${qty}`}</div>
+                <div style={{ fontSize:'.58rem', color:'#7a8899', marginBottom:6 }}>ETA {formatDate(p.expected_date)} vencida</div>
+                <Pbar pct={85} color="#e03030"/>
+                <div style={{ display:'flex', gap:6 }}>
+                  <BtnSm onClick={()=>act('goto','cpedidos')}>Gestionar</BtnSm>
+                  <BtnSm outline onClick={()=>act('trazabilidad',p.ref)}>Trazabilidad</BtnSm>
+                </div>
+              </div>
+            )
+          })}
+        </PedGroup>
+      )}
 
-      {/* Entregado — colapsado por defecto */}
-      <PedGroup dot="#2D8A30" label="Entregado" count="3" color="#2D8A30" defaultOpen={false}>
-        {[{id:'PED-2026-408',prod:'Margarina PF42',cant:'500kg',fecha:'15/04'},{id:'PED-2026-401',prod:'Harina W-280',cant:'3.000kg',fecha:'12/04'},{id:'PED-2026-395',prod:'Levadura LV-Pure',cant:'150kg',fecha:'08/04'}].map((p,i)=>(
-          <div key={i} style={{ padding:12, borderRadius:8, border:'1px solid #C6F6D5', background:'#F0FFF4' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-              <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.id}</span>
-              <Badge type="ok" text="Entregado"/>
-            </div>
-            <div style={{ fontSize:'.62rem', color:'#3a4a5a' }}><strong>{p.prod}</strong> × {p.cant}</div>
-            <div style={{ fontSize:'.58rem', color:'#7a8899' }}>{p.fecha}</div>
-          </div>
-        ))}
-      </PedGroup>
+      {!loading && grupos.inTransit.length > 0 && (
+        <PedGroup dot={ACCENT} label="En tránsito" count={String(grupos.inTransit.length)} color={ACCENT} defaultOpen>
+          {grupos.inTransit.map(p => {
+            const { main, qty } = linesSummary(p.lines)
+            return (
+              <div key={p.id} style={{ padding:12, borderRadius:8, border:'1px solid rgba(232,116,32,.15)', background:'#FFF8F0' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.ref}</span>
+                  <Badge type="amber" text="En tránsito"/>
+                </div>
+                <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:4 }}><strong>{main}</strong>{qty && ` × ${qty}`}</div>
+                {p.expected_date && <div style={{ fontSize:'.58rem', color:'#7a8899', marginBottom:6 }}>ETA {formatDate(p.expected_date)}</div>}
+                <Pbar pct={STATUS_PCT.in_transit} color={ACCENT}/>
+                <div style={{ display:'flex', gap:6 }}>
+                  <BtnSm onClick={()=>act('trazabilidad',p.ref)}>Trazabilidad</BtnSm>
+                  <BtnSm outline onClick={()=>act('contactar','Proveedor')}>Contactar</BtnSm>
+                </div>
+              </div>
+            )
+          })}
+        </PedGroup>
+      )}
+
+      {!loading && (grupos.confirmed.length > 0 || grupos.placed.length > 0) && (
+        <PedGroup dot="#1A78FF" label="Confirmado" count={String(grupos.confirmed.length + grupos.placed.length)} color="#1A78FF" defaultOpen>
+          {[...grupos.confirmed, ...grupos.placed].map(p => {
+            const { main, qty } = linesSummary(p.lines)
+            const pct = STATUS_PCT[p.status] ?? 20
+            return (
+              <div key={p.id} style={{ padding:12, borderRadius:8, border:'1px solid #C4DEFF', background:'#F0F7FF' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.ref}</span>
+                  <Badge type="blue" text={p.status === 'placed' ? 'Pendiente' : 'Confirmado'}/>
+                </div>
+                <div style={{ fontSize:'.62rem', color:'#3a4a5a', marginBottom:8 }}><strong>{main}</strong>{qty && ` × ${qty}`}</div>
+                <Pbar pct={pct} color="#1A78FF"/>
+              </div>
+            )
+          })}
+        </PedGroup>
+      )}
+
+      {!loading && grupos.delivered.length > 0 && (
+        <PedGroup dot="#2D8A30" label="Entregado" count={String(grupos.delivered.length)} color="#2D8A30" defaultOpen={false}>
+          {grupos.delivered.map(p => {
+            const { main, qty } = linesSummary(p.lines)
+            return (
+              <div key={p.id} style={{ padding:12, borderRadius:8, border:'1px solid #C6F6D5', background:'#F0FFF4' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{p.ref}</span>
+                  <Badge type="ok" text="Entregado"/>
+                </div>
+                <div style={{ fontSize:'.62rem', color:'#3a4a5a' }}><strong>{main}</strong>{qty && ` × ${qty}`}</div>
+                <div style={{ fontSize:'.58rem', color:'#7a8899' }}>{formatDate(p.delivered_at)}</div>
+              </div>
+            )
+          })}
+        </PedGroup>
+      )}
     </div>
   )
 }

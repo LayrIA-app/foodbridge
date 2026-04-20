@@ -4,7 +4,9 @@ import { supabase } from '../services/supabase'
 
 const SELECT =
   'id, ref, status, total_amount, expected_date, delivered_at, created_at, ' +
-  'cliente_id, fabricante_id, cotizacion_id'
+  'cliente_id, fabricante_id, cotizacion_id, ' +
+  'lines:pedido_lines(id, product_id, product_name, quantity, unit, unit_price, line_total), ' +
+  'cotizacion:cotizaciones(ref, cliente_name, product_name, margin_pct)'
 
 /**
  * Pedidos visibles para el usuario actual segun RLS:

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
+import { usePedidos } from '../../hooks'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
@@ -1032,36 +1033,110 @@ function CotizacionesScreen({ act }) {
 }
 
 /* ══ SCREEN 9: PEDIDOS EN CURSO ══ */
+function pedidoStatusMeta(status, delayed) {
+  if (delayed) return { type:'red', label:'Incidencia', btnType:'red', btnLabel:'Gestionar', color:'#e03030' }
+  if (status === 'in_transit') return { type:'amber', label:'En tránsito', btnType:'orange', btnLabel:'Tracking', color:'#e8a010' }
+  if (status === 'confirmed') return { type:'ok', label:'Confirmado', btnType:'orange', btnLabel:'Tracking', color:'#2D8A30' }
+  if (status === 'placed') return { type:'blue', label:'Pendiente', btnType:'orange', btnLabel:'Seguir', color:'#1A78FF' }
+  if (status === 'delivered') return { type:'ok', label:'Entregado', btnType:'green', btnLabel:'Ver', color:'#2D8A30' }
+  if (status === 'cancelled') return { type:'red', label:'Cancelado', btnType:'red', btnLabel:'Ver', color:'#e03030' }
+  return { type:'amber', label:status, btnType:'orange', btnLabel:'Ver', color:'#e8a010' }
+}
+
+function isPedidoDelayed(p) {
+  if (!p.expected_date) return false
+  if (p.status === 'delivered' || p.status === 'cancelled') return false
+  return new Date(p.expected_date) < new Date()
+}
+
+function formatEta(p) {
+  if (isPedidoDelayed(p)) {
+    const h = Math.round((Date.now() - new Date(p.expected_date).getTime()) / 3600000)
+    return `RETRASADO ${h}h`
+  }
+  if (!p.expected_date) return '—'
+  const d = new Date(p.expected_date)
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+}
+
+function productsSummary(lines) {
+  if (!lines?.length) return '—'
+  const first = lines[0]
+  const extra = lines.length > 1 ? ` + ${lines.length - 1}` : ''
+  const qty = Number(first.quantity).toLocaleString('es-ES')
+  return `${first.product_name} (${qty} ${first.unit || 'kg'})${extra}`
+}
+
 function PedidosScreen({ act }) {
+  const { profile } = useApp()
+  const { pedidos, loading } = usePedidos({ profile })
+
+  const kpis = useMemo(() => {
+    const activos = pedidos.filter(p => ['placed','confirmed','in_transit'].includes(p.status)).length
+    const retrasados = pedidos.filter(isPedidoDelayed).length
+    const entregados = pedidos.filter(p => p.status === 'delivered')
+    const total = entregados.length + retrasados
+    const pctAtTime = total > 0 ? Math.round((entregados.length / total) * 100) : null
+    return {
+      activos, retrasados,
+      pctAtTime: pctAtTime !== null ? `${pctAtTime}%` : '—',
+      enTransito: pedidos.filter(p => p.status === 'in_transit').length,
+    }
+  }, [pedidos])
+
+  const empty = !loading && pedidos.length === 0
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Pedidos en Curso" subtitle="Tracking en tiempo real con trazabilidad completa Reg. 178/2002" badge="12 activos" />
+      <PageHdr title="Pedidos en Curso" subtitle="Tracking en tiempo real con trazabilidad completa Reg. 178/2002" badge={`${kpis.activos} activos`} />
       <SearchBar placeholder="Buscar pedido, producto o cliente..." />
       <div className="grid-4 mb14">
-        <KPI val="12" label="Pedidos activos" delta="→ 3 en tránsito" color={ACCENT}/>
-        <KPI val="94%" label="Entrega a tiempo" delta="▲ +8pp vs 2025" up color="#2D8A30"/>
-        <KPI val="1" label="Retrasado" delta="▼ PED-2026-387" color="#e03030"/>
-        <KPI val="48h" label="Tiempo medio entrega" delta="▲ Antes: 5-7 días" up color="#1A78FF"/>
+        <KPI val={String(kpis.activos)} label="Pedidos activos" delta={`→ ${kpis.enTransito} en tránsito`} color={ACCENT}/>
+        <KPI val={kpis.pctAtTime} label="Entrega a tiempo" delta="calculado IA" up color="#2D8A30"/>
+        <KPI val={String(kpis.retrasados)} label="Retrasado" delta={kpis.retrasados > 0 ? '▼ Atención' : 'todo OK'} color={kpis.retrasados > 0 ? '#e03030' : '#2D8A30'}/>
+        <KPI val="48h" label="Tiempo medio entrega" delta="estimado" up color="#1A78FF"/>
       </div>
       <Card>
         <CardTitle>Pedidos activos <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Ref.','Cliente','Productos','Importe','Entrega est.','Estado','Acción']}/>
-          <tbody>
-            {[['PED-2026-387','Congelados Martz','Masa hojaldre -18°C','31.200€','RETRASADO 24h','red:Incidencia','red:Gestionar'],['PED-2026-410','Panaderías Leopold','Harina W-280 (5.000 kg)','14.800€','18/04','amber:En tránsito','orange:Tracking'],['PED-2026-411','Dulces Iberia','Cobertura 55% + Cacao 22%','22.400€','19/04','blue:Preparando','orange:Tracking'],['PED-2026-412','Agrudispa','Margarina PF42 (2.000 kg)','8.900€','20/04','ok:Confirmado','orange:Tracking'],['PED-2026-413','Pasteleros del Sur','Crema pastelera UHT','7.200€','21/04','ok:Confirmado','orange:Tracking']].map(([ref,cli,prod,imp,eta,st,ac],i)=>{const[tt,tv]=st.split(':');const[at,av]=ac.split(':');return(
-              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6', background:tt==='red'?'rgba(224,48,48,.04)':'' }} onMouseEnter={e=>e.currentTarget.style.background=tt==='red'?'rgba(224,48,48,.06)':'#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=tt==='red'?'rgba(224,48,48,.04)':''}>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:tt==='red'?'#e03030':ACCENT }}>{ref}</td>
-                <td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{cli}</td>
-                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{prod}</td>
-                <td style={{ padding:'8px 10px', fontWeight:700 }}>{imp}</td>
-                <td style={{ padding:'8px 10px', fontWeight:tt==='red'?700:400, color:tt==='red'?'#e03030':'#3a4a5a' }}>{eta}</td>
-                <td style={{ padding:'8px 10px' }}><Badge type={tt} text={tv}/></td>
-                <td style={{ padding:'8px 10px' }}><TblBtn type={at} onClick={()=>act(at==='red'?'incidencia':'tracking',ref)}>{av}</TblBtn></td>
-              </tr>
-            )})}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>Alerta IA:</strong> PED-2026-387 retrasado por incidencia logística en Congelados Navarra. IA ha contactado automáticamente al transportista y <strong>estima entrega mañana 10:00h</strong>." />
+
+        {loading && (
+          <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando pedidos…</div>
+        )}
+
+        {empty && (
+          <div style={{ padding:'28px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.95rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>
+              Sin pedidos de tus cotizaciones
+            </div>
+            <div style={{ fontSize:'.7rem', color:'#7a8899', lineHeight:1.5 }}>
+              Cuando un cliente acepte una de tus cotizaciones y genere pedido, aparecerá aquí con seguimiento en tiempo real.
+            </div>
+          </div>
+        )}
+
+        {!loading && !empty && (
+          <ScrollTable>
+            <Thead cols={['Ref.','Cliente','Productos','Importe','Entrega est.','Estado','Acción']}/>
+            <tbody>
+              {pedidos.map(p => {
+                const delayed = isPedidoDelayed(p)
+                const meta = pedidoStatusMeta(p.status, delayed)
+                const cli = p.cotizacion?.cliente_name || '—'
+                return (
+                  <tr key={p.id} style={{ borderBottom:'1px solid #F0E4D6', background:meta.type==='red'?'rgba(224,48,48,.04)':'' }} onMouseEnter={e=>e.currentTarget.style.background=meta.type==='red'?'rgba(224,48,48,.06)':'#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=meta.type==='red'?'rgba(224,48,48,.04)':''}>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:meta.type==='red'?'#e03030':ACCENT }}>{p.ref}</td>
+                    <td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{cli}</td>
+                    <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{productsSummary(p.lines)}</td>
+                    <td style={{ padding:'8px 10px', fontWeight:700 }}>{p.total_amount ? `${Number(p.total_amount).toLocaleString('es-ES')}€` : '—'}</td>
+                    <td style={{ padding:'8px 10px', fontWeight:meta.type==='red'?700:400, color:meta.type==='red'?'#e03030':'#3a4a5a' }}>{formatEta(p)}</td>
+                    <td style={{ padding:'8px 10px' }}><Badge type={meta.type} text={meta.label}/></td>
+                    <td style={{ padding:'8px 10px' }}><TblBtn type={meta.btnType} onClick={()=>act(delayed?'incidencia':'tracking', p.ref)}>{meta.btnLabel}</TblBtn></td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </ScrollTable>
+        )}
       </Card>
     </div>
   )
