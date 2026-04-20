@@ -1,17 +1,23 @@
 import { useState, useRef, useEffect } from 'react'
 import { askIA } from '../services/ia'
-import { useApp } from '../context/AppContext'
+
+const WELCOME = {
+  fabricante: '¡Hola Martín! Soy tu asistente IA de FoodBridge. Puedo ayudarte a optimizar tu catálogo, analizar ventas por canal y detectar tendencias. ¿Por dónde empezamos?',
+  comercial: '¡Hola! Soy tu asistente IA. Puedo prepararte visitas, generar cotizaciones con margen coherente y revisar objetivos. ¿Qué necesitas?',
+  cliente: '¡Hola Sara! Estoy aquí para buscarte fabricantes, comparar cotizaciones y revisar trazabilidad. ¿Qué buscas hoy?',
+  admin: '¡Hola! Panel de administración activo. Analizo métricas globales, detecto anomalías y optimizo el matching. ¿Qué miramos?',
+}
+
+const QUICK_Q = {
+  fabricante: ['¿Cómo optimizo mi catálogo?', '¿Qué tendencia tiene el canal B2B?', 'Analiza mi margen por producto'],
+  comercial: ['Prepárame la visita a Panaderías Leopold', 'Cotización harina W-380 para Dulces Iberia', '¿Cómo voy con el objetivo mensual?'],
+  cliente: ['Busco harina ecológica certificada', '¿Mejores fabricantes de lácteos?', 'Compara precios de mis cotizaciones'],
+  admin: ['Métricas del mes', 'Usuarios inactivos', 'Optimizar matching'],
+}
 
 export default function IAChat({ role, accent = '#E87420', collapsed = false }) {
   const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: role === 'fabricante'
-        ? '¡Hola Martín! Soy tu asistente IA de FoodBridge. Puedo ayudarte a optimizar tu catálogo, encontrar clientes ideales y analizar tendencias del mercado. ¿Por dónde empezamos?'
-        : role === 'cliente'
-        ? '¡Hola Sara! Estoy aquí para ayudarte a encontrar los mejores fabricantes según tus necesidades. Puedo comparar productos, analizar precios y recomendarte opciones. ¿Qué buscas hoy?'
-        : '¡Hola! Panel de administración activo. Puedo ayudarte a analizar métricas globales, detectar anomalías y optimizar el matching de la plataforma. ¿Qué analizamos?'
-    }
+    { role: 'assistant', content: WELCOME[role] || WELCOME.fabricante }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,11 +46,7 @@ export default function IAChat({ role, accent = '#E87420', collapsed = false }) 
 
   const onKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }
 
-  const QUICK = role === 'fabricante'
-    ? ['¿Cómo optimizo mi catálogo?', '¿Qué tendencias hay en lácteos?', 'Analiza mis ventas']
-    : role === 'cliente'
-    ? ['Busco quesos artesanales', '¿Mejores fabricantes de conservas?', 'Compara precios']
-    : ['Métricas del mes', 'Usuarios inactivos', 'Optimizar matching']
+  const QUICK = QUICK_Q[role] || QUICK_Q.fabricante
 
   if (!open) {
     return (
@@ -60,7 +62,7 @@ export default function IAChat({ role, accent = '#E87420', collapsed = false }) 
     )
   }
 
-  return (
+  const panel = (
     <div className="flex flex-col h-full animate-slideIn" style={{ background: '#fff', borderLeft: '1px solid rgba(26,47,74,.08)' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'rgba(26,47,74,.08)' }}>
@@ -158,4 +160,22 @@ export default function IAChat({ role, accent = '#E87420', collapsed = false }) 
       </div>
     </div>
   )
+
+  if (collapsed) {
+    return (
+      <div
+        className="fixed shadow-2xl rounded-2xl overflow-hidden z-40"
+        style={{
+          bottom: 24,
+          right: 24,
+          width: 'min(380px, calc(100vw - 32px))',
+          height: 'min(560px, calc(100vh - 48px))',
+          border: '1px solid rgba(26,47,74,.12)',
+        }}
+      >
+        {panel}
+      </div>
+    )
+  }
+  return panel
 }
