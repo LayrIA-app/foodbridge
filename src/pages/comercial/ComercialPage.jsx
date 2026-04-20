@@ -115,7 +115,7 @@ function KPI({ val, label, delta, up, color=ACCENT }) {
     <div style={{ background:'linear-gradient(160deg,#fff,#FFFBF5)', border:'1px solid rgba(232,116,32,.15)', borderRadius:11, padding:'14px 16px', boxShadow:'0 2px 16px rgba(26,47,74,.07)', position:'relative', overflow:'hidden', transition:'transform .28s,box-shadow .28s' }}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 36px rgba(26,47,74,.13)'}}
       onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 2px 16px rgba(26,47,74,.07)'}}>
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${color},transparent)` }} />
+
       <div style={{ fontSize:'.65rem', color:'#7a8899', marginBottom:4 }}>{label}</div>
       <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.45rem', fontWeight:800, color, marginBottom:3 }}>{display}</div>
       {delta && <div style={{ fontSize:'.64rem', fontWeight:600, color:up?'#2D8A30':delta.includes('▼')?'#e03030':'#7a8899' }}>{delta}</div>}
@@ -203,7 +203,7 @@ function PageHdr({ title, subtitle, badge }) {
 }
 
 function ScrollTable({ children }) {
-  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8 }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.72rem', minWidth:480 }}>{children}</table></div>
+  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8, maxWidth:'100%' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', minWidth:0 }}>{children}</table></div>
 }
 
 function Thead({ cols }) {
@@ -1454,8 +1454,10 @@ function EnviarCotizModal({ cot, onClose }) {
   const sendWhatsApp = () => {
     const num = phone.replace(/[\s\-+()]/g,'')
     if (!num) return
-    location.href = `https://wa.me/${num}?text=${msg}`
     setSent('whatsapp')
+    setTimeout(() => {
+      window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
+    }, 100)
   }
 
   const sendEmail = async () => {
