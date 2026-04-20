@@ -69,10 +69,8 @@ body {
   .grid-3 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
   .grid-2 { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 
-  /* Scroll horizontal prohibido en toda la app */
-  * { max-width: 100%; }
-  table { min-width: unset !important; }
-  .scrollable, [style*="overflow-x"] { overflow-x: hidden !important; }
+  /* Scroll horizontal solo en contenedor principal */
+  body { overflow-x: hidden; }
 
   /* Topbar */
   .fab-topbar-tagline { display: none !important; }
