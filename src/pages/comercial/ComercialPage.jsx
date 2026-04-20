@@ -1431,13 +1431,14 @@ function EnviarCotizModal({ cot, onClose }) {
   if (!cot) return null
 
   const msg = encodeURIComponent(
-    `Hola, le envío la cotización *${cot.ref}* generada por FoodBridge IA:\n\n` +
-    `📦 *Producto:* ${cot.prod}\n` +
-    `🏭 *Fabricante:* ${cot.fab}\n` +
-    `⚖️ *Cantidad:* ${cot.qty}\n` +
-    `💰 *Precio total:* ${cot.pvp} (IVA no incluido)\n` +
-    `📊 *Margen:* ${cot.margen}\n\n` +
-    `_Cotización generada automáticamente por FoodBridge IA_`
+    `Hola, te hago llegar la cotización solicitada *${cot.ref}*:\n\n` +
+    `Producto: ${cot.prod}\n` +
+    `Fabricante: ${cot.fab}\n` +
+    `Cantidad: ${cot.qty}\n` +
+    `Precio total: ${cot.pvp} (IVA no incluido)\n\n` +
+    `---\n` +
+    `_From FoodBridge IA · Soluciones inteligentes by COAXIONIA_\n` +
+    `_www.coaxionia.com · © Todos los derechos reservados_`
   )
 
   const emailBody = encodeURIComponent(
