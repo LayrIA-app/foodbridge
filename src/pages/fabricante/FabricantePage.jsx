@@ -543,10 +543,10 @@ function Comunicaciones({ act }) {
 
 /* ══ MODAL NOTIFICAR TARIFAS ══ */
 function NotificarTarifasModal({ open, onClose, showToast }) {
-  const [phone, setPhone] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [sentWa, setSentWa] = React.useState(false)
-  const [sentEm, setSentEm] = React.useState(false)
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [sentWa, setSentWa] = useState(false)
+  const [sentEm, setSentEm] = useState(false)
 
   if (!open) return null
 
