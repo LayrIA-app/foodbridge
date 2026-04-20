@@ -203,7 +203,7 @@ function PageHdr({ title, subtitle, badge }) {
 }
 
 function ScrollTable({ children }) {
-  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8, width:'100%', display:'block' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', tableLayout:'auto' }}>{children}</table></div>
+  return <div style={{ overflowX:'hidden', overflowY:'auto', borderRadius:8, width:'100%', display:'block' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', tableLayout:'fixed' }}>{children}</table></div>
 }
 
 function Thead({ cols }) {
@@ -334,7 +334,7 @@ function DashScreen({ act }) {
       </div>
 
       {/* PRÓXIMA VISITA */}
-      <Card style={{ marginBottom:13, borderLeft:`4px solid ${ACCENT}` }}>
+      <Card style={{ marginBottom:13,  }}>
         <CardTitle>Próxima visita <span style={{ fontSize:'.55rem', fontWeight:700, color:ACCENT, background:'rgba(232,116,32,.1)', padding:'2px 8px', borderRadius:12, marginLeft:6 }}>EN 47 MIN</span></CardTitle>
         <div style={{ display:'flex', gap:14, alignItems:'center', flexWrap:'wrap' }}>
           <div style={{ flex:1, minWidth:180 }}>
@@ -429,7 +429,7 @@ function RutaScreen({ act }) {
       <PageHdr title="Mi Ruta de Hoy" subtitle="Ruta optimizada por IA según prioridad, proximidad geográfica y ventanas horarias" badge="5 visitas | 287 km" />
       <SearchBar placeholder="Buscar cliente, dirección, zona..." />
 
-      <Card style={{ marginBottom:13, borderLeft:'4px solid #2D8A30' }}>
+      <Card style={{ marginBottom:13,  }}>
         <CardTitle>Resumen de ruta <IaBadge /></CardTitle>
         <div className="grid-4 mb14">
           {[{val:'287 km',label:'Distancia total',color:ACCENT},{val:'4h 12min',label:'Tiempo conducción',color:NAVY},{val:'52 km',label:'Ahorro IA vs manual',color:'#2D8A30'},{val:'78.400€',label:'Potencial en ruta',color:'#1A78FF'}].map((k,i)=>(
@@ -1606,6 +1606,27 @@ function buildModal(type, detail, showToast) {
     tracking:{title:`Tracking: ${detail}`,body:`<div style="padding:10px;background:#F0FFF4;border-radius:8px;font-size:.72rem;color:#2D8A30;font-weight:700;margin-bottom:10px">✓ Trazabilidad Reg. 178/2002 verificada</div><div style="font-size:.65rem;color:#3a4a5a">Cadena completa desde fabricante hasta destino final. Sin alertas de seguridad.</div>`,actions:[{label:'Ver trazabilidad',type:'primary',fn:()=>showToast('📋 Trazabilidad abierta')},{label:'Cerrar',type:'gray'}]},
     guardar:{title:`Guardar en CRM: ${detail}`,body:`<div style="padding:10px;background:#F0FFF4;border-radius:8px;font-size:.65rem;color:#2D8A30">✓ Nota guardada automáticamente en el CRM del cliente.</div>`,actions:[{label:'Ver CRM',type:'primary',fn:()=>showToast('✅ Nota guardada en CRM')},{label:'Cerrar',type:'gray'}]},
     tarea:{title:`Nueva tarea: ${detail}`,body:`<div style="padding:10px;background:rgba(26,120,255,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #1A78FF">Tarea creada: <strong>${detail}</strong>. IA la añadirá a tu agenda.</div>`,actions:[{label:'Añadir a agenda',type:'primary',fn:()=>showToast('📅 Tarea añadida')},{label:'Cerrar',type:'gray'}]},
+    ajustar:{title:`Ajustar cotización: ${detail}`,body:`
+      <div style="margin-bottom:12px">
+        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Producto</div>
+        <input style="width:100%;padding:9px 12px;border:1.5px solid #E8D5C0;border-radius:8px;font-size:.75rem;font-family:DM Sans,sans-serif;color:#1A2F4A;outline:none;box-sizing:border-box" value="Harina Panadera W-280" />
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Cantidad (kg)</div>
+        <input style="width:100%;padding:9px 12px;border:1.5px solid #E8D5C0;border-radius:8px;font-size:.75rem;font-family:DM Sans,sans-serif;color:#1A2F4A;outline:none;box-sizing:border-box" value="3.000" />
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <div style="flex:1">
+          <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Margen (%)</div>
+          <input style="width:100%;padding:9px 12px;border:1.5px solid #E8D5C0;border-radius:8px;font-size:.75rem;font-family:DM Sans,sans-serif;color:#1A2F4A;outline:none;box-sizing:border-box" value="18" />
+        </div>
+        <div style="flex:1">
+          <div style="font-size:.6rem;font-weight:700;color:#8A9BB0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">PVP Total (€)</div>
+          <input style="width:100%;padding:9px 12px;border:1.5px solid #E8D5C0;border-radius:8px;font-size:.75rem;font-family:DM Sans,sans-serif;color:#1A2F4A;outline:none;box-sizing:border-box" value="3.233" />
+        </div>
+      </div>
+      <div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.62rem;color:#E87420">IA recalculará automáticamente el precio al cambiar margen o cantidad.</div>
+    `,actions:[{label:'Guardar cambios',type:'primary',fn:()=>showToast('✅ Cotización actualizada')},{label:'Cancelar',type:'gray'}]},
     crm:{title:`CRM: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a">Ficha completa de <strong>${detail}</strong> con historial de visitas, notas de voz, cotizaciones y pedidos.</div>`,actions:[{label:'Ver ficha',type:'primary',fn:()=>showToast('📋 Ficha abierta')},{label:'Cerrar',type:'gray'}]},
     muestra:{title:`Solicitar muestra: ${detail}`,body:`<div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA solicitará la muestra al fabricante y coordinará la entrega al cliente.</div>`,actions:[{label:'Solicitar',type:'primary',fn:()=>showToast('✅ Muestra solicitada')},{label:'Cancelar',type:'gray'}]},
     valorar:{title:`Valorar muestra: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;margin-bottom:10px">¿Cuál fue la valoración del cliente sobre <strong>${detail}</strong>?</div>`,actions:[{label:'Aprobada → Cotizar',type:'primary',fn:()=>showToast('✅ Cotización generada automáticamente')},{label:'Rechazada',type:'red',fn:()=>showToast('❌ Muestra rechazada registrada')},{label:'Pendiente',type:'gray'}]},
