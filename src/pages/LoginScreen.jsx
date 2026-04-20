@@ -63,14 +63,13 @@ export default function LoginScreen() {
   const handleAcceder = () => enterPanel(fabProfile)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex' }} className="login-wrap">
 
       {/* LEFT — navy panel */}
       <div style={{
         flex: 1, background: '#1A2F4A',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        padding: '64px 72px', position: 'relative', overflow: 'hidden',
-        minHeight: 'min(50vh, 300px)'
+        padding: '64px 72px', position: 'relative', overflow: 'hidden'
       }} className="login-left">
         {/* Subtle bg glow */}
         <div style={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,116,32,.08), transparent 70%)', pointerEvents: 'none' }} />

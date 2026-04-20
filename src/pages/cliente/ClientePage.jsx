@@ -433,7 +433,7 @@ function CcotizaScreen({ act }) {
 
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Comparativa IA — Margarina -18°C <IaBadge /></CardTitle>
-        <div style={{ overflowX:'auto' }}>
+        <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', width:'100%', display:'block' }}>
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.6rem', minWidth:360 }}>
             <thead>
               <tr style={{ background:'#F8FAFC' }}>

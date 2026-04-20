@@ -185,7 +185,7 @@ function PageHdr({ title, subtitle, badge }) {
 }
 
 function ScrollTable({ children }) {
-  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8, maxWidth:'100%' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', minWidth:0 }}>{children}</table></div>
+  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8, width:'100%', display:'block' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', tableLayout:'auto' }}>{children}</table></div>
 }
 
 function Thead({ cols }) {
