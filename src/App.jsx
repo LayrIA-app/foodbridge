@@ -1,3 +1,4 @@
+import { Component } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import HomeScreen from './pages/HomeScreen'
 import LoginScreen from './pages/LoginScreen'
@@ -6,6 +7,52 @@ import ComercialPage from './pages/comercial/ComercialPage'
 import ClientePage from './pages/cliente/ClientePage'
 
 const SCREEN_BG = '#FFF8F0'
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) {
+    console.error('[ErrorBoundary]', error, info?.componentStack)
+  }
+  render() {
+    if (!this.state.error) return this.props.children
+    const err = this.state.error
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: SCREEN_BG, color: '#1A2F4A',
+        padding: 24, overflow: 'auto', fontFamily: 'DM Sans',
+      }}>
+        <div style={{
+          maxWidth: 720, margin: '0 auto', padding: 24,
+          background: '#fff', borderRadius: 16,
+          border: '1px solid #E8D5C0', boxShadow: '0 20px 60px rgba(26,47,74,.08)'
+        }}>
+          <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.2rem', fontWeight: 900, color: '#e03030', marginBottom: 10, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+            Error de renderizado
+          </div>
+          <div style={{ fontSize: '.8rem', color: '#3a4a5a', marginBottom: 12 }}>
+            <strong>{err?.name || 'Error'}:</strong> {err?.message || String(err)}
+          </div>
+          {err?.stack && (
+            <pre style={{
+              fontSize: '.65rem', background: '#F5F6F8', padding: 12, borderRadius: 8,
+              color: '#1A2F4A', overflow: 'auto', maxHeight: 320, whiteSpace: 'pre-wrap'
+            }}>{err.stack}</pre>
+          )}
+          <button onClick={() => location.reload()} style={{
+            marginTop: 14, padding: '10px 18px', background: '#1A2F4A', color: '#fff',
+            border: 'none', borderRadius: 8, cursor: 'pointer',
+            fontFamily: 'Barlow Condensed', fontWeight: 700, fontSize: '.82rem',
+            letterSpacing: '.08em', textTransform: 'uppercase'
+          }}>
+            Recargar
+          </button>
+        </div>
+      </div>
+    )
+  }
+}
 
 function Splash({ message }) {
   return (
@@ -111,5 +158,9 @@ function Router() {
 }
 
 export default function App() {
-  return <AppProvider><Router/></AppProvider>
+  return (
+    <ErrorBoundary>
+      <AppProvider><Router/></AppProvider>
+    </ErrorBoundary>
+  )
 }
