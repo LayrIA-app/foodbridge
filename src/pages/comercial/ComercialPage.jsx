@@ -997,7 +997,7 @@ function CotizacionesScreen({ act }) {
               </tr>
             </table>
             <div style={{ display:'flex', gap:6, marginTop:10 }}>
-              <BtnSm onClick={()=>act('enviar','COT-2026-094 a Leopold')}>→ Enviar a Leopold</BtnSm>
+              <BtnSm onClick={()=>act('enviar_cot',{ref:'COT-2026-094',prod:'Harina Panadera W-280',fab:'Harinas del Mediterráneo',qty:'3.000 kg',pvp:'3.233€',margen:'18%'})}>→ Enviar a cliente</BtnSm>
               <BtnSm outline onClick={()=>act('ajustar','COT-2026-094')}>Ajustar</BtnSm>
             </div>
           </div>
@@ -1017,7 +1017,9 @@ function CotizacionesScreen({ act }) {
                 <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{imp}</td>
                 <td style={{ padding:'8px 10px', fontWeight:700, color:'#2D8A30' }}>{mrg}</td>
                 <td style={{ padding:'8px 10px' }}><Badge type={tt} text={tv}/></td>
-                <td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>act(tt==='amber'?'enviar':'ver',ref)}>{tt==='amber'?'Enviar':'Ver'}</TblBtn></td>
+                <td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>tt==='amber'
+  ? act('enviar_cot',{ref,prod:'Ver detalle',fab:'FoodBridge IA',qty:'—',pvp:imp,margen:mrg})
+  : act('ver',ref)}>{tt==='amber'?'Enviar':'Ver'}</TblBtn></td>
               </tr>
             )})}
           </tbody>
@@ -1419,6 +1421,162 @@ function ProximamentePlaceholder({ title, icon }) {
   )
 }
 
+
+/* ══ MODAL ENVIAR COTIZACIÓN ══ */
+function EnviarCotizModal({ cot, onClose }) {
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(null)
+
+  if (!cot) return null
+
+  const msg = encodeURIComponent(
+    `Hola, le envío la cotización *${cot.ref}* generada por FoodBridge IA:\n\n` +
+    `📦 *Producto:* ${cot.prod}\n` +
+    `🏭 *Fabricante:* ${cot.fab}\n` +
+    `⚖️ *Cantidad:* ${cot.qty}\n` +
+    `💰 *Precio total:* ${cot.pvp} (IVA no incluido)\n` +
+    `📊 *Margen:* ${cot.margen}\n\n` +
+    `_Cotización generada automáticamente por FoodBridge IA_`
+  )
+
+  const emailBody = encodeURIComponent(
+    `Estimado cliente,\n\nAdjunto encontrará la cotización ${cot.ref}:\n\n` +
+    `Producto: ${cot.prod}\n` +
+    `Fabricante: ${cot.fab}\n` +
+    `Cantidad: ${cot.qty}\n` +
+    `Precio total: ${cot.pvp} (IVA no incluido)\n` +
+    `Margen: ${cot.margen}\n\n` +
+    `Generada por FoodBridge IA\n\nQuedamos a su disposición.`
+  )
+
+  const sendWhatsApp = () => {
+    const num = phone.replace(/[\s\-+()]/g,'')
+    if (!num) return
+    window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
+    setSent('whatsapp')
+  }
+
+  const sendEmail = async () => {
+    if (!email) return
+    setSent('sending_email')
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: email,
+          ref: cot.ref,
+          prod: cot.prod,
+          fab: cot.fab,
+          qty: cot.qty,
+          pvp: cot.pvp,
+          margen: cot.margen,
+        })
+      })
+      const data = await res.json()
+      if (data.success) setSent('email')
+      else setSent('email_error')
+    } catch {
+      setSent('email_error')
+    }
+  }
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div style={{ background:'#fff', borderRadius:18, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(26,47,74,.3)', animation:'modalIn .25s ease both' }}>
+
+          {/* Header */}
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'18px 18px 0 0', padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.1rem', fontWeight:900, color:'#fff', marginBottom:2 }}>Enviar cotización</div>
+              <div style={{ fontSize:'.62rem', color:'rgba(255,255,255,.5)' }}>Generada por FoodBridge IA · {cot.ref}</div>
+            </div>
+            <button onClick={onClose} style={{ width:30, height:30, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer', fontSize:'1rem' }}>✕</button>
+          </div>
+
+          <div style={{ padding:'20px 22px' }}>
+
+            {/* Cotización preview */}
+            <div style={{ background:'linear-gradient(135deg,#FFFBF5,#FFF8F0)', border:'1.5px solid rgba(232,116,32,.25)', borderRadius:12, padding:16, marginBottom:18 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+                <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:ACCENT }}>{cot.ref}</div>
+                <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.3rem', fontWeight:900, color:NAVY }}>{cot.pvp}</div>
+              </div>
+              {[['📦 Producto',cot.prod],['🏭 Fabricante',cot.fab],['⚖️ Cantidad',cot.qty],['📊 Margen',cot.margen]].map(([k,v])=>(
+                <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', borderBottom:'1px solid rgba(232,116,32,.1)', fontSize:'.72rem' }}>
+                  <span style={{ color:'#7a8899' }}>{k}</span>
+                  <span style={{ fontWeight:600, color:NAVY }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(45,138,48,.06)', borderRadius:8, fontSize:'.62rem', color:'#2D8A30', borderLeft:'3px solid #2D8A30' }}>
+                ✓ Generada automáticamente por FoodBridge IA en 47 segundos
+              </div>
+            </div>
+
+            {/* WhatsApp */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY, marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ fontSize:'1rem' }}>💬</span> Enviar por WhatsApp
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <div style={{ position:'relative', flex:1 }}>
+                  <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', fontSize:'.72rem', color:'#7a8899', pointerEvents:'none' }}>+</span>
+                  <input
+                    type="tel"
+                    placeholder="34 612 345 678"
+                    value={phone}
+                    onChange={e=>setPhone(e.target.value)}
+                    style={{ width:'100%', padding:'10px 12px 10px 22px', border:'2px solid rgba(37,211,102,.3)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans', outline:'none', boxSizing:'border-box', color:NAVY }}
+                    onFocus={e=>e.target.style.borderColor='#25D366'}
+                    onBlur={e=>e.target.style.borderColor='rgba(37,211,102,.3)'}
+                  />
+                </div>
+                <button onClick={sendWhatsApp} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', letterSpacing:'.04em', background:'#25D366', color:'#fff', whiteSpace:'nowrap', boxShadow:'0 4px 12px rgba(37,211,102,.3)', transition:'all .2s' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#1DA855'}
+                  onMouseLeave={e=>e.currentTarget.style.background='#25D366'}>
+                  Enviar →
+                </button>
+              </div>
+              {sent==='whatsapp' && <div style={{ marginTop:6, fontSize:'.62rem', color:'#25D366', fontWeight:600 }}>✓ WhatsApp abierto — pulsa Enviar en la app</div>}
+            </div>
+
+            {/* Email */}
+            <div style={{ marginBottom:18 }}>
+              <div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY, marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ fontSize:'1rem' }}>✉️</span> Enviar por Email
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input
+                  type="email"
+                  placeholder="cliente@empresa.com"
+                  value={email}
+                  onChange={e=>setEmail(e.target.value)}
+                  style={{ flex:1, padding:'10px 12px', border:'2px solid rgba(26,120,255,.25)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans', outline:'none', color:NAVY }}
+                  onFocus={e=>e.target.style.borderColor='#1A78FF'}
+                  onBlur={e=>e.target.style.borderColor='rgba(26,120,255,.25)'}
+                />
+                <button onClick={sendEmail} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', letterSpacing:'.04em', background:'#1A78FF', color:'#fff', whiteSpace:'nowrap', boxShadow:'0 4px 12px rgba(26,120,255,.3)', transition:'all .2s' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#1565D8'}
+                  onMouseLeave={e=>e.currentTarget.style.background='#1A78FF'}>
+                  Enviar →
+                </button>
+              </div>
+              {sent==='sending_email' && <div style={{ marginTop:6, fontSize:'.62rem', color:'#7a8899', fontWeight:600 }}>⏳ Enviando email...</div>}
+      {sent==='email' && <div style={{ marginTop:6, fontSize:'.62rem', color:'#2D8A30', fontWeight:600 }}>✓ Email enviado directamente al cliente</div>}
+      {sent==='email_error' && <div style={{ marginTop:6, fontSize:'.62rem', color:'#e03030', fontWeight:600 }}>✗ Error al enviar. Comprueba el email.</div>}
+            </div>
+
+            <button onClick={onClose} style={{ width:'100%', padding:10, borderRadius:9, border:'1px solid #E8D5C0', background:'transparent', color:'#7a8899', fontSize:'.7rem', cursor:'pointer', fontFamily:'DM Sans' }}>Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 /* ══ MODAL BUILDER ══ */
 function buildModal(type, detail, showToast) {
   const m = {
@@ -1514,6 +1672,7 @@ export default function ComercialPage() {
   const [active, setActive] = useState('dash')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modal, setModal] = useState(null)
+  const [sendCot, setSendCot] = useState(null)
   const [push, setPush] = useState(null)
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [readAlerts, setReadAlerts] = useState(new Set())
@@ -1522,8 +1681,12 @@ export default function ComercialPage() {
 
   const unreadCount = ALERTS.filter((_,i)=>!readAlerts.has(i)).length
   const closeModal = useCallback(()=>setModal(null),[])
-  const act = useCallback((type,detail)=>{ if(type==='goto'){changeSection(detail);return} setModal(buildModal(type,detail,showToast)) },[showToast,changeSection])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
+  const act = useCallback((type,detail)=>{
+    if(type==='goto'){changeSection(detail);return}
+    if(type==='enviar_cot'){setSendCot(detail);return}
+    setModal(buildModal(type,detail,showToast))
+  },[showToast,changeSection])
 
   useEffect(()=>{
     let idx=0
@@ -1620,6 +1783,7 @@ export default function ComercialPage() {
       </div>
 
       <Modal modal={modal} onClose={closeModal}/>
+      <EnviarCotizModal cot={sendCot} onClose={()=>setSendCot(null)}/>
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
       {alertsOpen&&<AlertsModal alerts={ALERTS} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
