@@ -569,16 +569,20 @@ function NotificarTarifasModal({ open, onClose, showToast }) {
     setTimeout(() => window.open(`https://wa.me/${num}?text=${waMsg}`, '_blank'), 100)
   }
 
-  const sendEm = () => {
+  const sendEm = async () => {
     if (!email) return
-    setSentEm(true)
-    const s = encodeURIComponent('Actualización de tarifas — FoodBridge IA')
-    const b = encodeURIComponent(
-      `Estimado cliente,\n\nLe informamos de los siguientes cambios de tarifa efectivos desde el 01/05/2026:\n\n` +
-      CAMBIOS.map(c=>`${c.prod}: ${c.antes} → ${c.despues}/kg (${c.pct})`).join('\n') +
-      `\n\nFrom FoodBridge IA · Soluciones inteligentes by COAXIONIA\nwww.coaxionia.com · © Todos los derechos reservados`
-    )
-    window.open(`mailto:${email}?subject=${s}&body=${b}`, '_blank')
+    setSentEm('sending')
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: email, tipo: 'tarifas' })
+      })
+      const data = await res.json()
+      setSentEm(data.success ? 'ok' : 'error')
+    } catch {
+      setSentEm('error')
+    }
   }
 
   return (
@@ -625,7 +629,9 @@ function NotificarTarifasModal({ open, onClose, showToast }) {
                   onFocus={e=>e.target.style.borderColor='#1A78FF'} onBlur={e=>e.target.style.borderColor='rgba(26,120,255,.25)'} />
                 <button onClick={sendEm} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:'pointer', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', background:'#1A78FF', color:'#fff', whiteSpace:'nowrap' }}>Enviar →</button>
               </div>
-              {sentEm && <div style={{ marginTop:5, fontSize:'.62rem', color:'#1A78FF', fontWeight:600 }}>✓ Email abierto</div>}
+              {sentEm==='sending' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#7a8899', fontWeight:600 }}>⏳ Enviando...</div>}
+      {sentEm==='ok' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#2D8A30', fontWeight:600 }}>✓ Email enviado directamente al cliente</div>}
+      {sentEm==='error' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#e03030', fontWeight:600 }}>✗ Error al enviar. Comprueba el email.</div>}
             </div>
             <div style={{ display:'flex', gap:8 }}>
               <button onClick={()=>{showToast('✅ Notificaciones enviadas a 2.000 contactos');onClose()}} style={{ flex:1, padding:11, background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:9, color:'#fff', fontFamily:'Barlow Condensed', fontWeight:900, fontSize:'.85rem', letterSpacing:'.08em', textTransform:'uppercase', cursor:'pointer' }}>Notificar a todos (2.000)</button>
