@@ -304,7 +304,7 @@ function DashScreen({ act }) {
       {/* OBJETIVO MENSUAL */}
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Objetivo mensual Abril 2026 <IaBadge /></CardTitle>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:14 }}>
+        <div className="grid-3" style={{ marginBottom:14 }}>
           {[{label:'FACTURACIÓN',val:'87.400 EUR',sub:'de 120.000 EUR',color:'#2D8A30'},{label:'OPERACIONES',val:'42',sub:'de 55 objetivo',color:'#2D8A30'},{label:'CLIENTES NUEVOS',val:'3',sub:'de 5 objetivo',color:'#e8a010'}].map((k,i)=>(
             <div key={i} style={{ textAlign:'center' }}>
               <div style={{ fontSize:'.5rem', fontWeight:700, color:'#7a8899', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:4 }}>{k.label}</div>
@@ -1267,7 +1267,7 @@ function GastosScreen({ act }) {
 
       <Card style={{ marginBottom:13, border:`2px solid rgba(232,116,32,.3)`, background:'linear-gradient(135deg,#FFFBF5,#FFF3E8)' }}>
         <CardTitle>Registrar gasto <IaBadge /></CardTitle>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12, marginBottom:14 }}>
+        <div className="grid-3" style={{ marginBottom:14 }}>
           {[{icon:'📷',label:'Foto del ticket',desc:'OCR lee importe y concepto',bg:`linear-gradient(135deg,${ACCENT},#F5A623)`},{icon:'📱',label:'Escanear QR',desc:'Lee todos los datos del QR',bg:'linear-gradient(135deg,#1A2F4A,#2A4A6A)'},{icon:'📍',label:'Km automático',desc:'GPS registra cada ruta',bg:'linear-gradient(135deg,#2D8A30,#4CAF50)'}].map((t,i)=>(
             <div key={i} onClick={()=>act('escanear',t.label)} style={{ background:'#fff', borderRadius:10, padding:16, border:`1.5px solid rgba(232,116,32,.2)`, textAlign:'center', cursor:'pointer', transition:'transform .2s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform=''}>
               <div style={{ width:44, height:44, borderRadius:'50%', background:t.bg, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 8px', fontSize:'1.2rem' }}>{t.icon}</div>

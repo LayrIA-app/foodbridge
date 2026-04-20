@@ -349,7 +349,7 @@ function CpedidosScreen({ act }) {
       <PageHdr title="Mis Pedidos" subtitle="Seguimiento completo con trazabilidad Reg. 178/2002" />
       <SearchBar placeholder="Buscar pedido o producto..." />
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:13 }}>
+      <div className="grid-4" style={{ marginBottom:13 }}>
         {[{v:'6',l:'Activos',c:'#E87420',bg:'#FFF8F0',border:'rgba(232,116,32,.15)'},{v:'1',l:'Retrasado',c:'#e8a010',bg:'#FFF3CD',border:'rgba(232,160,16,.2)'},{v:'3',l:'Entregados',c:'#2D8A30',bg:'#F0FFF4',border:'#C6F6D5'},{v:'2',l:'Confirmados',c:'#1A78FF',bg:'#F0F7FF',border:'#C4DEFF'}].map((k,i)=>(
           <div key={i} style={{ padding:12, borderRadius:10, background:k.bg, border:`1px solid ${k.border}`, textAlign:'center' }}>
             <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:k.c }}>{k.v}</div>
