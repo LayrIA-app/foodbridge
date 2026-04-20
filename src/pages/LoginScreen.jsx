@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 
-const ROLE_DATA = {
+const ROLE_COPY = {
   fabricante: {
     pill: 'Fabricante',
     h1: ['Panel', 'Fabricante'],
@@ -17,7 +17,6 @@ const ROLE_DATA = {
       { val: '340', lbl: 'Clientes conectados' },
       { val: '98%', lbl: 'Satisfacción' },
     ],
-    showToggle: true,
   },
   comercial: {
     pill: 'Comercial',
@@ -34,7 +33,6 @@ const ROLE_DATA = {
       { val: '2.3x', lbl: 'Más conversiones' },
       { val: '4 min', lbl: 'Propuesta lista' },
     ],
-    showToggle: false,
   },
   cliente: {
     pill: 'Cliente',
@@ -51,19 +49,63 @@ const ROLE_DATA = {
       { val: '48h', lbl: 'Entrega media' },
       { val: '100%', lbl: 'Trazabilidad' },
     ],
-    showToggle: false,
+  },
+  _default: {
+    pill: 'Acceso',
+    h1: ['Panel', 'FoodBridge'],
+    sub: 'Ecosistema IA adaptativa para toda la cadena de valor de la alimentación.',
+    feats: [
+      'Fichas técnicas generadas por IA',
+      'Matching fabricante ↔ cliente en tiempo real',
+      'Trazabilidad Reg. 178/2002',
+      'Insights IA proactivos en cada sección',
+    ],
+    kpis: [
+      { val: '1.600+', lbl: 'Fichas activas' },
+      { val: '340+', lbl: 'Fabricantes' },
+      { val: '98%', lbl: 'Satisfacción' },
+    ],
   },
 }
 
-export default function LoginScreen() {
-  const { currentRole, enterPanel, goHome } = useApp()
-  const [fabProfile, setFabProfile] = useState('directivo')
-  const data = ROLE_DATA[currentRole] || ROLE_DATA.comercial
+function mapAuthError(message) {
+  if (!message) return 'Error inesperado. Inténtalo de nuevo.'
+  const m = message.toLowerCase()
+  if (m.includes('invalid login credentials')) return 'Email o contraseña incorrectos.'
+  if (m.includes('email not confirmed')) return 'Tu cuenta aún no está confirmada. Revisa tu email.'
+  if (m.includes('too many requests') || m.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos.'
+  if (m.includes('network')) return 'Problema de conexión. Comprueba tu internet.'
+  return message
+}
 
-  const handleAcceder = () => enterPanel(fabProfile)
+export default function LoginScreen() {
+  const { currentRole, goHome, signIn } = useApp()
+  const data = ROLE_COPY[currentRole] || ROLE_COPY._default
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+
+  const disabled = submitting || !email || !password
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.()
+    if (disabled) return
+    setError(null)
+    setSubmitting(true)
+    const { error: err } = await signIn(email.trim(), password)
+    setSubmitting(false)
+    if (err) {
+      setError(mapAuthError(err.message))
+      return
+    }
+    // Si login OK, AppContext recibirá session + profile via onAuthStateChange,
+    // y App.jsx redirigirá al panel correspondiente según profile.role.
+  }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex' }} className="login-wrap">
+    <form onSubmit={handleSubmit} style={{ position: 'fixed', inset: 0, zIndex: 400, display: 'flex' }} className="login-wrap">
 
       {/* LEFT — navy panel */}
       <div style={{
@@ -71,12 +113,10 @@ export default function LoginScreen() {
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
         padding: '64px 72px', position: 'relative', overflow: 'hidden'
       }} className="login-left">
-        {/* Subtle bg glow */}
         <div style={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,116,32,.08), transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,116,32,.05), transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <div style={{
               width: 44, height: 44, borderRadius: '50%',
@@ -97,7 +137,6 @@ export default function LoginScreen() {
             </div>
           </div>
 
-          {/* Role pill */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: 'rgba(232,116,32,.15)', border: '1px solid rgba(232,116,32,.35)',
@@ -108,7 +147,6 @@ export default function LoginScreen() {
             {data.pill}
           </div>
 
-          {/* H1 */}
           <h1 style={{
             fontFamily: 'Barlow Condensed', fontSize: '2rem', fontWeight: 900,
             lineHeight: 1.05, color: '#fff', marginBottom: 14,
@@ -118,12 +156,10 @@ export default function LoginScreen() {
             <span style={{ color: '#F5A623' }}>{data.h1[1]}</span>
           </h1>
 
-          {/* Description */}
           <p style={{ color: 'rgba(255,255,255,.55)', fontSize: '.9rem', lineHeight: 1.75, maxWidth: 400 }}>
             {data.sub}
           </p>
 
-          {/* Features */}
           <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {data.feats.map((f, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '.78rem', color: 'rgba(255,255,255,.65)' }}>
@@ -134,7 +170,6 @@ export default function LoginScreen() {
           </div>
         </div>
 
-        {/* Brand footer */}
         <div style={{
           position: 'absolute', bottom: 28, left: 72,
           fontSize: '.55rem', color: 'rgba(255,255,255,.2)',
@@ -153,46 +188,17 @@ export default function LoginScreen() {
         <div style={{ fontSize: '.62rem', color: '#8A9BB0', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 8 }}>
           Acceso seguro
         </div>
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.5rem', fontWeight: 900, color: '#1A2F4A', marginBottom: 32, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.5rem', fontWeight: 900, color: '#1A2F4A', marginBottom: 24, textTransform: 'uppercase', letterSpacing: '.04em' }}>
           Acceder · <span style={{ color: '#E87420' }}>{data.pill}</span>
         </div>
 
-        {/* Fabricante toggle */}
-        {data.showToggle && (
-          <div style={{ marginBottom: 20, textAlign: 'center' }}>
-            <div style={{
-              display: 'inline-flex', background: 'rgba(26,47,74,.06)',
-              borderRadius: 30, padding: 3, border: '1px solid rgba(232,116,32,.15)'
-            }}>
-              {[
-                { id: 'directivo', label: 'Directivo / CEO' },
-                { id: 'operaciones', label: 'Operaciones / Calidad' },
-              ].map(opt => (
-                <button key={opt.id} onClick={() => setFabProfile(opt.id)}
-                  style={{
-                    padding: '8px 20px', borderRadius: 28, border: 'none',
-                    fontFamily: 'DM Sans', fontSize: '.7rem', fontWeight: 700,
-                    letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer',
-                    transition: 'all .25s',
-                    background: fabProfile === opt.id ? 'linear-gradient(135deg,#E87420,#D06A1C)' : 'transparent',
-                    color: fabProfile === opt.id ? '#fff' : '#7A8899',
-                    boxShadow: fabProfile === opt.id ? '0 4px 16px rgba(232,116,32,.3)' : 'none',
-                  }}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <div style={{ fontSize: '.62rem', color: '#8A9BB0', marginTop: 6 }}>
-              {fabProfile === 'directivo' ? 'Vista estratégica de negocio' : 'Vista operativa y de calidad'}
-            </div>
-          </div>
-        )}
-
-        {/* Email */}
         <label style={{ display: 'block', fontSize: '.6rem', fontWeight: 700, color: '#8A9BB0', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 6 }}>
           Correo electrónico
         </label>
-        <input type="email" placeholder="nombre@empresa.es"
+        <input
+          type="email" placeholder="nombre@empresa.es" autoComplete="email"
+          value={email} onChange={e => setEmail(e.target.value)}
+          disabled={submitting}
           style={{
             width: '100%', padding: '13px 16px',
             background: '#FFF8F0', border: '1.5px solid #E8D5C0',
@@ -204,49 +210,60 @@ export default function LoginScreen() {
           onBlur={e => { e.target.style.borderColor = '#E8D5C0'; e.target.style.boxShadow = 'none' }}
         />
 
-        {/* Password */}
         <label style={{ display: 'block', fontSize: '.6rem', fontWeight: 700, color: '#8A9BB0', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 6 }}>
           Contraseña
         </label>
-        <input type="password" placeholder="••••••••"
+        <input
+          type="password" placeholder="••••••••" autoComplete="current-password"
+          value={password} onChange={e => setPassword(e.target.value)}
+          disabled={submitting}
           style={{
             width: '100%', padding: '13px 16px',
             background: '#FFF8F0', border: '1.5px solid #E8D5C0',
             borderRadius: 8, color: '#1A2F4A', fontSize: '.88rem',
-            fontFamily: 'DM Sans', outline: 'none', marginBottom: 20,
+            fontFamily: 'DM Sans', outline: 'none', marginBottom: error ? 10 : 20,
             boxSizing: 'border-box'
           }}
           onFocus={e => { e.target.style.borderColor = '#E87420'; e.target.style.boxShadow = '0 0 0 3px rgba(232,116,32,.08)' }}
           onBlur={e => { e.target.style.borderColor = '#E8D5C0'; e.target.style.boxShadow = 'none' }}
         />
 
-        {/* Acceder button */}
-        <button onClick={handleAcceder}
+        {error && (
+          <div role="alert" style={{
+            marginBottom: 14, padding: '10px 12px',
+            background: '#FFF5F5', border: '1px solid rgba(224,48,48,.25)',
+            borderRadius: 8, color: '#c03030',
+            fontSize: '.72rem', fontWeight: 600, lineHeight: 1.4
+          }}>
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={disabled}
           style={{
             width: '100%', padding: 14,
-            background: 'linear-gradient(135deg,#E87420,#D06A1C)',
+            background: disabled
+              ? 'linear-gradient(135deg,rgba(232,116,32,.45),rgba(208,106,28,.45))'
+              : 'linear-gradient(135deg,#E87420,#D06A1C)',
             border: 'none', borderRadius: 8, color: '#fff',
             fontFamily: 'Barlow Condensed', fontWeight: 900, fontSize: '1rem',
-            letterSpacing: '.14em', textTransform: 'uppercase', cursor: 'pointer',
-            boxShadow: '0 4px 20px rgba(232,116,32,.3)',
+            letterSpacing: '.14em', textTransform: 'uppercase',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            boxShadow: disabled ? 'none' : '0 4px 20px rgba(232,116,32,.3)',
             transition: 'all .2s'
           }}
-          onMouseEnter={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 28px rgba(232,116,32,.4)' }}
-          onMouseLeave={e => { e.target.style.transform = ''; e.target.style.boxShadow = '0 4px 20px rgba(232,116,32,.3)' }}
         >
-          Acceder
+          {submitting ? 'Accediendo…' : 'Acceder'}
         </button>
 
-        {/* Back link */}
-        <span onClick={goHome}
-          style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: '.75rem', color: '#8A9BB0', cursor: 'pointer', transition: 'color .2s' }}
-          onMouseEnter={e => e.target.style.color = '#E87420'}
+        <span onClick={submitting ? undefined : goHome}
+          style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: '.75rem', color: '#8A9BB0', cursor: submitting ? 'not-allowed' : 'pointer', transition: 'color .2s' }}
+          onMouseEnter={e => { if (!submitting) e.target.style.color = '#E87420' }}
           onMouseLeave={e => e.target.style.color = '#8A9BB0'}
         >
-          ← Cambiar perfil
+          ← Volver
         </span>
 
-        {/* KPIs */}
         <div style={{ display: 'flex', marginTop: 24, borderTop: '1px solid #E8D5C0', paddingTop: 18 }}>
           {data.kpis.map((k, i) => (
             <div key={i} style={{ flex: 1, textAlign: 'center', padding: '0 8px', borderLeft: i > 0 ? '1px solid #E8D5C0' : 'none' }}>
@@ -256,6 +273,6 @@ export default function LoginScreen() {
           ))}
         </div>
       </div>
-    </div>
+    </form>
   )
 }
