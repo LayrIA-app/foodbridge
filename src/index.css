@@ -89,19 +89,19 @@ body {
   .login-wrap { flex-direction: column !important; }
   .login-left { padding: 24px 16px !important; min-height: 180px !important; }
 
-  /* Tarjetas alertas — 1 columna */
+  /* Tarjetas alertas — 1 columna en móvil */
   .grid-2 { grid-template-columns: 1fr !important; }
 
-  /* Tablas — sin scroll horizontal, solo vertical */
-  table { font-size: .6rem !important; }
-  td, th { white-space: normal !important; word-break: break-word; }
-  div[style*='overflowX'] { overflow-x: hidden !important; }
+  /* Tablas — texto se parte, scroll solo vertical */
+  table { font-size: .6rem !important; width: 100% !important; }
+  td, th { padding: 5px 6px !important; white-space: normal !important; word-break: break-word !important; }
 
-  /* Textos largos no se cortan */
-  .card, [class*="card"] { min-width: 0 !important; overflow: hidden !important; }
+  /* Contenedores de tabla — sin scroll horizontal */
+  .scrollable { overflow-x: hidden !important; }
 
-  /* KPI — fuente más pequeña en móvil */
-  .kpi-val, [style*="Barlow Condensed"] { font-size: 1.1rem !important; }
+  /* Contenido no se sale de pantalla */
+  .animate-fadeIn { max-width: 100% !important; overflow-x: hidden !important; }
+  .fab-content-pad > div { max-width: 100% !important; }
 }
 
 @media (min-width: 641px) {
