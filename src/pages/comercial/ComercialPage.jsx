@@ -247,7 +247,7 @@ function VisitCard({ num, hour, color, border, bg, name, loc, badge, amount, urg
         </div>}
         <div style={{ display:'flex', gap:6 }}>
           <button onClick={()=>act('checkin',name)} style={{ flex:1, padding:'8px', fontSize:'.62rem', borderRadius:8, background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', cursor:'pointer', fontFamily:'DM Sans', fontWeight:700 }}>✓ Check-in</button>
-          <button onClick={()=>act('llamar',name)} style={{ padding:'8px 12px', fontSize:'.62rem', borderRadius:8, background:'#f0f4f8', color:NAVY, border:'1px solid #dce3eb', cursor:'pointer' }}>📞</button>
+          <button disabled title="Disponible en Fase 3 · Voz IA" style={{ padding:'8px 12px', fontSize:'.62rem', borderRadius:8, background:'#f0f4f8', color:NAVY, border:'1px solid #dce3eb', cursor:'not-allowed', opacity:.5 }}>📞</button>
           <button onClick={()=>act('goto','fichas')} style={{ padding:'8px 12px', fontSize:'.62rem', borderRadius:8, background:'#f0f4f8', color:NAVY, border:'1px solid #dce3eb', cursor:'pointer' }}>📄</button>
         </div>
       </div>
@@ -349,7 +349,7 @@ function DashScreen({ act }) {
           </div>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
             <BtnSm onClick={()=>act('navegar','Congelados Martz')}>🧭 Navegar</BtnSm>
-            <BtnSm outline onClick={()=>act('llamar','Congelados Martz')}>📞 Llamar</BtnSm>
+            <button disabled title="Disponible en Fase 3 · Voz IA" style={{ padding:'6px 12px', fontSize:'.62rem', fontWeight:700, borderRadius:6, background:'transparent', color:NAVY, border:'1.5px solid #dce3eb', cursor:'not-allowed', opacity:.5, fontFamily:'DM Sans' }}>📞 Llamar</button>
           </div>
         </div>
       </Card>
@@ -539,7 +539,7 @@ function VisitasScreen({ act }) {
                 </div>
               ))}
             </div>
-            <div onClick={()=>act('notavoz','visita Martz')} style={{ display:'flex', gap:6, alignItems:'center', padding:'8px 12px', background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)', cursor:'pointer' }}>
+            <div title="Disponible en Fase 3 · Voz IA" style={{ display:'flex', gap:6, alignItems:'center', padding:'8px 12px', background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)', cursor:'not-allowed', opacity:.5, pointerEvents:'none' }}>
               <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/></svg>
               </div>
@@ -632,7 +632,7 @@ function BusquedaScreen({ act }) {
             placeholder="Ej: Mi cliente necesita una margarina para hojaldre que aguante -18°C sin palma..."
             style={{ flex:1, padding:'11px 16px', border:'1.5px solid #E8D5C0', borderRadius:10, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', background:'#fff', outline:'none' }}
             onFocus={e=>e.target.style.borderColor=ACCENT} onBlur={e=>e.target.style.borderColor='#E8D5C0'} />
-          <div onClick={()=>act('vozsearch','búsqueda por voz')} style={{ width:44, height:44, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, boxShadow:'0 2px 8px rgba(232,116,32,.3)' }}>
+          <div title="Disponible en Fase 3 · Voz IA" style={{ width:44, height:44, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'not-allowed', flexShrink:0, boxShadow:'0 2px 8px rgba(232,116,32,.3)', opacity:.5, pointerEvents:'none' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/></svg>
           </div>
           <button onClick={()=>doSearch(query)} style={{ padding:'11px 20px', borderRadius:10, border:'none', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', fontSize:'.72rem', fontWeight:700, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'DM Sans' }}>Buscar</button>
@@ -973,7 +973,7 @@ function CotizacionesScreen({ act }) {
         </div>
         <div className="grid-2">
           <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1px solid #E8D5C0', textAlign:'center' }}>
-            <div onClick={()=>act('vozsearch','cotización por voz')} style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'pointer', boxShadow:'0 4px 15px rgba(232,116,32,.3)' }}>
+            <div title="Disponible en Fase 3 · Voz IA" style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'not-allowed', boxShadow:'0 4px 15px rgba(232,116,32,.3)', opacity:.5, pointerEvents:'none' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2"/></svg>
             </div>
             <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY, marginBottom:4 }}>Dicta tu cotización</div>
@@ -1154,7 +1154,7 @@ function CrmScreen({ act }) {
         </div>
         <div className="grid-2">
           <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1px solid #E8D5C0', textAlign:'center' }}>
-            <div onClick={()=>act('notavoz','nota CRM')} style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'pointer', boxShadow:'0 4px 15px rgba(232,116,32,.3)' }}>
+            <div title="Disponible en Fase 3 · Voz IA" style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'not-allowed', boxShadow:'0 4px 15px rgba(232,116,32,.3)', opacity:.5, pointerEvents:'none' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2"/></svg>
             </div>
             <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY, marginBottom:4 }}>Dicta nota de cliente</div>
@@ -1590,7 +1590,7 @@ function EnviarCotizModal({ cot, onClose }) {
 function buildModal(type, detail, showToast) {
   const m = {
     alerta:{title:'Alerta',body:`<div style="padding:10px;border-radius:8px;background:#FFF5F5;border:1px solid rgba(224,48,48,.2);margin-bottom:12px;font-size:.75rem;color:#e03030;font-weight:700">${detail}</div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA recomienda actuar en las próximas 24h.</div>`,actions:[{label:'Gestionar',type:'primary',fn:()=>showToast('✅ Alerta gestionada')},{label:'Cerrar',type:'gray'}]},
-    checkin:{title:`Check-in: ${detail}`,body:`<div style="padding:12px;background:#F0FFF4;border-radius:8px;margin-bottom:12px"><div style="font-size:.72rem;font-weight:700;color:#2D8A30;margin-bottom:4px">✓ Check-in registrado automáticamente</div><div style="font-size:.62rem;color:#3a4a5a">Cliente: <strong>${detail}</strong><br/>Hora de llegada: ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}<br/>GPS verificado · FoodBridge IA</div></div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA ha registrado la visita y actualizado el CRM automáticamente.</div>`,actions:[{label:'Registrar resultado',type:'primary',fn:()=>showToast('✅ Visita registrada')},{label:'Dictar nota de voz',type:'blue',fn:()=>showToast('🎤 Grabando...')},{label:'Cerrar',type:'gray'}]},
+    checkin:{title:`Check-in: ${detail}`,body:`<div style="padding:12px;background:#F0FFF4;border-radius:8px;margin-bottom:12px"><div style="font-size:.72rem;font-weight:700;color:#2D8A30;margin-bottom:4px">✓ Check-in registrado automáticamente</div><div style="font-size:.62rem;color:#3a4a5a">Cliente: <strong>${detail}</strong><br/>Hora de llegada: ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}<br/>GPS verificado · FoodBridge IA</div></div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #E87420">IA ha registrado la visita y actualizado el CRM automáticamente.</div>`,actions:[{label:'Registrar resultado',type:'primary',fn:()=>showToast('✅ Visita registrada')},{label:'Cerrar',type:'gray'}]},
     llamar:{title:`Llamar: ${detail}`,body:`<div style="font-size:.72rem;color:#3a4a5a;margin-bottom:12px">Contactar con: <strong>${detail}</strong></div><div style="padding:10px;background:rgba(45,138,48,.05);border-radius:8px;font-size:.65rem;border-left:3px solid #2D8A30">IA tiene el historial de este cliente listo para la llamada.</div>`,actions:[{label:'Llamar ahora',type:'green',fn:()=>showToast('📞 Llamando...')},{label:'WhatsApp',type:'blue',fn:()=>showToast('💬 WhatsApp abierto')},{label:'Cerrar',type:'gray'}]},
     ficha:{title:`Ficha técnica: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a">Ficha técnica de <strong>${detail}</strong>.<br/><br/>Alérgenos verificados · Certificaciones IFS/BRC · Trazabilidad Reg. 178/2002</div>`,actions:[{label:'Ver ficha',type:'primary',fn:()=>showToast('📄 Ficha abierta')},{label:'Enviar al cliente',type:'blue',fn:()=>showToast('✉️ Ficha enviada')},{label:'Cerrar',type:'gray'}]},
     navegar:{title:`Navegar a: ${detail}`,body:`<div style="padding:12px;background:#F0FFF4;border-radius:8px;font-size:.72rem;color:#2D8A30;font-weight:700;margin-bottom:12px">📍 Ruta calculada por FoodBridge IA</div><div style="font-size:.65rem;color:#3a4a5a">Distancia estimada: 28 km · Tiempo: 35 min · Via AP-7</div>`,actions:[{label:'Abrir en Maps',type:'primary',fn:()=>showToast('🗺️ Abriendo Maps...')},{label:'Cerrar',type:'gray'}]},
