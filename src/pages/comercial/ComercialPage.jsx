@@ -203,7 +203,7 @@ function PageHdr({ title, subtitle, badge }) {
 }
 
 function ScrollTable({ children }) {
-  return <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', borderRadius:8, width:'100%' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.65rem', minWidth:480 }}>{children}</table></div>
+  return <div style={{ width:'100%', overflowX:'hidden' }}><table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.6rem', tableLayout:'fixed' }}><colgroup><col style={{wordBreak:'break-word',whiteSpace:'normal'}}/></colgroup>{children}</table></div>
 }
 
 function Thead({ cols }) {

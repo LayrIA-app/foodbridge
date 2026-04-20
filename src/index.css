@@ -69,8 +69,8 @@ body {
   .grid-3 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
   .grid-2 { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 
-  /* Scroll horizontal solo en contenedor principal */
-  body { overflow-x: hidden; }
+  /* Sin scroll horizontal */
+  body { overflow-x: hidden; overflow-y: auto; }
 
   /* Topbar */
   .fab-topbar-tagline { display: none !important; }
