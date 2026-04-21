@@ -9,7 +9,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
+html { font-size: 16px; overflow-x: hidden; max-width: 100vw; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--cream);
@@ -17,7 +17,13 @@ body {
   -webkit-font-smoothing: antialiased;
   height: 100vh;
   overflow: hidden;
+  max-width: 100vw;
 }
+
+/* Safety net: evitar overflow horizontal en cualquier dispositivo */
+#root { max-width: 100vw; overflow-x: hidden; }
+img, svg, video, canvas { max-width: 100%; }
+input, textarea, select, button { max-width: 100%; }
 
 /* Tipografia legible en movil (regla obligatoria COAXIONIA):
    en breakpoints 480px y 768px los rem se escalan ~15-20% para que el texto
@@ -72,6 +78,10 @@ body {
 
 /* Mobile */
 @media (max-width: 640px) {
+  /* Safety net universal en movil: nada debe crear scroll horizontal */
+  * { max-width: 100%; }
+  table { max-width: none; }  /* dejar que la tabla sea ancha; el wrapper scrollea */
+
   /* Grids — 2 cols en móvil */
   .grid-4 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
   .grid-3 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
@@ -153,6 +163,35 @@ body {
   /* Barra de canales: padding reducido, divisores invisibles entre items */
   .home-canales { padding: 6px 10px !important; max-width: 92vw !important; flex-wrap: wrap !important; justify-content: center !important; }
   .home-canales > div { padding: 0 8px !important; gap: 5px !important; }
+}
+
+/* ══ MODALES RESPONSIVOS ══ */
+/* Los modales con maxWidth fijo pueden desbordar en iframes estrechos */
+@media (max-width: 480px) {
+  [role="dialog"], .animate-modalIn {
+    max-width: 94vw !important;
+    width: auto !important;
+  }
+}
+
+/* Chat comercial: en movil apilar lista arriba y conversacion abajo */
+@media (max-width: 768px) {
+  .chat-split {
+    grid-template-columns: 1fr !important;
+  }
+  .chat-split > div:first-child {
+    border-right: none !important;
+    padding-right: 0 !important;
+    max-height: 240px !important;
+    border-bottom: 1px solid #E8D5C0 !important;
+    padding-bottom: 10px !important;
+  }
+}
+
+/* ══ LOGIN EXTRA NARROW ══ */
+@media (max-width: 480px) {
+  .login-left { padding: 20px 16px !important; min-height: 140px !important; }
+  .login-wrap > div:last-child { padding: 20px 16px !important; }
 }
 
 /* ══ HOME EXTRA NARROW (iframe estrecho, iPhone SE/mini, 360-375px) ══ */

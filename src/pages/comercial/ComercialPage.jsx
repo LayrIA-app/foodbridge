@@ -293,7 +293,7 @@ function DashScreen({ act }) {
               ))}
             </div>
           </div>
-          <div style={{ background:'rgba(255,255,255,.08)', borderRadius:10, padding:'12px 16px', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,.1)', minWidth:220, maxWidth:300, flex:'0 1 280px' }}>
+          <div style={{ background:'rgba(255,255,255,.08)', borderRadius:10, padding:'12px 16px', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,.1)', minWidth:0, maxWidth:'min(300px, 100%)', flex:'1 1 280px' }}>
             <div style={{ fontSize:'.5rem', fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'rgba(255,255,255,.4)', marginBottom:6 }}>BRIEFING IA DEL DÍA</div>
             <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.85)', lineHeight:1.55 }}>Prioridad 1: <strong style={{ color:'#ff8a8a' }}>Cerrar pedido Congelados Martz</strong> (visita 10:30h). Leopold necesita confirmación de stock W-280 antes de las 14h. Ruta optimizada: 287 km, ahorro de 52 km vs orden manual.</div>
           </div>
@@ -1168,7 +1168,7 @@ function NuevaCotModal({ open, onClose, profile, products, onCreate }) {
               </Field>
             ) : null}
             <Field label="Nombre del producto"><input value={productName} onChange={e=>setProductName(e.target.value)} placeholder="Harina W-280" style={inputStyle()} /></Field>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(90px, 1fr))', gap:8 }}>
               <Field label="Cantidad"><input type="number" min="1" value={quantity} onChange={e=>setQuantity(e.target.value)} style={inputStyle()} /></Field>
               <Field label="Precio unit. (€)"><input type="number" step="0.01" value={unitPrice} onChange={e=>setUnitPrice(e.target.value)} style={inputStyle()} /></Field>
               <Field label="Margen %"><input type="number" step="0.1" value={marginPct} onChange={e=>setMarginPct(e.target.value)} style={inputStyle()} /></Field>
@@ -1713,7 +1713,7 @@ function ComunicaScreen({ act }) {
             <button key={i} onClick={()=>act('filtro',f.label)} style={{ padding:'8px 14px', fontSize:'.65rem', fontWeight:700, background:f.bg, color:f.color, border:`1px solid ${f.bg}`, borderRadius:8, cursor:'pointer', fontFamily:'DM Sans' }}>{f.label}</button>
           ))}
         </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr', gap:14, minHeight:340 }}>
+        <div className="chat-split" style={{ display:'grid', gridTemplateColumns:'1fr 2fr', gap:14, minHeight:340 }}>
           {/* Lista chats */}
           <div style={{ borderRight:'1px solid #E8D5C0', paddingRight:14, display:'flex', flexDirection:'column', gap:6, overflowY:'auto', maxHeight:380 }}>
             {CHATS.map((c,i)=>(
