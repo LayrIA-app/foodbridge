@@ -79,17 +79,17 @@ export default function HomeScreen() {
 
         {/* Logo */}
         <div className="animate-fadeUp" style={{
-          display: 'flex', alignItems: 'center', gap: 'clamp(8px,3vw,16px)', marginBottom: 10,
-          background: '#1A2F4A', padding: 'clamp(8px,2vw,14px) clamp(14px,4vw,28px)', borderRadius: 50,
-          boxShadow: '0 8px 32px rgba(26,47,74,.3)'
+          display: 'flex', alignItems: 'center', gap: 'clamp(6px,2vw,10px)', marginBottom: 10,
+          background: '#1A2F4A', padding: 'clamp(6px,1.5vw,10px) clamp(12px,3vw,20px)', borderRadius: 40,
+          boxShadow: '0 6px 22px rgba(26,47,74,.28)'
         }}>
           <div style={{
-            width: 'clamp(36px,8vw,60px)', height: 'clamp(36px,8vw,60px)', borderRadius: '50%',
+            width: 'clamp(28px,5vw,38px)', height: 'clamp(28px,5vw,38px)', borderRadius: '50%',
             background: 'linear-gradient(135deg,#E87420,#F5A623)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 6px 28px rgba(232,116,32,.4)'
+            boxShadow: '0 4px 16px rgba(232,116,32,.35)'
           }}>
-            <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
               <path d="M14 36V22a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
               <path d="M10 36h28" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
               <path d="M24 12v8M20 14l4-4 4 4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -99,7 +99,7 @@ export default function HomeScreen() {
               <path d="M36 10h4M38 8v4" stroke="#1A2F4A" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <div style={{ fontFamily: 'Barlow Condensed', fontSize: 52, fontWeight: 900, letterSpacing: '.04em', lineHeight: 1 }}>
+          <div style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(22px,4vw,32px)', fontWeight: 900, letterSpacing: '.04em', lineHeight: 1 }}>
             <span style={{ color: '#fff' }}>Food</span><span style={{ color: '#fff' }}>Bridge</span><span style={{ color: '#F5A623' }}> IA</span>
           </div>
         </div>
