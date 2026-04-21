@@ -88,6 +88,16 @@ input, textarea, select, button { max-width: 100%; }
   .grid-3 { grid-template-columns: repeat(2,1fr); }
 }
 
+/* ≤ 768px · MOVIL: ocultar textos no esenciales del topbar + columna
+   decorativa del login. Siempre visibles en topbar: hamburguesa, logo,
+   campana, boton salir. Login en movil solo muestra el formulario. */
+@media (max-width: 768px) {
+  .login-left            { display: none !important; }
+  .fab-topbar-tagline    { display: none !important; }
+  .fab-topbar-rolebadge  { display: none !important; }
+  .fab-topbar-user-name  { display: none !important; }
+}
+
 /* ≤ 900px · oculta tagline del topbar en tablet portrait */
 @media (max-width: 900px) {
   .fab-topbar-tagline { display: none; }
@@ -101,7 +111,7 @@ input, textarea, select, button { max-width: 100%; }
 @media (max-width: 640px) {
   html { font-size: 17px; }  /* +6% para legibilidad; no fuerza wrap en topbar */
 
-  body { overflow-x: hidden; overflow-y: auto; }
+  body { overflow: hidden; }
 
   /* Grids */
   .grid-4 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }

@@ -1425,7 +1425,7 @@ export default function FabricantePage() {
   )
 
   return (
-    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'#FFF8F0' }}>
+    <div style={{ display:'flex', height:'100%', overflow:'hidden', background:'#FFF8F0' }}>
 
       {/* Sidebar overlay (mobile) */}
       {sidebarOpen && (

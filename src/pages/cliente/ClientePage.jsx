@@ -929,7 +929,7 @@ export default function ClientePage() {
   )
 
   return (
-    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'#FFF8F0' }}>
+    <div style={{ display:'flex', height:'100%', overflow:'hidden', background:'#FFF8F0' }}>
       {sidebarOpen&&<div onClick={()=>setSidebarOpen(false)} className="fab-sidebar-overlay" style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.55)', zIndex:999 }}/>}
 
       <div className="fab-sidebar" style={{ width:210, flexShrink:0, display:'flex', flexDirection:'column', background:'#fff', borderRight:'1px solid #E8D5C0', overflowY:'auto', padding:'12px 8px' }}>
