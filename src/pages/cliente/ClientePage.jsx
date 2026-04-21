@@ -875,7 +875,10 @@ export default function ClientePage() {
       cotizaciones_recientes: cliCotiz.slice(0,4).map(c=>({ ref:c.ref, status:c.status, producto:c.product_name })),
     },
   })
-  const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
+  // Normaliza alertas IA {sec, tipo, txt} al shape que espera AlertsModal {dot, text, time}
+  const ALERT_DOT = { red:'#e03030', amber:'#e8a010', green:'#2D8A30', blue:'#1A78FF' }
+  const mappedAi = aiAlerts.map(a => ({ dot: ALERT_DOT[a.tipo] || '#1A78FF', text: a.txt, time: a.sec }))
+  const displayAlerts = mappedAi.length > 0 ? mappedAi : ALERTS
   const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
 
   const { mensajes: aiPushes } = usePushIa({
@@ -890,8 +893,8 @@ export default function ClientePage() {
   const pushPoolRef = useRef(pushPool)
   pushPoolRef.current = pushPool
   const closeModal = useCallback(()=>setModal(null),[])
-  const act = useCallback((type,detail)=>{ if(type==='goto'){changeSection(detail);return} setModal(buildModal(type,detail,showToast)) },[showToast,changeSection])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
+  const act = useCallback((type,detail)=>{ if(type==='toast'){showToast(detail);return} if(type==='goto'){changeSection(detail);return} setModal(buildModal(type,detail,showToast)) },[showToast,changeSection])
 
   useEffect(()=>{
     let idx=0

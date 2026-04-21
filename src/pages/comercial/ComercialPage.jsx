@@ -2024,6 +2024,10 @@ function buildModal(type, detail, showToast) {
     liquidar:{title:'Generar liquidación',body:`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:#F8FAFC"><span style="font-size:.68rem">Kilometraje (1.280 km)</span><span style="font-size:.68rem;font-weight:700">243€</span></div><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:#F8FAFC"><span style="font-size:.68rem">Dietas y peajes</span><span style="font-size:.68rem;font-weight:700">156€</span></div><div style="display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(232,116,32,.06)"><span style="font-size:.68rem;font-weight:700">TOTAL</span><span style="font-size:.68rem;font-weight:800;color:#E87420">342€</span></div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>showToast('✅ Liquidación PDF descargada')},{label:'Enviar a dirección',type:'blue',fn:()=>showToast('✉️ Enviada a dirección')},{label:'Cerrar',type:'gray'}]},
     filtro:{title:`Filtro: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a">Filtrando mensajes por: <strong>${detail}</strong></div>`,actions:[{label:'Aplicar',type:'primary',fn:()=>showToast(`✅ Filtro ${detail} aplicado`)},{label:'Cerrar',type:'gray'}]},
     exportar:{title:`Exportar: ${detail}`,body:`<div style="text-align:center;padding:20px"><div style="font-size:.85rem;font-weight:700;color:#1A2F4A;margin-bottom:8px">${detail}</div><div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.62rem;color:#3a4a5a">PDF profesional generado por FoodBridge IA con todos los datos.</div></div>`,actions:[{label:'Descargar PDF',type:'primary',fn:()=>{pdfFichaTecnica({nombre:detail,ref:detail});showToast('✅ PDF descargado')}},{label:'Cerrar',type:'gray'}]},
+    documento:{title:`Documento: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a;margin-bottom:10px">Documento oficial <strong>${detail}</strong> verificado por FoodBridge IA.</div><div style="padding:10px;background:#F0FFF4;border-radius:8px;font-size:.62rem;color:#2D8A30;font-weight:700">✓ Trazabilidad completa · Firma digital válida</div>`,actions:[{label:'Abrir PDF',type:'primary',fn:()=>showToast('📄 Documento abierto')},{label:'Descargar',type:'blue',fn:()=>showToast('✅ Documento descargado')},{label:'Cerrar',type:'gray'}]},
+    ver_pdf:{title:`Vista previa: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a;margin-bottom:10px">Previsualización del documento <strong>${detail}</strong>.</div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.62rem">IA verifica autenticidad y vigencia de la certificación.</div>`,actions:[{label:'Abrir en pestaña',type:'primary',fn:()=>showToast('📄 PDF abierto')},{label:'Descargar',type:'blue',fn:()=>showToast('✅ PDF descargado')},{label:'Cerrar',type:'gray'}]},
+    revisar:{title:`Revisar: ${detail}`,body:`<div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.72rem;color:#3a4a5a;margin-bottom:10px">Revisar propuesta de <strong>${detail}</strong> antes de aprobar.</div><div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.62rem">IA sugiere ajustes: margen al 26%, PVP +2,1% respecto tarifa anterior.</div>`,actions:[{label:'Ajustar propuesta',type:'primary',fn:()=>showToast('✏️ Propuesta ajustada')},{label:'Rechazar',type:'red',fn:()=>showToast('❌ Propuesta rechazada')},{label:'Cerrar',type:'gray'}]},
+    ver:{title:`Ver: ${detail}`,body:`<div style="padding:10px;background:#F8FAFC;border-radius:8px;font-size:.72rem;color:#3a4a5a;margin-bottom:10px">Detalles de <strong>${detail}</strong>.</div><div style="padding:10px;background:rgba(232,116,32,.05);border-radius:8px;font-size:.62rem">Estado, historial y movimientos verificados por FoodBridge IA.</div>`,actions:[{label:'Ver detalle',type:'primary',fn:()=>showToast('📋 Detalle abierto')},{label:'Cerrar',type:'gray'}]},
   }
   return m[type]||{title:'FoodBridge IA',body:`<div style="font-size:.75rem;color:#3a4a5a;padding:10px">🧠 ${detail||type}</div>`,actions:[{label:'Cerrar',type:'gray'}]}
 }
@@ -2111,7 +2115,10 @@ export default function ComercialPage() {
       visitas_atrasadas: comVisitas.filter(v => v.status === 'scheduled' && new Date(v.scheduled_at) < new Date()).length,
     },
   })
-  const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
+  // Normaliza alertas IA {sec, tipo, txt} al shape que espera AlertsModal {dot, text, time}
+  const ALERT_DOT = { red:'#e03030', amber:'#e8a010', green:'#2D8A30', blue:'#1A78FF' }
+  const mappedAi = aiAlerts.map(a => ({ dot: ALERT_DOT[a.tipo] || '#1A78FF', text: a.txt, time: a.sec }))
+  const displayAlerts = mappedAi.length > 0 ? mappedAi : ALERTS
   const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
 
   const { mensajes: aiPushes } = usePushIa({
@@ -2131,6 +2138,7 @@ export default function ComercialPage() {
   const closeModal = useCallback(()=>setModal(null),[])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
   const act = useCallback((type,detail)=>{
+    if(type==='toast'){showToast(detail);return}
     if(type==='goto'){changeSection(detail);return}
     if(type==='enviar_cot'){setSendCot(detail);return}
     setModal(buildModal(type,detail,showToast))

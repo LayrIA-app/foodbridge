@@ -1349,7 +1349,10 @@ export default function FabricantePage() {
     },
   })
   const fallbackAlerts = isOps ? ALERTS_OPS : ALERTS_DIR
-  const currentAlerts = aiAlerts.length > 0 ? aiAlerts : fallbackAlerts
+  // Normaliza alertas IA {sec, tipo, txt} al shape que espera AlertsModal {dot, text, time}
+  const ALERT_DOT = { red:'#e03030', amber:'#e8a010', green:'#2D8A30', blue:'#1A78FF' }
+  const mappedAi = aiAlerts.map(a => ({ dot: ALERT_DOT[a.tipo] || '#1A78FF', text: a.txt, time: a.sec }))
+  const currentAlerts = mappedAi.length > 0 ? mappedAi : fallbackAlerts
 
   const { mensajes: aiPushes } = usePushIa({
     role: 'fabricante',
