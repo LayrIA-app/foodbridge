@@ -127,6 +127,7 @@ export function AppProvider({ children }) {
       currentRole,
       inPanel,
       fabProfile,
+      setFabProfile,
       enterAs: (id) => { setCurrentRole(id); setInPanel(false) },
       enterPanel: (fp) => { if (fp) setFabProfile(fp); setInPanel(true) },
       goHome: () => { setCurrentRole(null); setInPanel(false); setFabProfile('directivo') },
