@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
-import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente, useAlertasIa } from '../../hooks'
+import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
@@ -1333,6 +1333,19 @@ export default function FabricantePage() {
   })
   const fallbackAlerts = isOps ? ALERTS_OPS : ALERTS_DIR
   const currentAlerts = aiAlerts.length > 0 ? aiAlerts : fallbackAlerts
+
+  const { mensajes: aiPushes } = usePushIa({
+    role: 'fabricante',
+    data: {
+      productos: fabProducts.length,
+      pedidos_activos: fabKpis.pedidos_activos,
+      pedidos_retrasados: fabKpis.pedidos_retrasados,
+      clientes_unicos: fabKpis.clientes_unicos,
+      facturacion: Number(fabKpis.facturacion_delivered),
+      perfil: isOps ? 'operaciones' : 'directivo',
+    },
+  })
+  const pushPool = aiPushes.length > 0 ? aiPushes : PUSH_MSGS
   const unreadCount = currentAlerts.filter((_,i) => !readAlerts.has(i)).length
   const { toast, showToast } = useToast()
   const contentRef = useRef(null)
@@ -1351,9 +1364,16 @@ export default function FabricantePage() {
     setModal(buildModal(type, detail, showToast))
   }, [showToast, changeSection])
 
+  const pushPoolRef = useRef(pushPool)
+  pushPoolRef.current = pushPool
   useEffect(() => {
     let idx = 0
-    const show = () => { setPush(PUSH_MSGS[idx%PUSH_MSGS.length]); idx++; setTimeout(()=>setPush(null),5000) }
+    const show = () => {
+      const pool = pushPoolRef.current
+      if (!pool || pool.length === 0) return
+      setPush(pool[idx % pool.length]); idx++
+      setTimeout(() => setPush(null), 5000)
+    }
     const t1 = setTimeout(show, 20000)
     const t2 = setInterval(show, 15000)
     return () => { clearTimeout(t1); clearInterval(t2) }

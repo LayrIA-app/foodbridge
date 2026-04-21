@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizaciones, useAlertasIa } from '../../hooks'
+import { usePedidos, useCotizaciones, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
@@ -877,13 +877,25 @@ export default function ClientePage() {
   })
   const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
   const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
+
+  const { mensajes: aiPushes } = usePushIa({
+    role: 'cliente',
+    data: {
+      pedidos: cliPedidos.length,
+      pedidos_en_transito: cliPedidos.filter(p=>p.status==='in_transit').length,
+      cotizaciones_pendientes: cliCotiz.filter(c=>c.status==='sent').length,
+    },
+  })
+  const pushPool = aiPushes.length > 0 ? aiPushes : PUSH_MSGS
+  const pushPoolRef = useRef(pushPool)
+  pushPoolRef.current = pushPool
   const closeModal = useCallback(()=>setModal(null),[])
   const act = useCallback((type,detail)=>{ if(type==='goto'){changeSection(detail);return} setModal(buildModal(type,detail,showToast)) },[showToast,changeSection])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
 
   useEffect(()=>{
     let idx=0
-    const show=()=>{setPush(PUSH_MSGS[idx%PUSH_MSGS.length]);idx++;setTimeout(()=>setPush(null),5000)}
+    const show=()=>{const pool=pushPoolRef.current;if(!pool||pool.length===0)return;setPush(pool[idx%pool.length]);idx++;setTimeout(()=>setPush(null),5000)}
     const t1=setTimeout(show,20000); const t2=setInterval(show,15000)
     return()=>{clearTimeout(t1);clearInterval(t2)}
   },[])

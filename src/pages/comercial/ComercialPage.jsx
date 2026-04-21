@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas, useAlertasIa } from '../../hooks'
+import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
@@ -2094,6 +2094,21 @@ export default function ComercialPage() {
   })
   const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
   const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
+
+  const { mensajes: aiPushes } = usePushIa({
+    role: 'comercial',
+    data: {
+      pedidos_activos: comPedidos.filter(p => ['placed','confirmed','in_transit'].includes(p.status)).length,
+      cotizaciones_sent: comCotiz.filter(c => c.status === 'sent').length,
+      visitas_hoy: comVisitas.filter(v => {
+        const d = new Date(v.scheduled_at); const t = new Date()
+        return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate()
+      }).length,
+    },
+  })
+  const pushPool = aiPushes.length > 0 ? aiPushes : PUSH_MSGS
+  const pushPoolRef = useRef(pushPool)
+  pushPoolRef.current = pushPool
   const closeModal = useCallback(()=>setModal(null),[])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
   const act = useCallback((type,detail)=>{
@@ -2104,7 +2119,7 @@ export default function ComercialPage() {
 
   useEffect(()=>{
     let idx=0
-    const show=()=>{setPush(PUSH_MSGS[idx%PUSH_MSGS.length]);idx++;setTimeout(()=>setPush(null),5000)}
+    const show=()=>{const pool=pushPoolRef.current;if(!pool||pool.length===0)return;setPush(pool[idx%pool.length]);idx++;setTimeout(()=>setPush(null),5000)}
     const t1=setTimeout(show,15000); const t2=setInterval(show,12000)
     return()=>{clearTimeout(t1);clearInterval(t2)}
   },[])
