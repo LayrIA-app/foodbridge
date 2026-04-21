@@ -207,10 +207,12 @@ function PageHdr({ title, subtitle, badge }) {
 
 function ScrollTable({ children }) {
   return (
-    <div style={{ width:'100%', overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-      <table style={{ width:'100%', minWidth:560, borderCollapse:'collapse', fontSize:'.72rem' }}>
-        {children}
-      </table>
+    <div className="scroll-table-indicator">
+      <div className="scroll-table-wrap">
+        <table style={{ width:'100%', minWidth:560, borderCollapse:'collapse', fontSize:'.72rem' }}>
+          {children}
+        </table>
+      </div>
     </div>
   )
 }

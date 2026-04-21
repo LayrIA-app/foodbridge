@@ -73,6 +73,23 @@ input, textarea, select, button { max-width: 100%; }
 .scrollable::-webkit-scrollbar        { width: 4px; }
 .scrollable::-webkit-scrollbar-thumb  { background: rgba(26,47,74,.15); border-radius: 2px; }
 
+/* ─── TABLAS CON SCROLL HORIZONTAL (indicador visual) ───
+   Contenedor .scroll-table-indicator es position:relative para alojar
+   el ::after gradient. El wrapper interno .scroll-table-wrap es el
+   que scrollea con barra visible en movil. */
+.scroll-table-indicator { position: relative; width: 100%; }
+.scroll-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;                                  /* Firefox */
+  scrollbar-color: rgba(232,116,32,.5) rgba(26,47,74,.06); /* Firefox */
+}
+.scroll-table-wrap::-webkit-scrollbar         { height: 7px; }
+.scroll-table-wrap::-webkit-scrollbar-track   { background: rgba(26,47,74,.06); border-radius: 4px; }
+.scroll-table-wrap::-webkit-scrollbar-thumb   { background: rgba(232,116,32,.55); border-radius: 4px; }
+.scroll-table-wrap::-webkit-scrollbar-thumb:hover { background: rgba(232,116,32,.85); }
+
 .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 11px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 11px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr;      gap: 13px; }
@@ -146,6 +163,22 @@ input, textarea, select, button { max-width: 100%; }
   table        { font-size: .72rem !important; max-width: none !important; }
   table th,
   table td     { padding: 8px 10px !important; }
+
+  /* Indicador visual de scroll horizontal en tablas:
+     - Gradient fade en el borde derecho que sugiere 'hay mas contenido'
+     - Scrollbar visible y mas grueso para que el usuario lo detecte
+     - Ambos solo en movil (donde el contenido puede recortarse) */
+  .scroll-table-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 9px; /* deja sitio al scrollbar abajo */
+    width: 28px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(26,47,74,0), rgba(26,47,74,.12));
+    border-radius: 0 6px 6px 0;
+  }
+  .scroll-table-wrap::-webkit-scrollbar         { height: 8px; }
+  .scroll-table-wrap::-webkit-scrollbar-thumb   { background: rgba(232,116,32,.7); }
 
   /* Prevenir overflow silencioso en contenedores genericos
      (no tocamos overflow-x:hidden para que ScrollTable siga siendo el unico
