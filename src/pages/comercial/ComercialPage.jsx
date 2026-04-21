@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts } from '../../hooks'
+import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas } from '../../hooks'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
@@ -425,171 +425,308 @@ function DashScreen({ act }) {
 }
 
 /* ══ SCREEN 2: MI RUTA HOY ══ */
+const VISIT_COLORS = ['#2D8A30', ACCENT, '#1A78FF', '#e8a010', '#9B59B6']
+
+function formatDateLong(d) {
+  const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado']
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`
+}
+
+function formatHour(iso) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+}
+
 function RutaScreen({ act }) {
+  const { profile } = useApp()
+  const today = new Date()
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString()
+  const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString()
+  const { visitas, loading } = useVisitas({ profile, fromDate: dayStart, toDate: dayEnd })
+
+  const empty = !loading && visitas.length === 0
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Mi Ruta de Hoy" subtitle="Ruta optimizada por IA según prioridad, proximidad geográfica y ventanas horarias" badge="5 visitas | 287 km" />
+      <PageHdr title="Mi Ruta de Hoy" subtitle="Agenda del día — check-in con GPS al llegar" badge={`${visitas.length} visita${visitas.length===1?'':'s'}`} />
       <SearchBar placeholder="Buscar cliente, dirección, zona..." />
 
-      <Card style={{ marginBottom:13,  }}>
+      <Card style={{ marginBottom:13 }}>
         <CardTitle>Resumen de ruta <IaBadge /></CardTitle>
         <div className="grid-4 mb14">
-          {[{val:'287 km',label:'Distancia total',color:ACCENT},{val:'4h 12min',label:'Tiempo conducción',color:NAVY},{val:'52 km',label:'Ahorro IA vs manual',color:'#2D8A30'},{val:'78.400€',label:'Potencial en ruta',color:'#1A78FF'}].map((k,i)=>(
-            <div key={i} style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
-              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:k.color }}>{k.val}</div>
-              <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>{k.label}</div>
-            </div>
-          ))}
+          <div style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:ACCENT }}>{visitas.length}</div>
+            <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>Visitas hoy</div>
+          </div>
+          <div style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:NAVY }}>{visitas.filter(v=>v.status==='scheduled').length}</div>
+            <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>Programadas</div>
+          </div>
+          <div style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:'#2D8A30' }}>{visitas.filter(v=>v.status==='checked_in').length}</div>
+            <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>Check-in hecho</div>
+          </div>
+          <div style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:'#1A78FF' }}>{visitas.filter(v=>v.status==='completed').length}</div>
+            <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>Completadas</div>
+          </div>
         </div>
       </Card>
 
-      {/* AGENDA / TIMELINE */}
       <Card style={{ marginBottom:13, padding:0, overflow:'hidden' }}>
         <div style={{ padding:'16px 18px 10px', background:'linear-gradient(135deg,#1A2F4A,#2a4a6a)' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:6 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <span style={{ fontSize:'.82rem', fontWeight:800, color:'#fff' }}>Agenda del día</span>
-              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 10px', borderRadius:12, background:'rgba(245,166,35,.15)', color:'#F5A623', border:'1px solid rgba(245,166,35,.3)' }}>Miércoles 16 Abr</span>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-              <div className="animate-dotPulse" style={{ width:6, height:6, borderRadius:'50%', background:'#2D8A30' }}/>
-              <span style={{ fontSize:'.5rem', fontWeight:700, color:'#2D8A30', letterSpacing:'.05em' }}>IA OPTIMIZADA</span>
+              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 10px', borderRadius:12, background:'rgba(245,166,35,.15)', color:'#F5A623', border:'1px solid rgba(245,166,35,.3)' }}>{formatDateLong(today)}</span>
             </div>
           </div>
         </div>
-        <div style={{ padding:'16px 18px', position:'relative' }}>
-          {/* Timeline line */}
-          <div style={{ position:'absolute', left:54, top:16, bottom:16, width:3, background:'linear-gradient(to bottom,#2D8A30,#E87420,#1A78FF,#e8a010)', borderRadius:2, opacity:.3 }}/>
 
-          <VisitCard num={1} hour="08:30" color="#2D8A30" border="rgba(45,138,48,.25)" bg="linear-gradient(135deg,#f0faf0,#f8fff8)" name="Panaderías Leopold" loc="Valencia centro" badge="Confirmar stock" amount="14.800 EUR" act={act}/>
-          <TravelIndicator time="35 min conducción" km="28 km" via="AP-7"/>
-          <VisitCard num={2} hour="10:30" color={ACCENT} border="rgba(232,116,32,.25)" bg="linear-gradient(135deg,#fff8f0,#fffaf5)" name="Congelados Martz" loc="Paterna" badge="Pedido urgente" amount="31.200 EUR" urgent iaNote="IA: Adelantado por urgencia. Necesitan masa hojaldre antes del viernes." act={act}/>
-          <TravelIndicator time="25 min conducción" km="12 km" via="V-30"/>
-          <VisitCard num={3} hour="12:30" color="#1A78FF" border="rgba(26,120,255,.2)" bg="linear-gradient(135deg,#f0f6ff,#f8faff)" name="Dulces Iberia" loc="Manises" badge="Presentar cobertura" amount="22.400 EUR" act={act}/>
+        {loading && (
+          <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando agenda…</div>
+        )}
 
-          {/* Lunch */}
-          <div style={{ display:'flex', gap:14, marginBottom:6 }}>
-            <div style={{ width:36, textAlign:'center' }}><div style={{ fontSize:'.6rem', fontWeight:700, color:'#7a8899', marginTop:4 }}>13:30</div></div>
-            <div style={{ width:18, display:'flex', justifyContent:'center', paddingTop:6 }}><div style={{ width:12, height:12, borderRadius:'50%', background:'#f0f4f8', border:'2px solid #dce3eb' }}/></div>
-            <div style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, background:'rgba(122,136,153,.04)', border:'1px dashed rgba(122,136,153,.2)' }}>
-              <span style={{ fontSize:'.7rem' }}>🍽️</span>
-              <span style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899' }}>Pausa comida · 1h 30min</span>
+        {empty && (
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.95rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>
+              Hoy sin visitas programadas
+            </div>
+            <div style={{ fontSize:'.7rem', color:'#7a8899', lineHeight:1.5 }}>
+              Añade visitas desde "Visitas y Check-in" o planifica la semana.
             </div>
           </div>
+        )}
 
-          <TravelIndicator time="20 min conducción" km="15 km" via="CV-36"/>
-          <VisitCard num={4} hour="15:00" color="#e8a010" border="rgba(232,160,16,.2)" bg="linear-gradient(135deg,#fffdf5,#fffbf0)" name="Agrudispa" loc="Torrent" badge="Seguimiento cotización" amount="8.900 EUR" iaNote="Sin confirmar. Si no responde antes de las 13h, IA sustituye por Pasteleros del Sur." act={act}/>
-          <TravelIndicator time="40 min conducción" km="35 km" via="A-3"/>
-          <VisitCard num={5} hour="17:00" color="#9B59B6" border="rgba(155,89,182,.2)" bg="linear-gradient(135deg,#fdf6ff,#fbf0ff)" name="Bollería Artesana Lux" loc="Albacete" badge="Presentación catálogo" amount="6.200 EUR" act={act}/>
-        </div>
-        <div style={{ padding:'0 18px 16px' }}>
-          <IABox text="<strong>IA Ruta:</strong> Orden optimizado por proximidad y urgencia. Congelados Martz adelantado a las 10:30 por pedido urgente. Si Agrudispa no confirma antes de las 13h, IA recomienda sustituir por <strong>Pasteleros del Sur</strong>." />
-        </div>
+        {!loading && !empty && (
+          <div style={{ padding:'16px 18px', position:'relative' }}>
+            <div style={{ position:'absolute', left:54, top:16, bottom:16, width:3, background:'linear-gradient(to bottom,#2D8A30,#E87420,#1A78FF,#e8a010)', borderRadius:2, opacity:.3 }}/>
+            {visitas.map((v, i) => {
+              const color = VISIT_COLORS[i % VISIT_COLORS.length]
+              const bg = `linear-gradient(135deg,${color}14,${color}06)`
+              const border = `${color}40`
+              return (
+                <VisitCard
+                  key={v.id}
+                  num={i+1}
+                  hour={formatHour(v.scheduled_at)}
+                  color={color}
+                  border={border}
+                  bg={bg}
+                  name={v.cliente_name || 'Cliente'}
+                  loc={v.location || ''}
+                  badge={v.status === 'checked_in' ? 'Check-in hecho' : v.status === 'completed' ? 'Completada' : 'Programada'}
+                  amount=""
+                  act={act}
+                />
+              )
+            })}
+          </div>
+        )}
       </Card>
     </div>
   )
 }
 
-/* ══ SCREEN 3: VISITAS Y CHECK-IN ══ */
+function VisitStatusBadge({ status }) {
+  const meta = {
+    scheduled: { type:'blue', label:'Programada' },
+    checked_in: { type:'orange', label:'Check-in' },
+    completed: { type:'ok', label:'Completada' },
+    cancelled: { type:'red', label:'Cancelada' },
+  }[status] || { type:'amber', label:status }
+  return <Badge type={meta.type} text={meta.label}/>
+}
+
+function NuevaVisitaModal({ open, onClose, onCreate }) {
+  const [clienteName, setClienteName] = useState('')
+  const [location, setLocation] = useState('')
+  const [when, setWhen] = useState(() => {
+    const d = new Date(Date.now() + 24*3600e3)
+    d.setMinutes(0); d.setSeconds(0); d.setMilliseconds(0)
+    return d.toISOString().slice(0,16)
+  })
+  const [notes, setNotes] = useState('')
+  const [err, setErr] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  if (!open) return null
+
+  const submit = async () => {
+    setErr(null)
+    if (!clienteName.trim() || !when) { setErr('Rellena cliente y fecha/hora.'); return }
+    setSubmitting(true)
+    const { error } = await onCreate({
+      cliente_name: clienteName.trim(),
+      location: location.trim() || null,
+      scheduled_at: new Date(when).toISOString(),
+      notes: notes || null,
+      status: 'scheduled',
+    })
+    setSubmitting(false)
+    if (error) { setErr(error.message); return }
+    onClose()
+  }
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:480, boxShadow:'0 20px 60px rgba(26,47,74,.3)' }}>
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'16px 16px 0 0', padding:'16px 22px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:900, color:'#fff', letterSpacing:'.04em', textTransform:'uppercase' }}>Nueva visita</div>
+            <button onClick={onClose} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer' }}>✕</button>
+          </div>
+          <div style={{ padding:'18px 22px' }}>
+            <Field label="Cliente"><input value={clienteName} onChange={e=>setClienteName(e.target.value)} placeholder="Panaderías Leopold" style={inputStyle()} /></Field>
+            <Field label="Ubicación"><input value={location} onChange={e=>setLocation(e.target.value)} placeholder="Valencia centro" style={inputStyle()} /></Field>
+            <Field label="Fecha y hora"><input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)} style={inputStyle()} /></Field>
+            <Field label="Notas (opcional)"><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows="2" style={{...inputStyle(), resize:'vertical'}} /></Field>
+            {err && <div style={{ color:'#c03030', fontSize:'.7rem', marginBottom:8, fontWeight:600 }}>{err}</div>}
+            <div style={{ display:'flex', gap:8 }}>
+              <button disabled={submitting} onClick={submit} style={{ flex:1, padding:'11px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontWeight:800, cursor:submitting?'not-allowed':'pointer', fontFamily:'Barlow Condensed', letterSpacing:'.1em', textTransform:'uppercase', fontSize:'.82rem' }}>{submitting?'Guardando…':'Agendar'}</button>
+              <button disabled={submitting} onClick={onClose} style={{ padding:'11px 18px', background:'#F5F6F8', border:'1px solid #E8D5C0', borderRadius:8, color:NAVY, fontWeight:700, cursor:'pointer', fontSize:'.75rem' }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 function VisitasScreen({ act }) {
+  const { profile } = useApp()
+  const { visitas, loading, createVisita, checkIn, completeVisita } = useVisitas({ profile })
+  const [open, setOpen] = useState(false)
+  const [busyId, setBusyId] = useState(null)
+
+  const proximaPendiente = useMemo(() => {
+    const now = Date.now()
+    return visitas
+      .filter(v => v.status === 'scheduled')
+      .map(v => ({ v, delta: new Date(v.scheduled_at).getTime() - now }))
+      .sort((a,b) => Math.abs(a.delta) - Math.abs(b.delta))
+      [0]?.v
+  }, [visitas])
+
+  const kpis = useMemo(() => {
+    const mStart = new Date(); mStart.setDate(1); mStart.setHours(0,0,0,0)
+    const mesISO = mStart.toISOString()
+    const mes = visitas.filter(v => v.scheduled_at >= mesISO)
+    const completadas = mes.filter(v => v.status === 'completed').length
+    const ratio = mes.length > 0 ? Math.round((completadas / mes.length) * 100) : null
+    return {
+      mes: String(mes.length),
+      ratio: ratio !== null ? `${ratio}%` : '—',
+      clientes: new Set(mes.map(v => v.cliente_id || v.cliente_name)).size,
+      pendientes: visitas.filter(v => v.status === 'scheduled' && new Date(v.scheduled_at) < new Date()).length,
+    }
+  }, [visitas])
+
+  const doCheckIn = async (id) => {
+    setBusyId(id)
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        await checkIn(id, { lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setBusyId(null); act('toast', '✓ Check-in registrado con GPS')
+      }, async () => {
+        await checkIn(id)
+        setBusyId(null); act('toast', '✓ Check-in registrado (sin GPS)')
+      }, { timeout: 5000 })
+    } else {
+      await checkIn(id); setBusyId(null); act('toast', '✓ Check-in registrado')
+    }
+  }
+
+  const doComplete = async (id) => {
+    setBusyId(id)
+    await completeVisita(id, { outcome: 'completada' })
+    setBusyId(null); act('toast', '✓ Visita completada')
+  }
+
+  const historial = useMemo(() => visitas.slice().sort((a,b) => new Date(b.scheduled_at) - new Date(a.scheduled_at)), [visitas])
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Visitas y Check-in" subtitle="Check-in automático por GPS, resultado en 1 toque, notas por voz" badge="Abril 2026" />
+      <PageHdr title="Visitas y Check-in" subtitle="Check-in con GPS y resultado en 1 toque" badge={`${kpis.mes} este mes`} />
       <SearchBar placeholder="Buscar cliente o visita..." />
 
       <div className="grid-4 mb14">
-        <KPI val="47" label="Visitas abril" delta="▲ +12 vs marzo" up color={ACCENT}/>
-        <KPI val="82%" label="Ratio cierre" delta="▲ +5pp con IA" up color="#2D8A30"/>
-        <KPI val="23" label="Clientes visitados" delta="▲ de 28 en cartera" up color="#1A78FF"/>
-        <KPI val="5" label="Sin visita >30d" delta="▼ Requieren atención" color="#e8a010"/>
+        <KPI val={kpis.mes} label="Visitas este mes" delta="→ programadas + hechas" up color={ACCENT}/>
+        <KPI val={kpis.ratio} label="Ratio cierre" delta="completadas / totales" up color="#2D8A30"/>
+        <KPI val={String(kpis.clientes)} label="Clientes visitados" delta="únicos en el mes" up color="#1A78FF"/>
+        <KPI val={String(kpis.pendientes)} label="Atrasadas" delta={kpis.pendientes>0?'▼ Requieren atención':'todo al día'} color={kpis.pendientes>0?'#e8a010':'#2D8A30'}/>
       </div>
 
-      {/* GPS CHECK-IN */}
-      <Card style={{ marginBottom:13, border:'2px solid rgba(45,138,48,.3)', background:'linear-gradient(135deg,#f0faf0,#f8fff8)' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-          <div style={{ fontSize:'.6rem', fontWeight:700, color:'#7a8899', textTransform:'uppercase', letterSpacing:'.1em', display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2D8A30" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
-            Check-in detectado por GPS
-          </div>
-          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-            <div className="animate-dotPulse" style={{ width:6, height:6, borderRadius:'50%', background:'#2D8A30' }}/>
-            <span style={{ fontSize:'.55rem', fontWeight:700, color:'#2D8A30' }}>GPS ACTIVO</span>
-          </div>
-        </div>
-        <div className="grid-2">
-          <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid rgba(45,138,48,.2)' }}>
-            <div style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>UBICACIÓN DETECTADA</div>
-            <div style={{ fontSize:'.82rem', fontWeight:800, color:NAVY, marginBottom:4 }}>Congelados Martz S.L.</div>
-            <div style={{ fontSize:'.62rem', color:'#7a8899', marginBottom:10 }}>Pol. Ind. Fuente del Jarro, Nave 14 — Paterna</div>
-            <div style={{ display:'flex', gap:6, marginBottom:10, flexWrap:'wrap' }}>
-              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 8px', borderRadius:12, background:'rgba(45,138,48,.08)', color:'#2D8A30', border:'1px solid rgba(45,138,48,.15)' }}>Llegada: 10:28h</span>
-              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 8px', borderRadius:12, background:'rgba(232,116,32,.08)', color:ACCENT, border:'1px solid rgba(232,116,32,.15)' }}>Programada: 10:30h</span>
+      {proximaPendiente ? (
+        <Card style={{ marginBottom:13, border:'2px solid rgba(45,138,48,.3)', background:'linear-gradient(135deg,#f0faf0,#f8fff8)' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, flexWrap:'wrap', gap:6 }}>
+            <div style={{ fontSize:'.6rem', fontWeight:700, color:'#7a8899', textTransform:'uppercase', letterSpacing:'.1em', display:'flex', alignItems:'center', gap:6 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2D8A30" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+              Próxima visita · check-in con GPS
             </div>
-            <button onClick={()=>act('checkin','Congelados Martz')} style={{ width:'100%', padding:12, fontSize:'.75rem', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, cursor:'pointer', fontFamily:'DM Sans', fontWeight:700 }}>
-              ✓ Confirmar check-in
+            <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+              <div className="animate-dotPulse" style={{ width:6, height:6, borderRadius:'50%', background:'#2D8A30' }}/>
+              <span style={{ fontSize:'.55rem', fontWeight:700, color:'#2D8A30' }}>GPS DISPONIBLE</span>
+            </div>
+          </div>
+          <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid rgba(45,138,48,.2)' }}>
+            <div style={{ fontSize:'.82rem', fontWeight:800, color:NAVY, marginBottom:4 }}>{proximaPendiente.cliente_name || 'Cliente'}</div>
+            <div style={{ fontSize:'.62rem', color:'#7a8899', marginBottom:10 }}>{proximaPendiente.location || 'Sin ubicación'}</div>
+            <div style={{ display:'flex', gap:6, marginBottom:10, flexWrap:'wrap' }}>
+              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 8px', borderRadius:12, background:'rgba(232,116,32,.08)', color:ACCENT, border:'1px solid rgba(232,116,32,.15)' }}>Programada: {formatHour(proximaPendiente.scheduled_at)}</span>
+            </div>
+            <button disabled={busyId===proximaPendiente.id} onClick={()=>doCheckIn(proximaPendiente.id)} style={{ width:'100%', padding:12, fontSize:'.75rem', background:busyId===proximaPendiente.id?'#aaa':`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, cursor:busyId===proximaPendiente.id?'not-allowed':'pointer', fontFamily:'DM Sans', fontWeight:700 }}>
+              {busyId===proximaPendiente.id ? 'Localizando GPS…' : '✓ Hacer check-in ahora'}
             </button>
           </div>
-          <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid #E8D5C0' }}>
-            <div style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>AL SALIR: RESULTADO EN 1 TOQUE</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:10 }}>
-              {[{ico:'📦',label:'Pedido',color:'#2D8A30',bg:'rgba(45,138,48,.06)',border:'rgba(45,138,48,.2)'},{ico:'📄',label:'Cotización',color:ACCENT,bg:'rgba(232,116,32,.06)',border:'rgba(232,116,32,.2)'},{ico:'🎁',label:'Muestra',color:'#1A78FF',bg:'rgba(26,120,255,.06)',border:'rgba(26,120,255,.2)'},{ico:'🔄',label:'Seguimiento',color:'#7a8899',bg:'rgba(122,136,153,.06)',border:'rgba(122,136,153,.2)'}].map((r,i)=>(
-                <div key={i} onClick={()=>act('resultado',`${r.label} Martz`)} style={{ padding:10, borderRadius:8, background:r.bg, border:`1.5px solid ${r.border}`, textAlign:'center', cursor:'pointer' }}>
-                  <div style={{ fontSize:'.9rem', marginBottom:2 }}>{r.ico}</div>
-                  <div style={{ fontSize:'.62rem', fontWeight:700, color:r.color }}>{r.label}</div>
-                </div>
-              ))}
-            </div>
-            <div title="Disponible en Fase 3 · Voz IA" style={{ display:'flex', gap:6, alignItems:'center', padding:'8px 12px', background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)', cursor:'not-allowed', opacity:.5, pointerEvents:'none' }}>
-              <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/></svg>
-              </div>
-              <div style={{ fontSize:'.62rem', color:'#7a8899' }}>Pulsa para dictar notas por voz</div>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      ) : null}
 
-      {/* HISTORIAL */}
       <Card style={{ marginBottom:13 }}>
-        <CardTitle>Historial de visitas recientes</CardTitle>
-        <ScrollTable>
-          <Thead cols={['Fecha','Cliente','Duración','Resultado','Notas','Acción']}/>
-          <tbody>
-            {[['16/04','Congelados Martz','—','orange:En curso','Visita activa ahora',''],['14/04','Panaderías Leopold','1h 10min','ok:Cotización','Revisión catálogo. Necesitan W-280 urgente.','leopold'],['14/04','Dulces Iberia','35 min','blue:Muestra','Solicitan cobertura 55% sin soja.','dulces'],['11/04','Agrudispa','50 min','amber:Pendiente','Comparando con proveedor actual.','agrudispa'],['10/04','Congelados Martz','1h 20min','red:Urgente','Necesitan masa hojaldre específica.','martz']].map(([f,c,d,r,n,id],i)=>{const[rt,rv]=r.split(':');return(
-              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{f}</td>
-                <td style={{ padding:'8px 10px', color:NAVY, fontWeight:600 }}>{c}</td>
-                <td style={{ padding:'8px 10px', color:'#7a8899' }}>{d}</td>
-                <td style={{ padding:'8px 10px' }}><Badge type={rt} text={rv}/></td>
-                <td style={{ padding:'8px 10px', fontSize:'.6rem', color:'#3a4a5a', maxWidth:160 }}>{n}</td>
-                <td style={{ padding:'8px 10px' }}>{id&&<TblBtn type="orange" onClick={()=>act('seguimiento',c)}>Ver</TblBtn>}</td>
-              </tr>
-            )})}
-          </tbody>
-        </ScrollTable>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8, marginBottom:10 }}>
+          <CardTitle style={{ margin:0 }}>Todas las visitas</CardTitle>
+          <button onClick={()=>setOpen(true)} style={{ padding:'8px 16px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:'.72rem', cursor:'pointer', fontFamily:'DM Sans' }}>+ Nueva visita</button>
+        </div>
+
+        {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando visitas…</div>}
+
+        {!loading && historial.length === 0 && (
+          <div style={{ padding:'28px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.95rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>Sin visitas registradas</div>
+            <div style={{ fontSize:'.7rem', color:'#7a8899', lineHeight:1.5 }}>Agenda tu primera visita con el botón de arriba.</div>
+          </div>
+        )}
+
+        {!loading && historial.length > 0 && (
+          <ScrollTable>
+            <Thead cols={['Fecha','Cliente','Ubicación','Estado','Acción']}/>
+            <tbody>
+              {historial.map(v => {
+                const d = new Date(v.scheduled_at)
+                const fecha = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${formatHour(v.scheduled_at)}`
+                const busy = busyId === v.id
+                return (
+                  <tr key={v.id} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{fecha}</td>
+                    <td style={{ padding:'8px 10px', color:NAVY, fontWeight:600 }}>{v.cliente_name || '—'}</td>
+                    <td style={{ padding:'8px 10px', color:'#7a8899', fontSize:'.6rem' }}>{v.location || '—'}</td>
+                    <td style={{ padding:'8px 10px' }}><VisitStatusBadge status={v.status}/></td>
+                    <td style={{ padding:'8px 10px' }}>
+                      {v.status === 'scheduled' && <TblBtn type="orange" onClick={()=>doCheckIn(v.id)}>{busy?'…':'Check-in'}</TblBtn>}
+                      {v.status === 'checked_in' && <TblBtn type="green" onClick={()=>doComplete(v.id)}>{busy?'…':'Completar'}</TblBtn>}
+                      {(v.status === 'completed' || v.status === 'cancelled') && <TblBtn type="orange" onClick={()=>act('seguimiento', v.cliente_name)}>Ver</TblBtn>}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </ScrollTable>
+        )}
       </Card>
 
-      {/* CLIENTES SIN VISITA */}
-      <Card>
-        <CardTitle>Clientes sin visita reciente <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Cliente','Última visita','Días','Volumen 2026','Riesgo','Acción']}/>
-          <tbody>
-            {[['Helados Artesanos MED','12/03','35d','18.200 EUR','red:Alto','red'],['Obrador Santa Clara','15/03','32d','12.400 EUR','amber:Medio','orange'],['Catering Levante','16/03','31d','9.800 EUR','amber:Medio','orange']].map(([cli,uv,dias,vol,ris,bt],i)=>{const[rt,rv]=ris.split(':');return(
-              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cli}</td>
-                <td style={{ padding:'8px 10px', color:'#7a8899' }}>{uv}</td>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:rt==='red'?'#e03030':'#e8a010' }}>{dias}</td>
-                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{vol}</td>
-                <td style={{ padding:'8px 10px' }}><Badge type={rt} text={rv}/></td>
-                <td style={{ padding:'8px 10px' }}><TblBtn type={bt} onClick={()=>act('goto','ruta')}>{rt==='red'?'Agendar YA':'Agendar'}</TblBtn></td>
-              </tr>
-            )})}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>Alerta IA:</strong> Helados Artesanos MED no recibe visita en 35 días y su volumen ha caído un 22%. <strong>Riesgo de pérdida si no se visita esta semana.</strong>" />
-      </Card>
+      <NuevaVisitaModal open={open} onClose={()=>setOpen(false)} onCreate={createVisita} />
     </div>
   )
 }
