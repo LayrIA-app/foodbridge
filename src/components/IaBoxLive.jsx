@@ -21,7 +21,6 @@ export default function IaBoxLive({ context, data, fallback = '', accent = '#E87
     padding: '10px 14px',
     background: `linear-gradient(135deg,${accent}0D,${accent}14)`,
     border: `1px solid ${accent}33`,
-    borderLeft: `3px solid ${accent}`,
     borderRadius: 8,
     fontSize: '.72rem',
     color: '#3a4a5a',

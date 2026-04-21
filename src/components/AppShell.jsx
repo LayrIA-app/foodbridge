@@ -75,7 +75,6 @@ export default function AppShell({ children, activeSection, setActiveSection }) 
                 style={{
                   background: isActive ? `${accent}20` : 'transparent',
                   color: isActive ? '#fff' : 'rgba(255,255,255,.45)',
-                  borderLeft: isActive ? `3px solid ${accent}` : '3px solid transparent',
                 }}>
                 <span style={{ color: isActive ? accent : 'rgba(255,255,255,.35)' }}>
                   <NavIcon d={item.icon} />
