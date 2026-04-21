@@ -1829,18 +1829,37 @@ function EnviarCotizModal({ cot, onClose }) {
     if (!email) return
     setSent('sending_email')
     try {
+      // Intentar redaccion IA (Sonnet 4) antes del envio
+      let subject = null, html = null
+      try {
+        const borradorRes = await fetch('/api/email-borrador', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo: 'cotizacion',
+            datos: {
+              ref: cot.ref,
+              producto: cot.prod,
+              fabricante: cot.fab,
+              cantidad: cot.qty,
+              precio_total: cot.pvp,
+              margen: cot.margen,
+            },
+          }),
+        })
+        if (borradorRes.ok) {
+          const b = await borradorRes.json()
+          subject = b.subject; html = b.html
+        }
+      } catch { /* noop */ }
+
+      const payload = subject && html
+        ? { to: email, subject, html }
+        : { to: email, ref: cot.ref, prod: cot.prod, fab: cot.fab, qty: cot.qty, pvp: cot.pvp, margen: cot.margen }
       const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: email,
-          ref: cot.ref,
-          prod: cot.prod,
-          fab: cot.fab,
-          qty: cot.qty,
-          pvp: cot.pvp,
-          margen: cot.margen,
-        })
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (data.success) setSent('email')

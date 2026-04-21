@@ -5,11 +5,27 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { to, tipo, ref, prod, fab, qty, pvp } = req.body
+  const body = req.body || {}
+  const { to, tipo, ref, prod, fab, qty, pvp } = body
   const apiKey = process.env.RESEND_API_KEY
   const appUrl = 'https://foodbridge-ochre.vercel.app'
 
   let subject, html
+
+  // Si el frontend pasa subject+html (generados por IA en /api/email-borrador)
+  // los usamos directamente y saltamos el template hardcoded.
+  if (body.subject && body.html) {
+    subject = String(body.subject).slice(0, 200)
+    html = String(body.html)
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'FoodBridge IA <noreply@layria.app>', to: [to], subject, html }),
+    })
+    const data = await response.json()
+    if (!response.ok) return res.status(500).json({ error: data })
+    return res.status(200).json({ success: true, via: 'custom' })
+  }
 
   if (tipo === 'tarifas') {
     subject = 'Actualización de tarifas — FoodBridge IA'

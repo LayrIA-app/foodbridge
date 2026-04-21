@@ -7,3 +7,4 @@ export { useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasClient
 export { useIaInsight } from './useIaInsight'
 export { useAlertasIa } from './useAlertasIa'
 export { usePushIa } from './usePushIa'
+export { useEmailBorrador } from './useEmailBorrador'

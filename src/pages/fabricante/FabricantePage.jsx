@@ -819,10 +819,27 @@ function NotificarTarifasModal({ open, onClose, showToast }) {
     if (!email) return
     setSentEm('sending')
     try {
+      // Intentar redactar con IA (Sonnet 4). Si falla, cae al template hardcoded.
+      let subject = null, html = null
+      try {
+        const borradorRes = await fetch('/api/email-borrador', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'tarifas', datos: { cambios: CAMBIOS, fecha_efectiva: '01/05/2026' } }),
+        })
+        if (borradorRes.ok) {
+          const b = await borradorRes.json()
+          subject = b.subject; html = b.html
+        }
+      } catch { /* noop */ }
+
+      const payload = subject && html
+        ? { to: email, subject, html }
+        : { to: email, tipo: 'tarifas' }
       const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: email, tipo: 'tarifas' })
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       setSentEm(data.success ? 'ok' : 'error')
