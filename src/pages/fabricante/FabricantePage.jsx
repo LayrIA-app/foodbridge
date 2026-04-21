@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
+import { useProducts, useTarifas } from '../../hooks'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -410,49 +411,176 @@ function SimuladorIA({ act }) {
   )
 }
 
+function fInputStyle() {
+  return { width:'100%', padding:'9px 11px', background:'#FFF8F0', border:'1.5px solid #E8D5C0', borderRadius:6, fontSize:'.78rem', color:NAVY, fontFamily:'DM Sans', outline:'none', boxSizing:'border-box' }
+}
+function FField({ label, children }) {
+  return (
+    <div style={{ marginBottom:10 }}>
+      <div style={{ fontSize:'.58rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:4 }}>{label}</div>
+      {children}
+    </div>
+  )
+}
+
+function NuevoProductoModal({ open, onClose, onCreate }) {
+  const [sku, setSku] = useState('')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [unit, setUnit] = useState('kg')
+  const [priceCurrent, setPriceCurrent] = useState(1.00)
+  const [certs, setCerts] = useState('')
+  const [allergens, setAllergens] = useState('')
+  const [err, setErr] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  if (!open) return null
+
+  const submit = async () => {
+    setErr(null)
+    if (!sku.trim() || !name.trim() || !priceCurrent) { setErr('Rellena SKU, nombre y precio.'); return }
+    setSubmitting(true)
+    const { error } = await onCreate({
+      sku: sku.trim().toUpperCase(),
+      name: name.trim(),
+      description: description || null,
+      unit,
+      price_current: Number(priceCurrent),
+      certifications: certs ? certs.split(',').map(x=>x.trim()).filter(Boolean) : [],
+      allergens: allergens ? allergens.split(',').map(x=>x.trim()).filter(Boolean) : [],
+      active: true,
+    })
+    setSubmitting(false)
+    if (error) { setErr(error.message); return }
+    onClose()
+    setSku(''); setName(''); setDescription(''); setPriceCurrent(1.00); setCerts(''); setAllergens('')
+  }
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(26,47,74,.3)' }}>
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'16px 16px 0 0', padding:'16px 22px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:900, color:'#fff', letterSpacing:'.04em', textTransform:'uppercase' }}>Nuevo producto</div>
+            <button onClick={onClose} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer' }}>✕</button>
+          </div>
+          <div style={{ padding:'18px 22px' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+              <FField label="SKU"><input value={sku} onChange={e=>setSku(e.target.value)} placeholder="HAR-W280" style={fInputStyle()} /></FField>
+              <FField label="Unidad"><select value={unit} onChange={e=>setUnit(e.target.value)} style={fInputStyle()}><option value="kg">kg</option><option value="l">l</option><option value="ud">ud</option></select></FField>
+            </div>
+            <FField label="Nombre"><input value={name} onChange={e=>setName(e.target.value)} placeholder="Harina W-280" style={fInputStyle()} /></FField>
+            <FField label="Descripción (opcional)"><textarea value={description} onChange={e=>setDescription(e.target.value)} rows="2" style={{...fInputStyle(), resize:'vertical'}} /></FField>
+            <FField label="Precio actual (€/unidad)"><input type="number" step="0.01" value={priceCurrent} onChange={e=>setPriceCurrent(e.target.value)} style={fInputStyle()} /></FField>
+            <FField label="Certificaciones (coma-separadas)"><input value={certs} onChange={e=>setCerts(e.target.value)} placeholder="IFS, BRC, Eco" style={fInputStyle()} /></FField>
+            <FField label="Alérgenos (coma-separados)"><input value={allergens} onChange={e=>setAllergens(e.target.value)} placeholder="gluten, lacteos" style={fInputStyle()} /></FField>
+            {err && <div style={{ color:'#c03030', fontSize:'.7rem', marginBottom:8, fontWeight:600 }}>{err}</div>}
+            <div style={{ display:'flex', gap:8 }}>
+              <button disabled={submitting} onClick={submit} style={{ flex:1, padding:'11px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontWeight:800, cursor:submitting?'not-allowed':'pointer', fontFamily:'Barlow Condensed', letterSpacing:'.1em', textTransform:'uppercase', fontSize:'.82rem' }}>{submitting?'Guardando…':'Crear producto'}</button>
+              <button disabled={submitting} onClick={onClose} style={{ padding:'11px 18px', background:'#F5F6F8', border:'1px solid #E8D5C0', borderRadius:8, color:NAVY, fontWeight:700, cursor:'pointer', fontSize:'.75rem' }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 function Catalogo({ act }) {
+  const { profile } = useApp()
+  const { products, loading, upsertProduct, deactivateProduct } = useProducts({ profile, onlyActive: false })
+  const { tarifas } = useTarifas({ profile })
+  const [open, setOpen] = useState(false)
+
+  const kpis = useMemo(() => {
+    const activos = products.filter(p => p.active).length
+    const inactivos = products.length - activos
+    const mStart = new Date(); mStart.setDate(1); mStart.setHours(0,0,0,0)
+    const nuevos = products.filter(p => new Date(p.created_at) >= mStart).length
+    const conCert = products.filter(p => p.certifications?.length > 0).length
+    return { activos: String(activos), inactivos: String(inactivos), nuevos: String(nuevos), conCert: String(conCert) }
+  }, [products])
+
+  const empty = !loading && products.length === 0
+
   return (
     <div className="animate-fadeIn">
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12, flexWrap:'wrap', gap:8 }}>
         <div>
           <h2 style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:NAVY }}>Catálogo de Productos</h2>
-          <p style={{ fontSize:'.72rem', color:'#7a8899' }}>1.247 productos publicados en FoodBridge IA</p>
+          <p style={{ fontSize:'.72rem', color:'#7a8899' }}>{products.length} productos en tu catálogo FoodBridge IA</p>
         </div>
-        <button onClick={()=>act('goto','osubir')} style={{ padding:'8px 14px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontSize:'.7rem', fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>+ Subir documento</button>
+        <button onClick={()=>setOpen(true)} style={{ padding:'8px 14px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontSize:'.7rem', fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>+ Nuevo producto</button>
       </div>
-      <SearchBar placeholder="Buscar categoría o producto..." />
+      <SearchBar placeholder="Buscar producto..." />
       <div className="grid-4 mb14">
-        <KPI val="1.247" label="Productos activos" delta="▲ Todos con ficha IA" up color={ACCENT}/>
-        <KPI val="8" label="Categorías" delta="→ Harinas, sémolas..." color="#2D8A30"/>
-        <KPI val="47" label="Por actualizar" delta="▼ Revisión pendiente" color="#1A78FF"/>
-        <KPI val="12" label="Nuevos este mes" delta="▲ Indexados por IA" up color="#e8a010"/>
+        <KPI val={kpis.activos} label="Productos activos" delta="visibles para clientes" up color={ACCENT}/>
+        <KPI val={kpis.conCert} label="Con certificación" delta="IFS, BRC, Eco..." color="#2D8A30"/>
+        <KPI val={kpis.inactivos} label="Inactivos" delta="ocultos del catálogo" color="#1A78FF"/>
+        <KPI val={kpis.nuevos} label="Nuevos este mes" delta="▲ añadidos" up color="#e8a010"/>
       </div>
-      <div style={{ background:'linear-gradient(135deg,#FFF3E8,#FFFBF5)', border:'1.5px solid rgba(232,116,32,.25)', borderRadius:10, padding:'12px 16px', marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
-        <div>
-          <div style={{ fontSize:'.68rem', fontWeight:700, color:ACCENT, marginBottom:3 }}>⚡ ACTUALIZACIÓN DE TARIFAS PENDIENTE</div>
-          <div style={{ fontSize:'.62rem', color:'#3a4a5a' }}>IA ha detectado cambios en 47 productos — <strong>2.000 clientes y agentes afectados</strong></div>
-        </div>
-        <BtnSm onClick={()=>act('notificar_tarifas','cambio_tarifas')}>Notificar cambios IA →</BtnSm>
-      </div>
+
       <Card style={{ marginBottom:13 }}>
-        <CardTitle>Productos por categoría</CardTitle>
-        <ScrollTable>
-          <Thead cols={['Categoría','Productos','Con ficha IA','Solicitudes Q1','Acción']}/>
-          <tbody>
-            {[['Harinas panificación','342','ok:342','1.240'],['Harinas repostería','198','ok:198','670'],['Harinas ecológicas','87','ok:87','480'],['Sémolas','156','ok:156','320'],['Mezclas y mejorantes','234','blue:228','510'],['Otros','230','blue:224','180']].map(([cat,prod,ficha,sol],i)=>{const[ft,fv]=ficha.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cat}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{prod}</td><td style={{ padding:'8px 10px' }}><Badge type={ft} text={fv}/></td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{sol}</td><td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>act('goto','ofichas')}>Ver fichas</TblBtn></td></tr>)})}
-          </tbody>
-        </ScrollTable>
+        <CardTitle>Todos los productos</CardTitle>
+
+        {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando catálogo…</div>}
+
+        {empty && (
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>Catálogo vacío</div>
+            <div style={{ fontSize:'.72rem', color:'#7a8899', lineHeight:1.5 }}>Crea tu primer producto con el botón de arriba. Luego los comerciales podrán cotizarlo a sus clientes.</div>
+          </div>
+        )}
+
+        {!loading && !empty && (
+          <ScrollTable>
+            <Thead cols={['SKU','Producto','Precio','Certificaciones','Alérgenos','Estado','Acción']}/>
+            <tbody>
+              {products.map(p => (
+                <tr key={p.id} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT, fontSize:'.62rem' }}>{p.sku}</td>
+                  <td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{p.name}</td>
+                  <td style={{ padding:'8px 10px', color:NAVY, fontWeight:700 }}>{Number(p.price_current).toFixed(2)}€/{p.unit}</td>
+                  <td style={{ padding:'8px 10px', color:'#2D8A30', fontSize:'.6rem' }}>{(p.certifications||[]).join(', ') || '—'}</td>
+                  <td style={{ padding:'8px 10px', color:'#e03030', fontSize:'.6rem' }}>{(p.allergens||[]).join(', ') || '—'}</td>
+                  <td style={{ padding:'8px 10px' }}><Badge type={p.active?'ok':'amber'} text={p.active?'Activo':'Inactivo'}/></td>
+                  <td style={{ padding:'8px 10px' }}>
+                    {p.active && <TblBtn type="red" onClick={()=>deactivateProduct(p.id)}>Desactivar</TblBtn>}
+                    {!p.active && <TblBtn type="green" onClick={()=>upsertProduct({ ...p, active: true })}>Activar</TblBtn>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </ScrollTable>
+        )}
       </Card>
-      <Card>
-        <CardTitle>Fichas técnicas recientes <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Producto','Ref.','Alérgenos','Certificaciones','Estado','Acción']}/>
-          <tbody>
-            {[['Harina W-280','HM-W280-25','Gluten','IFS Food v8, BRC','ok:Publicada'],['Harina W-380','HM-W380-25','Gluten','IFS Food v8','ok:Publicada'],['Sémola Duro','HM-STD-25','Gluten','IFS Food v8','amber:Revisión'],['H. Integral T-150','HM-INT-25','Gluten','BRC Grade A','ok:Publicada']].map(([p,ref,al,cert,st],i)=>{const[ct,cv]=st.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('PDF',p)}><td style={{ padding:'8px 10px', fontWeight:600, color:NAVY, whiteSpace:'nowrap' }}>{p}</td><td style={{ padding:'8px 10px', color:'#7a8899', fontSize:'.62rem' }}>{ref}</td><td style={{ padding:'8px 10px', color:'#e03030', fontSize:'.62rem', fontWeight:600 }}>{al}</td><td style={{ padding:'8px 10px', fontSize:'.62rem', color:'#2D8A30' }}>{cert}</td><td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={ct==='amber'?'orange':'green'} onClick={e=>{e.stopPropagation();act(ct==='amber'?'revisar':'PDF',p)}}>{ct==='amber'?'Revisar':'Ver PDF'}</TblBtn></td></tr>)})}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>FoodBridge IA:</strong> Todas las fichas cumplen con el Reglamento 1169/2011. 14 alérgenos declarados, valores nutricionales y microbiológicos verificados." />
-      </Card>
+
+      {tarifas.length > 0 && (
+        <Card>
+          <CardTitle>Cambios de tarifa recientes <IaBadge /></CardTitle>
+          <ScrollTable>
+            <Thead cols={['Fecha efectiva','Producto','Precio antes','Precio después','Cambio','Motivo']}/>
+            <tbody>
+              {tarifas.slice(0, 10).map(t => {
+                const prodName = products.find(p => p.id === t.product_id)?.name || '—'
+                const pct = Number(t.pct_change)
+                const pctColor = pct > 0 ? '#e03030' : pct < 0 ? '#2D8A30' : '#7a8899'
+                return (
+                  <tr key={t.id} style={{ borderBottom:'1px solid #F0E4D6' }}>
+                    <td style={{ padding:'8px 10px', color:NAVY, fontWeight:600, fontSize:'.62rem' }}>{t.effective_date}</td>
+                    <td style={{ padding:'8px 10px', color:NAVY }}>{prodName}</td>
+                    <td style={{ padding:'8px 10px', color:'#7a8899' }}>{Number(t.price_before).toFixed(2)}€</td>
+                    <td style={{ padding:'8px 10px', color:NAVY, fontWeight:700 }}>{Number(t.price_after).toFixed(2)}€</td>
+                    <td style={{ padding:'8px 10px', color:pctColor, fontWeight:700 }}>{pct > 0 ? '+' : ''}{pct.toFixed(1)}%</td>
+                    <td style={{ padding:'8px 10px', color:'#3a4a5a', fontSize:'.62rem' }}>{t.reason || '—'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </ScrollTable>
+        </Card>
+      )}
+
+      <NuevoProductoModal open={open} onClose={()=>setOpen(false)} onCreate={upsertProduct} />
     </div>
   )
 }
