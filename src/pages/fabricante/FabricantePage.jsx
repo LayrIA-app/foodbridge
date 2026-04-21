@@ -305,7 +305,7 @@ function VentasCanal({ act }) {
         context="fabricante_ventas_cliente"
         data={{
           clientes: filas.slice(0, 10).map(f => ({
-            cliente_id_prefix: f.cliente_id?.slice(0, 8) || 'anon',
+            cliente: f.cliente_name || 'anon',
             pedidos: Number(f.num_pedidos),
             entregados: Number(f.pedidos_delivered),
             facturacion: Number(f.facturacion),
@@ -330,10 +330,10 @@ function VentasCanal({ act }) {
               <Thead cols={['Cliente','Pedidos','Entregados','Facturación','Último pedido']}/>
               <tbody>
                 {filas.map((f,i) => {
-                  const clienteLabel = f.cliente_id ? f.cliente_id.slice(0, 8) + '…' : '—'
+                  const clienteLabel = f.cliente_name || (f.cliente_id ? f.cliente_id.slice(0, 8) + '…' : '—')
                   const last = f.ultimo_pedido_at ? new Date(f.ultimo_pedido_at).toLocaleDateString('es-ES') : '—'
                   return (
-                    <tr key={f.cliente_id||i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                    <tr key={`${f.cliente_id||''}-${f.cliente_name||i}`} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
                       <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY, fontSize:'.65rem' }}>{clienteLabel}</td>
                       <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{f.num_pedidos}</td>
                       <td style={{ padding:'8px 10px', color:'#2D8A30', fontWeight:700 }}>{f.pedidos_delivered}</td>
@@ -346,9 +346,9 @@ function VentasCanal({ act }) {
             </ScrollTable>
             {top3.length > 0 && (
               <div style={{ marginTop:12 }}>
-                <Pbar label={`Top 1: ${top3[0]?.cliente_id?.slice(0,8) || '—'}…`} val={formatEur(top3[0]?.facturacion)} pct={Math.min(100, (Number(top3[0]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#2D8A30"/>
-                {top3[1] && <Pbar label={`Top 2: ${top3[1]?.cliente_id?.slice(0,8)}…`} val={formatEur(top3[1]?.facturacion)} pct={Math.min(100, (Number(top3[1]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#1A78FF"/>}
-                {top3[2] && <Pbar label={`Top 3: ${top3[2]?.cliente_id?.slice(0,8)}…`} val={formatEur(top3[2]?.facturacion)} pct={Math.min(100, (Number(top3[2]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color={ACCENT}/>}
+                <Pbar label={`Top 1: ${top3[0]?.cliente_name || '—'}`} val={formatEur(top3[0]?.facturacion)} pct={Math.min(100, (Number(top3[0]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#2D8A30"/>
+                {top3[1] && <Pbar label={`Top 2: ${top3[1]?.cliente_name || '—'}`} val={formatEur(top3[1]?.facturacion)} pct={Math.min(100, (Number(top3[1]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#1A78FF"/>}
+                {top3[2] && <Pbar label={`Top 3: ${top3[2]?.cliente_name || '—'}`} val={formatEur(top3[2]?.facturacion)} pct={Math.min(100, (Number(top3[2]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color={ACCENT}/>}
                 {restoFact > 0 && <Pbar label="Resto de clientes" val={formatEur(restoFact)} pct={Math.min(100, (restoFact / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#e8a010"/>}
               </div>
             )}

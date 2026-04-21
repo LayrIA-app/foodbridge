@@ -34,7 +34,7 @@ export function useFabricanteVentasCliente({ profile }) {
   const enabled = !!profile?.id && profile.role === 'fabricante'
   const { rows, loading, error, refresh } = useSupabaseList({
     table: 'v_fabricante_ventas_cliente',
-    select: 'cliente_id, num_pedidos, pedidos_delivered, facturacion, ultimo_pedido_at',
+    select: 'cliente_id, cliente_name, num_pedidos, pedidos_delivered, facturacion, ultimo_pedido_at',
     enabled,
     filter: (q) => q.eq('fabricante_id', profile?.id).order('facturacion', { ascending: false }),
   })
