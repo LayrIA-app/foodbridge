@@ -907,6 +907,138 @@ function NotificarTarifasModal({ open, onClose, showToast }) {
   )
 }
 
+/* ══ MODAL CANALES (WhatsApp + Email + Voz) ══ */
+function CanalMensajeModal({ open, destinatario, onClose }) {
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [mensaje, setMensaje] = useState('')
+  const [sentWa, setSentWa] = useState(false)
+  const [sentEm, setSentEm] = useState(null)
+
+  if (!open) return null
+
+  const sendWa = () => {
+    const num = phone.replace(/[\s\-+()]/g, '')
+    if (!num) return
+    const text = encodeURIComponent(
+      (mensaje || `Hola ${destinatario || ''}, te escribo desde FoodBridge IA.`)
+      + `\n\n---\nFoodBridge IA · Soluciones inteligentes by COAXIONIA`
+    )
+    setSentWa(true)
+    setTimeout(() => window.open(`https://wa.me/${num}?text=${text}`, '_blank'), 100)
+  }
+
+  const sendEm = async () => {
+    if (!email || !mensaje) return
+    setSentEm('sending')
+    try {
+      const safe = mensaje.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')
+      const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:#1A2F4A;padding:20px;text-align:center;border-radius:12px 12px 0 0">
+          <span style="font-size:22px;font-weight:900;color:#fff">Food<span style="color:#E87420">Bridge IA</span></span>
+        </div>
+        <div style="border:1px solid #E8D5C0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+          <p style="font-size:14px;color:#1A2F4A;margin-bottom:16px">Estimado/a ${destinatario || 'cliente'},</p>
+          <div style="font-size:14px;color:#3a4a5a;line-height:1.6">${safe}</div>
+          <hr style="border:none;border-top:1px solid #E8D5C0;margin:20px 0"/>
+          <p style="font-size:11px;color:#aab5c0;text-align:center">
+            <em>FoodBridge IA · Soluciones inteligentes by COAXIONIA</em>
+          </p>
+        </div>
+      </div>`
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: email, subject: `Mensaje de FoodBridge IA${destinatario ? ' · ' + destinatario : ''}`, html }),
+      })
+      const data = await res.json()
+      setSentEm(data.success ? 'ok' : 'error')
+    } catch {
+      setSentEm('error')
+    }
+  }
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div className="animate-modalIn" style={{ background:'#fff', borderRadius:18, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(26,47,74,.3)' }}>
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'18px 18px 0 0', padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.1rem', fontWeight:900, color:'#fff', marginBottom:2 }}>Enviar mensaje</div>
+              <div style={{ fontSize:'.62rem', color:'rgba(255,255,255,.5)' }}>Canal unificado FoodBridge IA{destinatario ? ' · ' + destinatario : ''}</div>
+            </div>
+            <button onClick={onClose} style={{ width:30, height:30, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer', fontSize:'1rem' }}>✕</button>
+          </div>
+
+          <div style={{ padding:'18px 22px' }}>
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span>Mensaje</span>
+                <span title="Próximamente" style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'3px 8px', borderRadius:12, background:'#f0f4f8', border:'1px solid #dce3eb', color:'#94A3B8', cursor:'not-allowed', opacity:.6, fontSize:'.55rem', fontWeight:700 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                  Dictar
+                </span>
+              </div>
+              <textarea value={mensaje} onChange={e=>setMensaje(e.target.value)} placeholder="Escribe tu mensaje..."
+                style={{ width:'100%', minHeight:100, padding:'10px 12px', border:'1.5px solid #E8D5C0', borderRadius:9, fontSize:'.75rem', fontFamily:'DM Sans,sans-serif', outline:'none', resize:'vertical', color:NAVY, boxSizing:'border-box', background:'#FFF8F0' }}
+                onFocus={e=>e.target.style.borderColor=ACCENT} onBlur={e=>e.target.style.borderColor='#E8D5C0'} />
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:14, height:14, borderRadius:4, background:'#25D366', display:'inline-flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                Canal WhatsApp
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+34 612 345 678" type="tel"
+                  style={{ flex:1, padding:'10px 12px', border:'2px solid rgba(37,211,102,.3)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', outline:'none', color:NAVY }}
+                  onFocus={e=>e.target.style.borderColor='#25D366'} onBlur={e=>e.target.style.borderColor='rgba(37,211,102,.3)'} />
+                <button onClick={sendWa} disabled={!phone} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:phone?'pointer':'not-allowed', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', background:phone?'#25D366':'#cbd5df', color:'#fff', whiteSpace:'nowrap', opacity:phone?1:.6 }}>Abrir WhatsApp →</button>
+              </div>
+              {sentWa && <div style={{ marginTop:5, fontSize:'.62rem', color:'#25D366', fontWeight:600 }}>✓ WhatsApp abierto en pestaña nueva</div>}
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:14, height:14, borderRadius:4, background:'#378ADD', display:'inline-flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                Canal Email
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="cliente@empresa.com" type="email"
+                  style={{ flex:1, padding:'10px 12px', border:'2px solid rgba(55,138,221,.3)', borderRadius:9, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', outline:'none', color:NAVY }}
+                  onFocus={e=>e.target.style.borderColor='#378ADD'} onBlur={e=>e.target.style.borderColor='rgba(55,138,221,.3)'} />
+                <button onClick={sendEm} disabled={!email || !mensaje || sentEm==='sending'} style={{ padding:'10px 16px', borderRadius:9, border:'none', cursor:(email&&mensaje&&sentEm!=='sending')?'pointer':'not-allowed', fontFamily:'Barlow Condensed', fontWeight:700, fontSize:'.82rem', background:(email&&mensaje&&sentEm!=='sending')?'#378ADD':'#cbd5df', color:'#fff', whiteSpace:'nowrap', opacity:(email&&mensaje&&sentEm!=='sending')?1:.6 }}>Enviar →</button>
+              </div>
+              {sentEm==='sending' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#7a8899', fontWeight:600 }}>⏳ Enviando...</div>}
+              {sentEm==='ok' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#2D8A30', fontWeight:600 }}>✓ Email enviado via Resend</div>}
+              {sentEm==='error' && <div style={{ marginTop:5, fontSize:'.62rem', color:'#e03030', fontWeight:600 }}>✗ Error al enviar. Comprueba el email.</div>}
+            </div>
+
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:'.6rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:6, display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:14, height:14, borderRadius:4, background:'#FF6B2B', display:'inline-flex', alignItems:'center', justifyContent:'center', opacity:.5 }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8a16 16 0 0 0 5.91 5.91l.27-.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+                </span>
+                Canal Voz
+              </div>
+              <button disabled title="Próximamente" style={{ width:'100%', padding:'10px 14px', borderRadius:9, border:'1.5px solid #dce3eb', background:'#f0f4f8', color:'#94A3B8', fontSize:'.72rem', cursor:'not-allowed', fontFamily:'DM Sans,sans-serif', fontWeight:600, opacity:.7, display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+                🔒 Próximamente — llamada por Voz IA
+              </button>
+            </div>
+
+            <button onClick={onClose} style={{ width:'100%', padding:10, borderRadius:9, border:'1px solid #E8D5C0', background:'transparent', color:'#7a8899', fontSize:'.7rem', cursor:'pointer', fontFamily:'DM Sans,sans-serif' }}>Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 /* ══ MODAL BUILDER ══ */
 function buildModal(type, detail, showToast) {
   const modals = {
@@ -1333,6 +1465,8 @@ export default function FabricantePage() {
   const [push, setPush] = useState(null)
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [readAlerts, setReadAlerts] = useState(new Set())
+  const [canalOpen, setCanalOpen] = useState(false)
+  const [canalDest, setCanalDest] = useState('')
 
   const { kpis: fabKpis } = useFabricanteKpis({ profile })
   const { products: fabProducts } = useProducts({ profile, onlyActive: false })
@@ -1379,8 +1513,10 @@ export default function FabricantePage() {
   }, [])
 
   const act = useCallback((type, detail) => {
+    if (type === 'toast') { showToast(detail); return }
     if (type === 'goto') { changeSection(detail); return }
     if (type === 'notificar_tarifas') { setTarifasOpen(true); return }
+    if (type === 'comunicar' || type === 'llamar' || type === 'canal') { setCanalDest(detail || ''); setCanalOpen(true); return }
     setModal(buildModal(type, detail, showToast))
   }, [showToast, changeSection])
 
@@ -1503,6 +1639,7 @@ export default function FabricantePage() {
 
       <Modal modal={modal} onClose={closeModal} />
       <NotificarTarifasModal open={tarifasOpen} onClose={()=>setTarifasOpen(false)} showToast={showToast} />
+      <CanalMensajeModal open={canalOpen} destinatario={canalDest} onClose={()=>setCanalOpen(false)} />
       <Toast msg={toast} />
       {push && <PushNotif msg={push} onClose={()=>setPush(null)} />}
       {alertsOpen && <AlertsModal alerts={currentAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))} />}

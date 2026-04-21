@@ -221,7 +221,7 @@ export default function HomeScreen() {
                   <div style={{ fontFamily: 'Barlow Condensed', fontSize: 20, fontWeight: 900, color: card.titleColor, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>
                     {card.title}
                   </div>
-                  <div style={{ fontSize: 11, color: card.descColor, lineHeight: 1.6 }}>
+                  <div style={{ fontSize: '.68rem', color: card.descColor, lineHeight: 1.6 }}>
                     {card.desc}
                   </div>
                 </div>
