@@ -79,8 +79,13 @@ function mapAuthError(message) {
 }
 
 export default function LoginScreen() {
-  const { currentRole, goHome, signIn } = useApp()
+  const { currentRole, goHome, signIn, fabProfile, setFabProfile } = useApp()
   const data = ROLE_COPY[currentRole] || ROLE_COPY._default
+  const isFabricante = currentRole === 'fabricante'
+  const isOps = fabProfile === 'operaciones'
+  const displayPill = isFabricante
+    ? (isOps ? 'Operaciones / Calidad' : 'Directivo / CEO')
+    : data.pill
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -188,9 +193,43 @@ export default function LoginScreen() {
         <div style={{ fontSize: '.62rem', color: '#8A9BB0', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 8 }}>
           Acceso seguro
         </div>
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.5rem', fontWeight: 900, color: '#1A2F4A', marginBottom: 24, textTransform: 'uppercase', letterSpacing: '.04em' }}>
-          Acceder · <span style={{ color: '#E87420' }}>{data.pill}</span>
+        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '1.5rem', fontWeight: 900, color: '#1A2F4A', marginBottom: isFabricante ? 14 : 24, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+          Acceder · <span style={{ color: '#E87420' }}>{displayPill}</span>
         </div>
+
+        {isFabricante && (
+          <div style={{ textAlign: 'center', marginBottom: 18 }}>
+            <div style={{ display: 'inline-flex', background: 'rgba(26,47,74,.06)', borderRadius: 30, padding: 3, border: '1px solid rgba(232,116,32,.15)' }}>
+              <button type="button" onClick={() => setFabProfile('directivo')}
+                style={{
+                  padding: '8px 20px', borderRadius: 28, border: 'none',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: '.7rem', fontWeight: 700,
+                  letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer',
+                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  background: !isOps ? 'linear-gradient(135deg,#E87420,#D06A1C)' : 'transparent',
+                  color: !isOps ? '#fff' : '#7A8899',
+                  boxShadow: !isOps ? '0 4px 16px rgba(232,116,32,.3)' : 'none'
+                }}>
+                Directivo / CEO
+              </button>
+              <button type="button" onClick={() => setFabProfile('operaciones')}
+                style={{
+                  padding: '8px 20px', borderRadius: 28, border: 'none',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: '.7rem', fontWeight: 700,
+                  letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer',
+                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  background: isOps ? 'linear-gradient(135deg,#E87420,#D06A1C)' : 'transparent',
+                  color: isOps ? '#fff' : '#7A8899',
+                  boxShadow: isOps ? '0 4px 16px rgba(232,116,32,.3)' : 'none'
+                }}>
+                Operaciones / Calidad
+              </button>
+            </div>
+            <div style={{ fontSize: '.62rem', color: '#8A9BB0', marginTop: 6 }}>
+              {isOps ? 'Fichas técnicas, calidad y trazabilidad con IA' : 'Vista estratégica de negocio'}
+            </div>
+          </div>
+        )}
 
         <label style={{ display: 'block', fontSize: '.6rem', fontWeight: 700, color: '#8A9BB0', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: 6 }}>
           Correo electrónico

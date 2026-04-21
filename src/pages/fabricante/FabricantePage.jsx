@@ -1452,7 +1452,7 @@ function AlertsModal({ alerts, onClose, onMarkRead, readSet }) {
 }
 
 export default function FabricantePage() {
-  const { signOut, fabProfile, setFabProfile, profile } = useApp()
+  const { signOut, fabProfile, profile } = useApp()
   const isOps = fabProfile === 'operaciones'
   const currentNav = isOps ? NAV_OPS : NAV
   const currentScreens = isOps ? SCREENS_OPS : SCREENS
@@ -1511,14 +1511,6 @@ export default function FabricantePage() {
     setSidebarOpen(false)
     setTimeout(() => { if (contentRef.current) contentRef.current.scrollTop = 0 }, 0)
   }, [])
-
-  const switchSubProfile = useCallback((fp) => {
-    if (fp === fabProfile) return
-    setFabProfile(fp)
-    setActive(fp === 'operaciones' ? 'odash' : 'fdash')
-    setSidebarOpen(false)
-    setTimeout(() => { if (contentRef.current) contentRef.current.scrollTop = 0 }, 0)
-  }, [fabProfile, setFabProfile])
 
   const act = useCallback((type, detail) => {
     if (type === 'toast') { showToast(detail); return }
@@ -1636,21 +1628,6 @@ export default function FabricantePage() {
               onMouseLeave={e=>{e.currentTarget.style.borderColor='#E8D5C0';e.currentTarget.style.color='#7a8899'}}>
               ↩ Salir
             </button>
-          </div>
-        </div>
-
-        {/* Sub-perfil toggle Directivo / Operaciones */}
-        <div style={{ flexShrink:0, padding:'10px 16px 8px', background:'#FFF8F0', borderBottom:'1px solid #F0E4D6', display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-          <div style={{ display:'inline-flex', background:'rgba(26,47,74,.06)', borderRadius:30, padding:3, border:'1px solid rgba(232,116,32,.15)' }}>
-            <button onClick={()=>switchSubProfile('directivo')} style={{ padding:'8px 20px', borderRadius:28, border:'none', fontFamily:'DM Sans,sans-serif', fontSize:'.7rem', fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', cursor:'pointer', transition:'all .25s', background: !isOps ? `linear-gradient(135deg,${ACCENT},#D06A1C)` : 'transparent', color: !isOps ? '#fff' : '#7A8899', boxShadow: !isOps ? '0 4px 16px rgba(232,116,32,.3)' : 'none', whiteSpace:'nowrap' }}>
-              Directivo / CEO
-            </button>
-            <button onClick={()=>switchSubProfile('operaciones')} style={{ padding:'8px 20px', borderRadius:28, border:'none', fontFamily:'DM Sans,sans-serif', fontSize:'.7rem', fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', cursor:'pointer', transition:'all .25s', background: isOps ? `linear-gradient(135deg,${ACCENT},#D06A1C)` : 'transparent', color: isOps ? '#fff' : '#7A8899', boxShadow: isOps ? '0 4px 16px rgba(232,116,32,.3)' : 'none', whiteSpace:'nowrap' }}>
-              Operaciones / Calidad
-            </button>
-          </div>
-          <div style={{ fontSize:'.62rem', color:'#8A9BB0', textAlign:'center' }}>
-            {isOps ? 'Fichas técnicas, calidad y trazabilidad con IA' : 'Vista estratégica de negocio'}
           </div>
         </div>
 
