@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos } from '../../hooks'
+import { usePedidos, useCotizacionClientesMap } from '../../hooks'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
@@ -1070,6 +1070,7 @@ function productsSummary(lines) {
 function PedidosScreen({ act }) {
   const { profile } = useApp()
   const { pedidos, loading } = usePedidos({ profile })
+  const cotMap = useCotizacionClientesMap(pedidos)
 
   const kpis = useMemo(() => {
     const activos = pedidos.filter(p => ['placed','confirmed','in_transit'].includes(p.status)).length
@@ -1121,7 +1122,7 @@ function PedidosScreen({ act }) {
               {pedidos.map(p => {
                 const delayed = isPedidoDelayed(p)
                 const meta = pedidoStatusMeta(p.status, delayed)
-                const cli = p.cotizacion?.cliente_name || '—'
+                const cli = cotMap[p.cotizacion_id]?.cliente_name || '—'
                 return (
                   <tr key={p.id} style={{ borderBottom:'1px solid #F0E4D6', background:meta.type==='red'?'rgba(224,48,48,.04)':'' }} onMouseEnter={e=>e.currentTarget.style.background=meta.type==='red'?'rgba(224,48,48,.06)':'#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=meta.type==='red'?'rgba(224,48,48,.04)':''}>
                     <td style={{ padding:'8px 10px', fontWeight:700, color:meta.type==='red'?'#e03030':ACCENT }}>{p.ref}</td>

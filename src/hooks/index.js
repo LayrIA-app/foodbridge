@@ -1,5 +1,5 @@
 export { useSupabaseList } from './useSupabaseList'
-export { usePedidos, usePedidoLines } from './usePedidos'
+export { usePedidos, usePedidoLines, useCotizacionClientesMap } from './usePedidos'
 export { useCotizaciones } from './useCotizaciones'
 export { useVisitas } from './useVisitas'
 export { useProducts, useTarifas } from './useProducts'
