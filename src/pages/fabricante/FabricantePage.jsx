@@ -1462,12 +1462,12 @@ export default function FabricantePage() {
               <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <svg width="14" height="14" viewBox="0 0 48 48" fill="none"><path d="M14 36V22a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14" stroke="#fff" strokeWidth="3" strokeLinecap="round"/><path d="M10 36h28" stroke="#fff" strokeWidth="3" strokeLinecap="round"/></svg>
               </div>
-              <span style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:900, color:NAVY, whiteSpace:'nowrap' }}>Food<span style={{ color:ACCENT }}>Bridge IA</span></span>
+              <span className="fab-topbar-logo" style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:900, color:NAVY, whiteSpace:'nowrap' }}>Food<span style={{ color:ACCENT }}>Bridge IA</span></span>
             </div>
             <span className="fab-topbar-tagline" style={{ fontSize:'.68rem', color:'#7a8899', fontStyle:'italic', whiteSpace:'nowrap' }}>{isOps ? '"Tu calidad, verificada por IA"' : '"Tu catálogo, automatizado por IA"'}</span>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
-            <span style={{ padding:'3px 10px', borderRadius:20, fontSize:'.62rem', fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', background:'#FFF3E8', color:ACCENT, border:'1px solid rgba(232,116,32,.25)', whiteSpace:'nowrap' }}>{isOps ? 'Operaciones' : 'Fabricante CEO'}</span>
+            <span className="fab-topbar-rolebadge" style={{ padding:'3px 10px', borderRadius:20, fontSize:'.62rem', fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', background:'#FFF3E8', color:ACCENT, border:'1px solid rgba(232,116,32,.25)', whiteSpace:'nowrap' }}>{isOps ? 'Operaciones' : 'Fabricante CEO'}</span>
             {/* Bell */}
             <div onClick={()=>setAlertsOpen(v=>!v)} style={{ position:'relative', cursor:'pointer', display:'flex', alignItems:'center' }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7a8899" strokeWidth="2" strokeLinecap="round" style={{ transition:'transform .2s' }}
