@@ -3,3 +3,4 @@ export { usePedidos, usePedidoLines, useCotizacionClientesMap } from './usePedid
 export { useCotizaciones } from './useCotizaciones'
 export { useVisitas } from './useVisitas'
 export { useProducts, useTarifas } from './useProducts'
+export { useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente } from './useFabricanteAgregados'

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
-import { useProducts, useTarifas } from '../../hooks'
+import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente } from '../../hooks'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -194,19 +194,30 @@ function Thead({ cols }) {
   return <thead><tr style={{ background:NAVY }}>{cols.map(c=><th key={c} style={{ fontSize:'.58rem', fontWeight:700, color:'rgba(255,255,255,.55)', textTransform:'uppercase', letterSpacing:'.08em', padding:'8px 10px', textAlign:'left', whiteSpace:'nowrap' }}>{c}</th>)}</tr></thead>
 }
 
+function formatEur(n) {
+  const v = Number(n) || 0
+  if (v >= 1_000_000) return `${(v/1_000_000).toFixed(1)}M€`
+  if (v >= 1_000) return `${Math.round(v/1000)}k€`
+  return `${v.toFixed(0)}€`
+}
+
 /* ══ SCREENS ══ */
 function DashboardCEO({ act }) {
+  const { profile } = useApp()
+  const { kpis } = useFabricanteKpis({ profile })
+  const { products } = useProducts({ profile, onlyActive: false })
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Dashboard CEO" subtitle="Visión estratégica de negocio — datos actualizados por IA en tiempo real" badge="Abril 2026" />
+      <PageHdr title="Dashboard CEO" subtitle="Visión estratégica de negocio — datos agregados en tiempo real" badge="Abril 2026" />
       <SearchBar placeholder="Buscar producto, alerta o canal..." />
-      <LiveTicker msgs={['Analizando rendimiento de 1.247 fichas técnicas...','99.2% precisión IA — máximo histórico','3 agentes cerraron operaciones hoy','Alerta: IFS Food v8 caduca en 30 días']} />
+      <LiveTicker msgs={['Monitorizando pedidos en curso…','Clientes únicos actualizados','Tarifas en seguimiento','Trazabilidad Reg. 178/2002 OK']} />
 
       <div className="grid-4 mb14">
-        <KPI val="1.247" label="Fichas publicadas" delta="▲ +156 este trimestre" up color={ACCENT}/>
-        <KPI val="847k€" label="Ventas Q1 2026" delta="▲ +38% vs Q1 2025" up color="#2D8A30"/>
-        <KPI val="23" label="Agentes conectados" delta="▲ +5 nuevos" up color="#1A78FF"/>
-        <KPI val="99.2%" label="Precisión IA" delta="▲ Máximo histórico" up color="#e8a010"/>
+        <KPI val={String(products.length)} label="Productos en catálogo" delta={`${products.filter(p=>p.active).length} activos`} up color={ACCENT}/>
+        <KPI val={formatEur(kpis.facturacion_delivered)} label="Facturación entregada" delta={`${kpis.pedidos_delivered} pedidos`} up color="#2D8A30"/>
+        <KPI val={String(kpis.clientes_unicos)} label="Clientes únicos" delta="que han comprado" up color="#1A78FF"/>
+        <KPI val={formatEur(kpis.ticket_medio)} label="Ticket medio" delta="por pedido entregado" up color="#e8a010"/>
       </div>
 
       <div className="grid-2 mb14">
@@ -258,55 +269,114 @@ function DashboardCEO({ act }) {
 }
 
 function VentasCanal({ act }) {
+  const { profile } = useApp()
+  const { filas, loading } = useFabricanteVentasCliente({ profile })
+  const { kpis } = useFabricanteKpis({ profile })
+
+  const top3 = filas.slice(0, 3)
+  const restoFact = filas.slice(3).reduce((s,f) => s + Number(f.facturacion || 0), 0)
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Ventas por Canal" subtitle="Análisis detallado de rendimiento por canal de distribución" />
-      <SearchBar placeholder="Buscar canal, zona o mes..." />
+      <PageHdr title="Ventas por Cliente" subtitle="Desglose agregado — quién compra, cuánto y cuándo" />
+      <SearchBar placeholder="Buscar cliente..." />
       <div className="grid-3 mb14">
-        <KPI val="487k€" label="Canal B2B (Agentes)" delta="▲ 57% del total" up color="#2D8A30"/>
-        <KPI val="234k€" label="Venta directa" delta="▲ 28% del total" up color="#1A78FF"/>
-        <KPI val="126k€" label="Marketplace" delta="▲ 15% del total" up color={ACCENT}/>
+        <KPI val={formatEur(kpis.facturacion_delivered)} label="Facturación entregada" delta={`${kpis.clientes_unicos} clientes`} up color="#2D8A30"/>
+        <KPI val={String(kpis.pedidos_delivered)} label="Pedidos completados" delta={`${kpis.pedidos_activos} activos`} up color="#1A78FF"/>
+        <KPI val={formatEur(kpis.ticket_medio)} label="Ticket medio" delta="por pedido" up color={ACCENT}/>
       </div>
-      <Card style={{ marginBottom:13 }}>
-        <CardTitle>Evolución mensual por canal</CardTitle>
-        <ScrollTable>
-          <Thead cols={['Mes','B2B Agentes','Venta directa','Marketplace','Total']}/>
-          <tbody>
-            {[['Enero','148.000€','72.000€','38.000€','258.000€'],['Febrero','162.000€','78.000€','42.000€','282.000€'],['Marzo','177.000€','84.000€','46.000€','307.000€']].map(([mes,...c],i)=>(
-              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{mes}</td>
-                {c.slice(0,3).map((v,j)=><td key={j} style={{ padding:'8px 10px', color:'#3a4a5a' }}>{v}</td>)}
-                <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{c[3]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>Tendencia IA:</strong> Canal B2B crece un 9.8% mensual. <strong>Marketplace es el canal con mayor crecimiento relativo (+10.5%/mes).</strong>" />
-      </Card>
       <Card>
-        <CardTitle>Rendimiento por zona geográfica <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Zona','Agente','Q1 Real','Objetivo','Cumplim.','Estado','Acción']}/>
-          <tbody>
-            {[['Levante','J.L. Martínez','124.8k€','118k€','ok:105.8%','ok:Top'],['Cataluña','A. García','98.4k€','95k€','ok:103.6%','ok:Top'],['Andalucía','C. Ruiz','72.3k€','78k€','amber:92.7%','amber:OK'],['Portugal','M. Santos','56.2k€','48k€','ok:117.1%','ok:★ Nuevo'],['Baleares','P. Almeida','34.1k€','52k€','red:65.6%','red:Apoyo']].map(([z,ag,r,o,cum,est],i)=>{const[ct,cv]=cum.split(':');const[et,ev]=est.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY, whiteSpace:'nowrap' }}>{z}</td><td style={{ padding:'8px 10px', color:'#3a4a5a', whiteSpace:'nowrap' }}>{ag}</td><td style={{ padding:'8px 10px', fontWeight:700, color:'#2D8A30' }}>{r}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{o}</td><td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td><td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={et==='red'?'red':'orange'} onClick={()=>act('ver',`Zona ${z}`)}>Ver</TblBtn></td></tr>)})}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>IA detecta:</strong> La zona Centro (Madrid) no tiene cobertura. <strong>Potencial no capturado: 214k€ anuales.</strong>" />
-        <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
-          <BtnSm onClick={()=>act('simular','Expansión zona Centro Madrid')}>Simular expansión</BtnSm>
-          <BtnSm outline onClick={()=>act('exportar','Informe zonas geográficas')}>Exportar</BtnSm>
-        </div>
+        <CardTitle>Facturación por cliente <IaBadge /></CardTitle>
+        {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando…</div>}
+        {!loading && filas.length === 0 && (
+          <div style={{ padding:'28px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.95rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>Sin datos de ventas aún</div>
+            <div style={{ fontSize:'.7rem', color:'#7a8899', lineHeight:1.5 }}>Cuando tus pedidos empiecen a entregarse, verás aquí el desglose por cliente.</div>
+          </div>
+        )}
+        {!loading && filas.length > 0 && (
+          <>
+            <ScrollTable>
+              <Thead cols={['Cliente','Pedidos','Entregados','Facturación','Último pedido']}/>
+              <tbody>
+                {filas.map((f,i) => {
+                  const clienteLabel = f.cliente_id ? f.cliente_id.slice(0, 8) + '…' : '—'
+                  const last = f.ultimo_pedido_at ? new Date(f.ultimo_pedido_at).toLocaleDateString('es-ES') : '—'
+                  return (
+                    <tr key={f.cliente_id||i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                      <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY, fontSize:'.65rem' }}>{clienteLabel}</td>
+                      <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{f.num_pedidos}</td>
+                      <td style={{ padding:'8px 10px', color:'#2D8A30', fontWeight:700 }}>{f.pedidos_delivered}</td>
+                      <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{formatEur(f.facturacion)}</td>
+                      <td style={{ padding:'8px 10px', fontSize:'.62rem', color:'#7a8899' }}>{last}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </ScrollTable>
+            {top3.length > 0 && (
+              <div style={{ marginTop:12 }}>
+                <Pbar label={`Top 1: ${top3[0]?.cliente_id?.slice(0,8) || '—'}…`} val={formatEur(top3[0]?.facturacion)} pct={Math.min(100, (Number(top3[0]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#2D8A30"/>
+                {top3[1] && <Pbar label={`Top 2: ${top3[1]?.cliente_id?.slice(0,8)}…`} val={formatEur(top3[1]?.facturacion)} pct={Math.min(100, (Number(top3[1]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#1A78FF"/>}
+                {top3[2] && <Pbar label={`Top 3: ${top3[2]?.cliente_id?.slice(0,8)}…`} val={formatEur(top3[2]?.facturacion)} pct={Math.min(100, (Number(top3[2]?.facturacion||0) / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color={ACCENT}/>}
+                {restoFact > 0 && <Pbar label="Resto de clientes" val={formatEur(restoFact)} pct={Math.min(100, (restoFact / Math.max(1, Number(kpis.facturacion_delivered||1))) * 100)} color="#e8a010"/>}
+              </div>
+            )}
+          </>
+        )}
       </Card>
     </div>
   )
 }
 
 function Rentabilidad({ act }) {
+  const { profile } = useApp()
+  const { filas, loading } = useFabricanteRentabilidad({ profile })
+  const { kpis } = useFabricanteKpis({ profile })
+
+  const totalFact = filas.reduce((s,f) => s + Number(f.facturacion_total||0), 0)
+  const productoTop = filas[0]
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Rentabilidad" subtitle="Análisis de márgenes y rentabilidad por producto — calculado por IA" />
+      <PageHdr title="Rentabilidad" subtitle="Análisis de ventas por producto — datos agregados" />
       <div className="grid-4 mb14">
-        <KPI val="22%" label="Margen bruto medio" delta="▲ +2pp vs Q1 2025" up color={ACCENT}/>
+        <KPI val={formatEur(totalFact)} label="Facturación por productos" delta={`${filas.length} productos`} up color={ACCENT}/>
+        <KPI val={formatEur(kpis.facturacion_delivered)} label="Total entregado" delta={`${kpis.pedidos_delivered} pedidos`} up color="#2D8A30"/>
+        <KPI val={productoTop?.product_name || '—'} label="Producto top" delta={productoTop ? formatEur(productoTop.facturacion_total) : 'Sin datos'} color="#1A78FF"/>
+        <KPI val={String(kpis.pedidos_retrasados)} label="Pedidos retrasados" delta={kpis.pedidos_retrasados>0?'▼ Atención':'todo al día'} color={kpis.pedidos_retrasados>0?'#e03030':'#2D8A30'}/>
+      </div>
+      <Card>
+        <CardTitle>Facturación por producto <IaBadge /></CardTitle>
+        {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando…</div>}
+        {!loading && filas.length === 0 && (
+          <div style={{ padding:'28px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.95rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>Sin productos aún</div>
+            <div style={{ fontSize:'.7rem', color:'#7a8899', lineHeight:1.5 }}>Añade productos desde el Catálogo para ver aquí su rentabilidad.</div>
+          </div>
+        )}
+        {!loading && filas.length > 0 && (
+          <ScrollTable>
+            <Thead cols={['Producto','SKU','Precio','Cantidad vendida','Facturación','Nº pedidos','Clientes']}/>
+            <tbody>
+              {filas.map(f => (
+                <tr key={f.product_id} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                  <td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{f.product_name}</td>
+                  <td style={{ padding:'8px 10px', color:ACCENT, fontSize:'.62rem', fontWeight:700 }}>{f.sku}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{Number(f.price_current).toFixed(2)}€/{f.unit}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{Number(f.cantidad_total).toLocaleString('es-ES')} {f.unit}</td>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:'#2D8A30' }}>{formatEur(f.facturacion_total)}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{f.num_pedidos}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{f.clientes_unicos}</td>
+                </tr>
+              ))}
+            </tbody>
+          </ScrollTable>
+        )}
+      </Card>
+      <div style={{ height:14 }}/>
+      <div className="grid-4 mb14" style={{ display:'none' }}>
+        <KPI val="—" label="Margen bruto medio" delta="requiere campo coste" color={ACCENT}/>
         <KPI val="186k€" label="Beneficio neto Q1" delta="▲ +41% vs Q1 2025" up color="#2D8A30"/>
         <KPI val="18%" label="Prod. más rentable" delta="Harina W-380" color="#1A78FF"/>
         <KPI val="3" label="Productos a revisar" delta="Margen < 10%" color="#e03030"/>
