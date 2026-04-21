@@ -139,12 +139,17 @@ input, textarea, select, button { max-width: 100%; }
   .login-wrap { flex-direction: column !important; }
   .login-left { padding: 24px 16px !important; min-height: 160px !important; }
 
-  /* Tablas en movil: texto partido, sin scroll horizontal */
-  table        { font-size: .72rem !important; width: 100% !important; }
+  /* Tablas en movil (REGLA 3 FRANQUICIA):
+     - La tabla puede ser ancha; su wrapper ScrollTable scrollea horizontalmente.
+     - NO forzamos width:100% ni word-break: las palabras nunca se parten a mitad.
+     - Font-size minimo .72rem y padding comodo para dedo (~44px de area tactil por fila). */
+  table        { font-size: .72rem !important; max-width: none !important; }
   table th,
-  table td     { padding: 6px 7px !important; white-space: normal !important; word-break: break-word !important; }
+  table td     { padding: 8px 10px !important; }
 
-  /* Prevenir overflow silencioso en contenedores genericos */
+  /* Prevenir overflow silencioso en contenedores genericos
+     (no tocamos overflow-x:hidden para que ScrollTable siga siendo el unico
+      elemento con scroll horizontal local) */
   .animate-fadeIn { max-width: 100% !important; overflow-x: hidden !important; }
 }
 

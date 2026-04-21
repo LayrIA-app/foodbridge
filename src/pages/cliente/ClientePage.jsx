@@ -238,6 +238,20 @@ function CanalMensajeModal({ open, destinatario, onClose }) {
   )
 }
 
+function ScrollTable({ children }) {
+  return (
+    <div style={{ width:'100%', overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+      <table style={{ width:'100%', minWidth:560, borderCollapse:'collapse', fontSize:'.72rem' }}>
+        {children}
+      </table>
+    </div>
+  )
+}
+
+function Thead({ cols }) {
+  return <thead><tr style={{ background:NAVY }}>{cols.map(c=><th key={c} style={{ fontSize:'.58rem', fontWeight:700, color:'rgba(255,255,255,.55)', textTransform:'uppercase', letterSpacing:'.08em', padding:'8px 10px', textAlign:'left', whiteSpace:'nowrap' }}>{c}</th>)}</tr></thead>
+}
+
 function Badge({ type, text }) {
   const s = { ok:{bg:'#EBF5EF',color:'#2D8A30',border:'#C6F6D5'}, red:{bg:'#FDECEA',color:'#e03030',border:'#F1A9A0'}, amber:{bg:'#FDF3E7',color:'#e8a010',border:'#F0C06A'}, blue:{bg:'#EEF5FF',color:'#1A78FF',border:'#B5D4F4'}, orange:{bg:'#FFF3E8',color:'#E87420',border:'rgba(232,116,32,.3)'} }[type]||{bg:'#F0E6D9',color:NAVY,border:'#E8D5C0'}
   return <span style={{ display:'inline-block', padding:'2px 9px', borderRadius:20, fontSize:'.6rem', fontWeight:700, background:s.bg, color:s.color, border:`1px solid ${s.border}`, whiteSpace:'nowrap', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis', verticalAlign:'middle' }}>{text}</span>
