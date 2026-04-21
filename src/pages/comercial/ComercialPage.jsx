@@ -33,7 +33,7 @@ function useCountUp(target, duration=900) {
 /* ══ BASE COMPONENTS ══ */
 function Toast({ msg }) {
   if (!msg) return null
-  return <div style={{ position:'fixed', bottom:80, left:'50%', transform:'translateX(-50%)', background:NAVY, color:'#fff', padding:'10px 20px', borderRadius:10, fontSize:'.72rem', fontWeight:600, zIndex:9999, border:'1px solid rgba(232,116,32,.3)', boxShadow:'0 8px 24px rgba(26,47,74,.25)', whiteSpace:'nowrap' }}>{msg}</div>
+  return <div style={{ position:'fixed', bottom:80, left:'50%', transform:'translateX(-50%)', background:NAVY, color:'#fff', padding:'10px 20px', borderRadius:10, fontSize:'.72rem', fontWeight:600, zIndex:9999, border:'1px solid rgba(232,116,32,.3)', boxShadow:'0 8px 24px rgba(26,47,74,.25)', maxWidth:'calc(100vw - 32px)', textAlign:'center', lineHeight:1.4 }}>{msg}</div>
 }
 
 function Modal({ modal, onClose }) {
@@ -105,7 +105,7 @@ function AlertsModal({ alerts, onClose, readSet, onMarkRead }) {
 
 function Badge({ type, text }) {
   const s = { ok:{bg:'#EBF5EF',color:'#2D8A30',border:'#C6F6D5'}, red:{bg:'#FDECEA',color:'#e03030',border:'#F1A9A0'}, amber:{bg:'#FDF3E7',color:'#e8a010',border:'#F0C06A'}, blue:{bg:'#EEF5FF',color:'#1A78FF',border:'#B5D4F4'}, orange:{bg:'#FFF3E8',color:'#E87420',border:'rgba(232,116,32,.3)'} }[type]||{bg:'#F0E6D9',color:NAVY,border:'#E8D5C0'}
-  return <span style={{ display:'inline-block', padding:'2px 9px', borderRadius:20, fontSize:'.6rem', fontWeight:700, background:s.bg, color:s.color, border:`1px solid ${s.border}`, whiteSpace:'nowrap' }}>{text}</span>
+  return <span style={{ display:'inline-block', padding:'2px 9px', borderRadius:20, fontSize:'.6rem', fontWeight:700, background:s.bg, color:s.color, border:`1px solid ${s.border}`, whiteSpace:'nowrap', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis', verticalAlign:'middle' }}>{text}</span>
 }
 
 function KPI({ val, label, delta, up, color=ACCENT }) {
@@ -115,13 +115,13 @@ function KPI({ val, label, delta, up, color=ACCENT }) {
   const prefix = String(val).match(/^[€+]*/)?.[0]||''
   const display = num ? `${prefix}${animated.toLocaleString('es-ES')}${suffix}` : val
   return (
-    <div style={{ background:'linear-gradient(160deg,#fff,#FFFBF5)', border:'1px solid rgba(232,116,32,.15)', borderRadius:11, padding:'14px 16px', boxShadow:'0 2px 16px rgba(26,47,74,.07)', position:'relative', overflow:'hidden', transition:'transform .28s,box-shadow .28s' }}
+    <div style={{ background:'linear-gradient(160deg,#fff,#FFFBF5)', border:'1px solid rgba(232,116,32,.15)', borderRadius:11, padding:'14px 16px', boxShadow:'0 2px 16px rgba(26,47,74,.07)', position:'relative', overflow:'hidden', minWidth:0, transition:'transform .28s,box-shadow .28s' }}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 36px rgba(26,47,74,.13)'}}
       onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 2px 16px rgba(26,47,74,.07)'}}>
 
-      <div style={{ fontSize:'.65rem', color:'#7a8899', marginBottom:4 }}>{label}</div>
-      <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.45rem', fontWeight:800, color, marginBottom:3 }}>{display}</div>
-      {delta && <div style={{ fontSize:'.64rem', fontWeight:600, color:up?'#2D8A30':delta.includes('▼')?'#e03030':'#7a8899' }}>{delta}</div>}
+      <div style={{ fontSize:'.65rem', color:'#7a8899', marginBottom:4, wordBreak:'break-word' }}>{label}</div>
+      <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.45rem', fontWeight:800, color, marginBottom:3, wordBreak:'break-word', overflowWrap:'anywhere', lineHeight:1.1 }}>{display}</div>
+      {delta && <div style={{ fontSize:'.64rem', fontWeight:600, color:up?'#2D8A30':delta.includes('▼')?'#e03030':'#7a8899', wordBreak:'break-word' }}>{delta}</div>}
     </div>
   )
 }
@@ -185,12 +185,12 @@ function Pbar({ pct, color=ACCENT, height=10 }) {
 }
 
 function BtnSm({ children, outline, color, onClick }) {
-  return <button onClick={onClick} style={{ padding:'6px 12px', borderRadius:7, border:outline?`1.5px solid rgba(232,116,32,.4)`:'none', cursor:'pointer', fontSize:'.62rem', fontWeight:700, fontFamily:'DM Sans,sans-serif', background:outline?'transparent':color||`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:outline?ACCENT:'#fff', whiteSpace:'nowrap' }}>{children}</button>
+  return <button onClick={onClick} style={{ padding:'6px 12px', borderRadius:7, border:outline?`1.5px solid rgba(232,116,32,.4)`:'none', cursor:'pointer', fontSize:'.62rem', fontWeight:700, fontFamily:'DM Sans,sans-serif', background:outline?'transparent':color||`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:outline?ACCENT:'#fff', whiteSpace:'nowrap', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis' }}>{children}</button>
 }
 
 function TblBtn({ type, children, onClick }) {
   const s = { orange:{bg:'rgba(232,116,32,.1)',color:ACCENT,border:'1px solid rgba(232,116,32,.25)'}, red:{bg:'rgba(224,48,48,.08)',color:'#e03030',border:'1px solid rgba(224,48,48,.2)'}, green:{bg:'rgba(45,138,48,.08)',color:'#2D8A30',border:'1px solid rgba(45,138,48,.2)'}, blue:{bg:'rgba(26,120,255,.08)',color:'#1A78FF',border:'1px solid rgba(26,120,255,.2)'} }[type]||{}
-  return <button onClick={onClick} style={{ padding:'3px 8px', borderRadius:5, border:s.border, cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:s.bg, color:s.color, fontFamily:'DM Sans,sans-serif', whiteSpace:'nowrap' }}>{children}</button>
+  return <button onClick={onClick} style={{ padding:'3px 8px', borderRadius:5, border:s.border, cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:s.bg, color:s.color, fontFamily:'DM Sans,sans-serif', whiteSpace:'nowrap', maxWidth:'100%' }}>{children}</button>
 }
 
 function PageHdr({ title, subtitle, badge }) {

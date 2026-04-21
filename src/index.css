@@ -79,8 +79,11 @@ input, textarea, select, button { max-width: 100%; }
 /* Mobile */
 @media (max-width: 640px) {
   /* Safety net universal en movil: nada debe crear scroll horizontal */
-  * { max-width: 100%; }
+  * { max-width: 100%; min-width: 0; }
   table { max-width: none; }  /* dejar que la tabla sea ancha; el wrapper scrollea */
+
+  /* Texto largo: cortar con ellipsis por defecto en elementos con clase badge-like */
+  button, a, span, div { word-break: normal; overflow-wrap: anywhere; }
 
   /* Grids — 2 cols en móvil */
   .grid-4 { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
@@ -186,6 +189,60 @@ input, textarea, select, button { max-width: 100%; }
     border-bottom: 1px solid #E8D5C0 !important;
     padding-bottom: 10px !important;
   }
+}
+
+/* ══ KPIs, CARDS, HEADERS · legibilidad en movil ══ */
+@media (max-width: 640px) {
+  /* KPIs: los valores numericos largos no deben desbordar */
+  [class*="KPI"], .kpi, [class*="kpi"] {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Cards genericas */
+  [class*="Card"], .card {
+    padding: 12px !important;
+  }
+
+  /* Botones: permitir wrap si hace falta */
+  button {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Barras de busqueda / inputs */
+  input[type="text"], input[type="email"], input[type="number"], input[type="password"],
+  input[type="date"], input[type="datetime-local"], textarea, select {
+    min-width: 0 !important;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Headers de pagina (PageHdr): badge + titulo no colisionan */
+  h1, h2, h3 { word-break: break-word; }
+}
+
+/* ══ TOPBAR · flex-wrap en movil ══ */
+@media (max-width: 640px) {
+  .fab-topbar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    row-gap: 6px !important;
+  }
+  .fab-topbar > * { max-width: 100%; }
+}
+
+/* ══ Tablas · scroll horizontal interno garantizado ══ */
+@media (max-width: 640px) {
+  /* Los wrappers .scrollable de tablas necesitan permitir scroll horizontal si la tabla lo pide */
+  /* (El global .scrollable tiene overflow-x:hidden; las tablas con minWidth inline usan div propio con overflowX:auto) */
+  table { font-size: .72rem !important; }
+  table th, table td { padding: 6px 7px !important; word-break: break-word !important; white-space: normal !important; }
+}
+
+/* ══ HOMESCREEN · refuerzo canales en viewport intermedio ══ */
+@media (max-width: 640px) {
+  .home-canales { flex-wrap: wrap !important; row-gap: 4px !important; }
 }
 
 /* ══ LOGIN EXTRA NARROW ══ */
