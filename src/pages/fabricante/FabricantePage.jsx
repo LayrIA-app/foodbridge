@@ -1145,10 +1145,12 @@ function OsubirScreen({ act }) {
 }
 
 function OfichasScreen({ act }) {
+  const [filter, setFilter] = useState('todas')
+  const FILTERS = [['todas','Todas (1.247)'],['panificacion','Panificación (342)'],['ecologica','Ecológica (87)'],['semola','Sémolas (156)'],['mezclas','Mezclas (234)'],['otros','Otros (428)']]
   return (
     <div className="animate-fadeIn">
       <PageHdr title="Fichas Técnicas" subtitle="1.247 fichas generadas por IA — Reg. 1169/2011" />
-      <SearchBar placeholder="Buscar ficha técnica..." />
+      <SearchBar placeholder="Buscar producto, categoría, alérgeno..." />
       <div className="grid-4 mb14">
         <KPI val="1.247" label="Fichas publicadas" delta="▲ 99.2% precisión" up color={ACCENT}/>
         <KPI val="47" label="Por revisar" delta="→ IA las marcó" color="#e8a010"/>
@@ -1156,11 +1158,18 @@ function OfichasScreen({ act }) {
         <KPI val="0" label="Errores normativos" delta="▲ Cumplimiento total" up color="#1A78FF"/>
       </div>
       <Card style={{ marginBottom:13 }}>
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          {FILTERS.map(([id,label])=>(
+            <span key={id} onClick={()=>setFilter(id)} style={{ padding:'4px 12px', borderRadius:20, fontSize:'.6rem', fontWeight:600, cursor:'pointer', background:filter===id?ACCENT:'rgba(232,116,32,.08)', color:filter===id?'#fff':ACCENT, border:`1px solid ${filter===id?ACCENT:'rgba(232,116,32,.2)'}`, transition:'all .15s' }}>{label}</span>
+          ))}
+        </div>
+      </Card>
+      <Card style={{ marginBottom:13 }}>
         <CardTitle>Fichas por categoría</CardTitle>
         <ScrollTable>
           <Thead cols={['Categoría','Total','Publicadas','Por revisar','Acción']}/>
           <tbody>
-            {[['Harinas panificación','342','ok:342','0'],['Harinas repostería','198','ok:198','0'],['Harinas ecológicas','87','ok:87','0'],['Sémolas','156','amber:151','5'],['Mezclas y mejorantes','234','amber:228','6'],['Otros','230','amber:224','6']].map(([cat,tot,pub,rev],i)=>{const[pt,pv]=pub.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cat}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{tot}</td><td style={{ padding:'8px 10px' }}><Badge type={pt} text={pv}/></td><td style={{ padding:'8px 10px', color:rev==='0'?'#2D8A30':'#e8a010', fontWeight:700 }}>{rev}</td><td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>act('goto','ofichas')}>Ver fichas</TblBtn></td></tr>)})}
+            {[['Harinas panificación','342','ok:342','0'],['Harinas repostería','198','ok:198','0'],['Harinas ecológicas','87','ok:87','0'],['Sémolas','156','amber:151','5'],['Mezclas y mejorantes','234','amber:228','6'],['Otros','230','amber:224','6']].map(([cat,tot,pub,rev],i)=>{const[pt,pv]=pub.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('ver',`Categoría ${cat} · ${tot} fichas`)}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cat}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{tot}</td><td style={{ padding:'8px 10px' }}><Badge type={pt} text={pv}/></td><td style={{ padding:'8px 10px', color:rev==='0'?'#2D8A30':'#e8a010', fontWeight:700 }}>{rev}</td><td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={e=>{e.stopPropagation();act('ver',`Fichas ${cat}`)}}>Ver fichas</TblBtn></td></tr>)})}
           </tbody>
         </ScrollTable>
       </Card>
@@ -1196,7 +1205,7 @@ function OcertsScreen({ act }) {
         <ScrollTable>
           <Thead cols={['Certificación','Entidad','Vigencia','Días','Estado','Acción']}/>
           <tbody>
-            {[['IFS Food v8','TÜV SÜD','15/06/2026','60','red:Urgente','red:Renovar'],['BRC Global','SGS','22/11/2026','220','ok:OK','green:Ver'],['ISO 22000','Bureau Veritas','03/09/2027','506','ok:OK','green:Ver'],['RGSEAA','AESAN','Permanente','—','ok:Activo','green:Ver']].map(([cert,ent,vig,dias,est,acc],i)=>{const[et,ev]=est.split(':');const[at,av]=acc.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cert}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{ent}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{vig}</td><td style={{ padding:'8px 10px', fontWeight:700, color:et==='red'?'#e03030':'#2D8A30' }}>{dias}</td><td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={at} onClick={()=>at==='red'?act('goto','ocerts'):act('validar',cert)}>{av}</TblBtn></td></tr>)})}
+            {[['IFS Food v8','TÜV SÜD','15/06/2026','60','red:Urgente','red:Renovar'],['BRC Global','SGS','22/11/2026','220','ok:OK','green:Ver'],['ISO 22000','Bureau Veritas','03/09/2027','506','ok:OK','green:Ver'],['RGSEAA','AESAN','Permanente','—','ok:Activo','green:Ver']].map(([cert,ent,vig,dias,est,acc],i)=>{const[et,ev]=est.split(':');const[at,av]=acc.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cert}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{ent}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{vig}</td><td style={{ padding:'8px 10px', fontWeight:700, color:et==='red'?'#e03030':'#2D8A30' }}>{dias}</td><td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={at} onClick={()=>act(at==='red'?'validar':'ver',cert)}>{av}</TblBtn></td></tr>)})}
           </tbody>
         </ScrollTable>
       </Card>
@@ -1209,17 +1218,27 @@ function OlotesScreen({ act }) {
     <div className="animate-fadeIn">
       <PageHdr title="Control de Lotes" subtitle="Trazabilidad completa Reg. 178/2002 de cada lote producido" />
       <SearchBar placeholder="Buscar lote o producto..." />
+      <div className="grid-4 mb14">
+        <KPI val="312" label="Lotes Q1+Q2" delta="▲ Todos trazados" up color={ACCENT}/>
+        <KPI val="311" label="Liberados" delta="▲ Análisis OK" up color="#2D8A30"/>
+        <KPI val="1" label="Retenidos" delta="▼ Micro pendiente" color="#e03030"/>
+        <KPI val="4.2s" label="Localización IA" delta="▲ vs 48h manual" up color="#1A78FF"/>
+      </div>
       <Card>
         <CardTitle>Últimos lotes registrados</CardTitle>
         <ScrollTable>
-          <Thead cols={['Lote','Producto','Fecha','Cantidad','Análisis','Estado']}/>
+          <Thead cols={['Lote','Producto','Fecha','Cantidad','Análisis','Estado','Acción']}/>
           <tbody>
-            {[['L-2026-0416','Harina W-280','16/04/2026','25.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0415','Harina Eco T-110','15/04/2026','8.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0414','Sémola Duro','14/04/2026','15.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0412','Harina W-280','12/04/2026','20.000 kg','red:Pendiente micro','red:Retenido']].map(([lote,prod,fecha,cant,an,st],i)=>{const[at,av]=an.split(':');const[st2,sv]=st.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('ver',`Lote ${lote}`)}><td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{lote}</td><td style={{ padding:'8px 10px', color:NAVY }}>{prod}</td><td style={{ padding:'8px 10px', color:'#7a8899' }}>{fecha}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{cant}</td><td style={{ padding:'8px 10px' }}><Badge type={at} text={av}/></td><td style={{ padding:'8px 10px' }}><Badge type={st2} text={sv}/></td></tr>)})}
+            {[['L-2026-0416','Harina W-280','16/04/2026','25.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0415','Harina Eco T-110','15/04/2026','8.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0414','Sémola Duro','14/04/2026','15.000 kg','ok:Aprobado','ok:Liberado'],['L-2026-0412','Harina W-280','12/04/2026','20.000 kg','red:Pendiente micro','red:Retenido']].map(([lote,prod,fecha,cant,an,st],i)=>{const[at,av]=an.split(':');const[st2,sv]=st.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('ver',`Lote ${lote}`)}><td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{lote}</td><td style={{ padding:'8px 10px', color:NAVY }}>{prod}</td><td style={{ padding:'8px 10px', color:'#7a8899' }}>{fecha}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{cant}</td><td style={{ padding:'8px 10px' }}><Badge type={at} text={av}/></td><td style={{ padding:'8px 10px' }}><Badge type={st2} text={sv}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={st2==='red'?'red':'green'} onClick={e=>{e.stopPropagation();act(st2==='red'?'alerta':'ver',`Lote ${lote}`)}}>{st2==='red'?'Urgente':'Trazar'}</TblBtn></td></tr>)})}
           </tbody>
         </ScrollTable>
-        <div style={{ background:'#FDECEA', border:'1px solid #F1A9A0', borderRadius:8, padding:'9px 12px', marginTop:10 }}>
+        <div style={{ background:'#FDECEA', border:'1px solid #F1A9A0', borderRadius:8, padding:'9px 12px', marginTop:10, cursor:'pointer' }} onClick={()=>act('alerta','Lote L-2026-0412 retenido')}>
           <div style={{ fontSize:'.72rem', fontWeight:700, color:'#e03030', marginBottom:2 }}>🚨 Lote L-2026-0412 retenido</div>
           <div style={{ fontSize:'.65rem', color:'#3a4a5a' }}>Análisis Salmonella ausencia/25g pendiente. Resultado esperado: 17/04. No liberar hasta confirmación laboratorio.</div>
+        </div>
+        <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
+          <BtnSm onClick={()=>act('exportar','Registro lotes abril 2026')}>Exportar registro</BtnSm>
+          <BtnSm outline onClick={()=>act('goto','otrazabilidad')}>Ver trazabilidad completa</BtnSm>
         </div>
       </Card>
     </div>
@@ -1251,7 +1270,7 @@ function OalergenosScreen({ act }) {
       <Card>
         <CardTitle>14 alérgenos de declaración obligatoria <IaBadge /></CardTitle>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))', gap:8, marginTop:8 }}>
-          {ALERG.map((a,i)=>{const c=colors[a.tipo];return(<div key={i} style={{ padding:10, borderRadius:8, background:c.bg, border:`1px solid ${c.border}`, textAlign:'center' }}><div style={{ fontSize:'1.1rem', marginBottom:4 }}>{a.e}</div><div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY }}>{a.n}</div><div style={{ fontSize:'.55rem', color:c.c, fontWeight:600, marginTop:2 }}>{a.desc}</div></div>)})}
+          {ALERG.map((a,i)=>{const c=colors[a.tipo];return(<div key={i} onClick={()=>act('ver',`Alérgeno: ${a.n} · ${a.desc}`)} style={{ padding:10, borderRadius:8, background:c.bg, border:`1px solid ${c.border}`, textAlign:'center', cursor:'pointer', transition:'transform .15s' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e=>e.currentTarget.style.transform=''}><div style={{ fontSize:'1.1rem', marginBottom:4 }}>{a.e}</div><div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY }}>{a.n}</div><div style={{ fontSize:'.55rem', color:c.c, fontWeight:600, marginTop:2 }}>{a.desc}</div></div>)})}
         </div>
         <IABox text="<strong>FoodBridge IA verifica automáticamente</strong> los 14 alérgenos de declaración obligatoria (Reg. 1169/2011) en cada ficha técnica. Precisión de detección: <strong>99.2%</strong>. Incluye trazas y contaminación cruzada." />
       </Card>
@@ -1314,6 +1333,19 @@ function OproduccionScreen({ act }) {
         </ScrollTable>
         <IABox text="<strong>IA optimiza producción:</strong> La demanda de Harina Ecológica T-110 ha subido +48%. Recomendación: reasignar Línea 4 (cuando termine mantenimiento) a producción ecológica para cubrir pedidos Q2." />
       </Card>
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Plan de producción semana 16 <IaBadge /></CardTitle>
+        <ScrollTable>
+          <Thead cols={['Día','Línea 1','Línea 2','Línea 3','Total kg']}/>
+          <tbody>
+            {[['Lun 14','W-280','Eco T-110','Sémola','48.000','#E87420'],['Mar 15','W-280','Eco T-110','Sémola','48.000','#E87420'],['Mié 16','W-280','Eco T-110','Sémola','68.000','#2D8A30'],['Jue 17','W-280','Eco T-110','Mej. (D)','58.000','#1A78FF'],['Vie 18','W-380','Eco T-110','Eco T-110','72.000','#9B59B6']].map(([dia,l1,l2,l3,tot,col],i)=>(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', background:i===2?'#FFFBF5':'transparent', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=i===2?'#FFFBF5':''} onClick={()=>act('ver',`Producción ${dia}`)}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{dia}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{l1}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{l2}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{l3}</td><td style={{ padding:'8px 10px', fontWeight:700, color:col }}>{tot}</td></tr>))}
+          </tbody>
+        </ScrollTable>
+        <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
+          <BtnSm onClick={()=>act('exportar','Plan producción semana 16')}>Exportar plan</BtnSm>
+          <BtnSm outline onClick={()=>act('aplicar','Optimización plan IA')}>Aplicar optimización IA</BtnSm>
+        </div>
+      </Card>
     </div>
   )
 }
@@ -1348,8 +1380,18 @@ function OtrazabilidadScreen({ act }) {
         <IABox text="<strong>Trazabilidad verificada:</strong> Cadena completa desde materia prima hasta cliente final. Cumple Reg. 178/2002. Sin alertas de seguridad alimentaria." />
         <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
           <BtnSm onClick={()=>act('exportar','Informe trazabilidad L-2026-0416')}>Exportar PDF</BtnSm>
-          <BtnSm outline onClick={()=>act('goto','otrazabilidad')}>Ver trazabilidad completa</BtnSm>
+          <BtnSm outline onClick={()=>act('comunicar','Trazabilidad cliente')}>Enviar al cliente</BtnSm>
         </div>
+      </Card>
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Mapa de distribución L-2026-0416 <IaBadge /></CardTitle>
+        <ScrollTable>
+          <Thead cols={['Cliente','Cantidad','Pedido','Estado entrega','Trazabilidad']}/>
+          <tbody>
+            {[['Panaderías Leopold','3.000 kg','PED-2026-416','amber:En tránsito','ok:Completa'],['Grupo Bolún','8.000 kg','PED-2026-413','ok:Entregado','ok:Completa'],['Agrudispa SL','5.000 kg','PED-2026-411','ok:Entregado','ok:Completa'],['Pastelería Norte','2.000 kg','PED-2026-409','ok:Entregado','ok:Completa'],['Resto almacén','7.000 kg','—','blue:Stock','ok:Trazado']].map(([cli,cant,ped,est,tr],i)=>{const[et,ev]=est.split(':');const[tt,tv]=tr.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('ver',`Pedido ${ped}`)}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cli}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{cant}</td><td style={{ padding:'8px 10px', color:ACCENT, fontWeight:700 }}>{ped}</td><td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td><td style={{ padding:'8px 10px' }}><Badge type={tt} text={tv}/></td></tr>)})}
+          </tbody>
+        </ScrollTable>
+        <IABox text="<strong>En caso de alerta alimentaria:</strong> FoodBridge IA localiza en <strong>4.2 segundos</strong> todos los clientes afectados por un lote y notifica automáticamente. Cumplimiento Reg. 178/2002 garantizado." />
       </Card>
     </div>
   )
