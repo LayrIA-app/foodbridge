@@ -75,7 +75,7 @@ export default function HomeScreen() {
       </div>
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <div className="home-content" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '100%', padding: '0 12px', boxSizing: 'border-box' }}>
 
         {/* Logo */}
         <div className="animate-fadeUp" style={{
@@ -105,7 +105,7 @@ export default function HomeScreen() {
         </div>
 
         {/* Tagline */}
-        <div className="animate-fadeUp" style={{ animationDelay: '.1s', fontSize: '.72rem', color: 'rgba(26,47,74,.4)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <div className="animate-fadeUp home-tagline" style={{ animationDelay: '.1s', fontSize: '.72rem', color: 'rgba(26,47,74,.4)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 10, textAlign: 'center', maxWidth: '100%', padding: '0 4px' }}>
           — Puente Inteligente · Sector Alimentario · IA 4ª Generación —
         </div>
 
@@ -128,7 +128,7 @@ export default function HomeScreen() {
         </div>
 
         {/* Canales */}
-        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(26,47,74,.15)', borderRadius: 30, padding: '7px 14px', marginBottom: 8 }}>
+        <div className="home-canales" style={{ display: 'flex', alignItems: 'center', background: 'rgba(26,47,74,.15)', borderRadius: 30, padding: '7px 14px', marginBottom: 8, maxWidth: '100%' }}>
           {[
             { bg: '#FF6B2B', label: 'VOZ IA', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8a16 16 0 0 0 5.91 5.91l.27-.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg> },
             { bg: '#25D366', label: 'WHATSAPP', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
@@ -241,9 +241,10 @@ export default function HomeScreen() {
       </div>
 
       {/* Footer */}
-      <div style={{
+      <div className="home-footer" style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '10px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 8,
         background: 'rgba(232,116,32,.03)', borderTop: '1px solid rgba(232,116,32,.08)'
       }}>
         <span style={{ fontSize: '.44rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 600, color: 'rgba(26,47,74,.25)' }}>COAXIONIA · FoodBridge IA</span>

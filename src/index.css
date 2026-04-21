@@ -128,7 +128,7 @@ body {
     overflow-x: hidden !important;
     justify-content: flex-start !important;
     padding-top: 20px !important;
-    padding-bottom: 20px !important;
+    padding-bottom: 60px !important;  /* evita que footer tape contenido */
   }
   .home-cards {
     flex-direction: column !important;
@@ -140,4 +140,36 @@ body {
   .home-cards > div {
     width: min(340px, 88vw) !important;
   }
+
+  /* Tagline: reducir letter-spacing y permitir wrap */
+  .home-tagline {
+    letter-spacing: .08em !important;
+    font-size: .6rem !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+    max-width: 92vw !important;
+  }
+
+  /* Barra de canales: padding reducido, divisores invisibles entre items */
+  .home-canales { padding: 6px 10px !important; max-width: 92vw !important; flex-wrap: wrap !important; justify-content: center !important; }
+  .home-canales > div { padding: 0 8px !important; gap: 5px !important; }
+}
+
+/* ══ HOME EXTRA NARROW (iframe estrecho, iPhone SE/mini, 360-375px) ══ */
+@media (max-width: 400px) {
+  /* Content padding mas ajustado */
+  .home-content { padding: 0 8px !important; }
+
+  /* Tagline aun mas compacta — eliminar guiones laterales si hace falta */
+  .home-tagline { letter-spacing: .04em !important; font-size: .56rem !important; padding: 0 !important; }
+
+  /* Barra canales: ocultar labels textuales, dejar solo iconos para que quepa */
+  .home-canales { padding: 5px 8px !important; }
+  .home-canales > div { padding: 0 6px !important; gap: 0 !important; }
+  .home-canales > div > span { display: none !important; }
+
+  /* Footer: ocultar segundo span (menos prioritario) y dejar solo marca + dot */
+  .home-footer { padding: 8px 12px !important; }
+  .home-footer > span:last-child { display: none !important; }
+  .home-footer > span:first-child { font-size: .5rem !important; }
 }
