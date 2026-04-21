@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { usePedidos, useCotizaciones } from '../../hooks'
+import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -406,6 +407,21 @@ function CpedidosScreen({ act }) {
         ))}
       </div>
 
+      {!loading && pedidos.length > 0 && (
+        <IaBoxLive
+          context="cliente_pedidos"
+          data={{
+            total: pedidos.length,
+            en_transito: grupos.inTransit.length,
+            retrasados: grupos.delayed.length,
+            confirmados: grupos.confirmed.length + grupos.placed.length,
+            entregados: grupos.delivered.length,
+            ultimos: pedidos.slice(0,5).map(p=>({ ref:p.ref, status:p.status, eta:p.expected_date })),
+          }}
+          style={{ marginBottom:14 }}
+        />
+      )}
+
       {loading && (
         <Card>
           <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando pedidos…</div>
@@ -572,6 +588,19 @@ function CcotizaScreen({ act }) {
         </div>
       </div>
 
+      {cotizaciones.length > 0 && (
+        <IaBoxLive
+          context="cliente_cotizaciones"
+          data={{
+            pendientes: kpis.pendientes,
+            aceptadas: kpis.aceptadas,
+            ratio_aceptacion: kpis.ratio,
+            borradores: kpis.borrador,
+            ultimas: cotizaciones.slice(0,8).map(c=>({ ref:c.ref, status:c.status, producto:c.product_name, total:Number(c.total_price), margen:c.margin_pct })),
+          }}
+          style={{ marginBottom:14 }}
+        />
+      )}
       <Card>
         <CardTitle>Cotizaciones recibidas <IaBadge /></CardTitle>
 

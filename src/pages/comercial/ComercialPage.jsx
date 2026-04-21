@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas } from '../../hooks'
+import IaBoxLive from '../../components/IaBoxLive'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
@@ -1232,6 +1233,17 @@ function CotizacionesScreen({ act }) {
         <KPI val={String(cotizaciones.filter(c=>c.status==='sent').length)} label="Pendientes respuesta" delta="estado 'enviada'" color="#e8a010"/>
       </div>
 
+      <IaBoxLive
+        context="comercial_cotizaciones"
+        data={{
+          total: cotizaciones.length,
+          conversion: kpis.conv,
+          volumen: kpis.volumen,
+          margen_medio: kpis.margen,
+          status_counts: cotizaciones.reduce((a,c)=>{ a[c.status]=(a[c.status]||0)+1; return a }, {}),
+        }}
+        style={{ marginBottom:14 }}
+      />
       <Card>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8, marginBottom:10 }}>
           <CardTitle style={{ margin:0 }}>Cotizaciones recientes <IaBadge /></CardTitle>
@@ -1363,6 +1375,16 @@ function PedidosScreen({ act }) {
         <KPI val={String(kpis.retrasados)} label="Retrasado" delta={kpis.retrasados > 0 ? '▼ Atención' : 'todo OK'} color={kpis.retrasados > 0 ? '#e03030' : '#2D8A30'}/>
         <KPI val="48h" label="Tiempo medio entrega" delta="estimado" up color="#1A78FF"/>
       </div>
+      <IaBoxLive
+        context="comercial_pedidos"
+        data={{
+          activos: kpis.activos,
+          en_transito: kpis.enTransito,
+          retrasados: kpis.retrasados,
+          ultimos: pedidos.slice(0,8).map(p => ({ ref:p.ref, status:p.status, total:Number(p.total_amount), eta:p.expected_date })),
+        }}
+        style={{ marginBottom:14 }}
+      />
       <Card>
         <CardTitle>Pedidos activos <IaBadge /></CardTitle>
 

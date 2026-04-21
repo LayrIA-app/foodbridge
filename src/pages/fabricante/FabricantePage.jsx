@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
 import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente } from '../../hooks'
+import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -220,6 +221,21 @@ function DashboardCEO({ act }) {
         <KPI val={formatEur(kpis.ticket_medio)} label="Ticket medio" delta="por pedido entregado" up color="#e8a010"/>
       </div>
 
+      <IaBoxLive
+        context="fabricante_dashboard"
+        data={{
+          productos_total: products.length,
+          productos_activos: products.filter(p => p.active).length,
+          pedidos_activos: kpis.pedidos_activos,
+          pedidos_delivered: kpis.pedidos_delivered,
+          pedidos_retrasados: kpis.pedidos_retrasados,
+          facturacion_delivered: Number(kpis.facturacion_delivered),
+          clientes_unicos: kpis.clientes_unicos,
+          ticket_medio: Number(kpis.ticket_medio),
+        }}
+        style={{ marginBottom:14 }}
+      />
+
       <div className="grid-2 mb14">
         <Card>
           <CardTitle>Ventas por canal <IaBadge /></CardTitle>
@@ -285,6 +301,20 @@ function VentasCanal({ act }) {
         <KPI val={String(kpis.pedidos_delivered)} label="Pedidos completados" delta={`${kpis.pedidos_activos} activos`} up color="#1A78FF"/>
         <KPI val={formatEur(kpis.ticket_medio)} label="Ticket medio" delta="por pedido" up color={ACCENT}/>
       </div>
+      <IaBoxLive
+        context="fabricante_ventas_cliente"
+        data={{
+          clientes: filas.slice(0, 10).map(f => ({
+            cliente_id_prefix: f.cliente_id?.slice(0, 8) || 'anon',
+            pedidos: Number(f.num_pedidos),
+            entregados: Number(f.pedidos_delivered),
+            facturacion: Number(f.facturacion),
+          })),
+          total_clientes: filas.length,
+          total_facturacion: Number(kpis.facturacion_delivered),
+        }}
+        style={{ marginBottom:14 }}
+      />
       <Card>
         <CardTitle>Facturación por cliente <IaBadge /></CardTitle>
         {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando…</div>}
@@ -346,6 +376,23 @@ function Rentabilidad({ act }) {
         <KPI val={productoTop?.product_name || '—'} label="Producto top" delta={productoTop ? formatEur(productoTop.facturacion_total) : 'Sin datos'} color="#1A78FF"/>
         <KPI val={String(kpis.pedidos_retrasados)} label="Pedidos retrasados" delta={kpis.pedidos_retrasados>0?'▼ Atención':'todo al día'} color={kpis.pedidos_retrasados>0?'#e03030':'#2D8A30'}/>
       </div>
+      <IaBoxLive
+        context="fabricante_rentabilidad"
+        data={{
+          productos: filas.slice(0, 10).map(f => ({
+            sku: f.sku,
+            nombre: f.product_name,
+            precio_unit: Number(f.price_current),
+            unit: f.unit,
+            cantidad_vendida: Number(f.cantidad_total),
+            facturacion: Number(f.facturacion_total),
+            pedidos: Number(f.num_pedidos),
+            clientes_unicos: Number(f.clientes_unicos),
+          })),
+          total_productos: filas.length,
+        }}
+        style={{ marginBottom:14 }}
+      />
       <Card>
         <CardTitle>Facturación por producto <IaBadge /></CardTitle>
         {loading && <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando…</div>}
