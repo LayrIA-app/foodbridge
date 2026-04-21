@@ -24,17 +24,17 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; overflow-x: hidden; max-width: 100vw; }
+html { font-size: 16px; overflow-x: hidden; max-width: 100vw; height: 100%; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--cream);
   color: var(--navy);
   -webkit-font-smoothing: antialiased;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   max-width: 100vw;
 }
-#root { max-width: 100vw; overflow-x: hidden; }
+#root { max-width: 100vw; overflow-x: hidden; height: 100%; }
 img, svg, video, canvas { max-width: 100%; }
 input, textarea, select, button { max-width: 100%; }
 
@@ -88,10 +88,12 @@ input, textarea, select, button { max-width: 100%; }
   .grid-3 { grid-template-columns: repeat(2,1fr); }
 }
 
-/* ≤ 768px · MOVIL: ocultar textos no esenciales del topbar + columna
-   decorativa del login. Siempre visibles en topbar: hamburguesa, logo,
-   campana, boton salir. Login en movil solo muestra el formulario. */
+/* ≤ 768px · MOVIL: tipografia legible sin zoom (+15.6%) + ocultar
+   textos no esenciales del topbar + columna decorativa del login.
+   Regla obligatoria COAXIONIA: escalando html{font-size} todos los rem
+   inline crecen proporcionalmente sin tocar cada style. */
 @media (max-width: 768px) {
+  html                   { font-size: 18.5px; }
   .login-left            { display: none !important; }
   .fab-topbar-tagline    { display: none !important; }
   .fab-topbar-rolebadge  { display: none !important; }
@@ -109,7 +111,7 @@ input, textarea, select, button { max-width: 100%; }
    - Grids a 2 cols (menos grid-2 que va a 1)
    - Tablas con texto partido y sin scroll horizontal */
 @media (max-width: 640px) {
-  html { font-size: 17px; }  /* +6% para legibilidad; no fuerza wrap en topbar */
+  /* html font-size hereda el 18.5px del breakpoint 768px (+15.6%) */
 
   body { overflow: hidden; }
 
@@ -153,12 +155,12 @@ input, textarea, select, button { max-width: 100%; }
 }
 
 
-/* ≤ 480px · MOVIL PEQUENO (+10% fuentes, mas compacto)
-   - Fuentes +10% (16 → 17.6)
+/* ≤ 480px · MOVIL PEQUENO (+20% fuentes, mas compacto)
+   - Fuentes +20% (16 → 19.2)
    - Modales con max-width 94vw
    - Badge de rol del topbar oculto (deja hamburger + logo a la izq, campana + avatar + salir a la der) */
 @media (max-width: 480px) {
-  html { font-size: 17.6px; }
+  html { font-size: 19.2px; }
 
   .fab-topbar-rolebadge { display: none !important; }
 

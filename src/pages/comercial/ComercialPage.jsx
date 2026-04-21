@@ -2086,7 +2086,7 @@ const SCREENS = {
 
 /* ══ MAIN ══ */
 export default function ComercialPage() {
-  const { goHome, profile } = useApp()
+  const { signOut, profile } = useApp()
   const [active, setActive] = useState('dash')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modal, setModal] = useState(null)
@@ -2170,10 +2170,10 @@ export default function ComercialPage() {
         </div>
       ))}
       <div style={{ marginTop:'auto', borderTop:'1px solid #F0E4D6', paddingTop:10 }}>
-        <button onClick={goHome} style={{ width:'100%', textAlign:'left', padding:'8px 10px', background:'transparent', border:'1px solid transparent', borderRadius:7, fontSize:'.7rem', color:'#7a8899', cursor:'pointer', display:'flex', alignItems:'center', gap:8, fontFamily:'DM Sans,sans-serif' }}
+        <button onClick={signOut} style={{ width:'100%', textAlign:'left', padding:'8px 10px', background:'transparent', border:'1px solid transparent', borderRadius:7, fontSize:'.7rem', color:'#7a8899', cursor:'pointer', display:'flex', alignItems:'center', gap:8, fontFamily:'DM Sans,sans-serif' }}
           onMouseEnter={e=>{e.currentTarget.style.background='#FEF0F0';e.currentTarget.style.color='#e03030'}}
           onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#7a8899'}}>
-          ↩ Cambiar perfil
+          ↩ Cerrar sesión
         </button>
       </div>
     </>
@@ -2225,7 +2225,7 @@ export default function ComercialPage() {
               <div style={{ width:26, height:26, borderRadius:'50%', background:'linear-gradient(135deg,#2D8A30,#4CAF50)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.6rem', fontWeight:700, color:'#fff', flexShrink:0 }}>JL</div>
               <span className="fab-topbar-user-name" style={{ whiteSpace:'nowrap' }}>José Luis Martínez</span>
             </div>
-            <button onClick={goHome} style={{ padding:'4px 10px', border:'1px solid #E8D5C0', borderRadius:20, background:'transparent', color:'#7a8899', fontSize:'.65rem', cursor:'pointer', fontFamily:'DM Sans,sans-serif', whiteSpace:'nowrap' }}
+            <button onClick={signOut} style={{ padding:'4px 10px', border:'1px solid #E8D5C0', borderRadius:20, background:'transparent', color:'#7a8899', fontSize:'.65rem', cursor:'pointer', fontFamily:'DM Sans,sans-serif', whiteSpace:'nowrap' }}
               onMouseEnter={e=>{e.currentTarget.style.borderColor=ACCENT;e.currentTarget.style.color=ACCENT}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor='#E8D5C0';e.currentTarget.style.color='#7a8899'}}>
               ↩ Salir
