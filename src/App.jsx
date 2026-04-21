@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { Component, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import HomeScreen from './pages/HomeScreen'
 import LoginScreen from './pages/LoginScreen'
@@ -55,12 +55,17 @@ class ErrorBoundary extends Component {
 }
 
 function Splash({ message }) {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 8000)
+    return () => clearTimeout(t)
+  }, [])
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 500,
       background: SCREEN_BG, color: '#1A2F4A',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      gap: 12, fontFamily: 'DM Sans'
+      gap: 12, fontFamily: 'DM Sans', padding: 16
     }}>
       <div style={{
         width: 36, height: 36, borderRadius: '50%',
@@ -69,6 +74,31 @@ function Splash({ message }) {
         animation: 'spin 1s linear infinite'
       }}/>
       <div style={{ fontSize: '.78rem', color: '#7A8899', letterSpacing: '.08em' }}>{message}</div>
+      {slow && (
+        <div style={{ marginTop: 14, textAlign: 'center', maxWidth: 320 }}>
+          <div style={{ fontSize: '.7rem', color: '#7A8899', lineHeight: 1.5, marginBottom: 10 }}>
+            Está tardando más de lo normal. Si persiste, prueba a recargar o limpiar sesión guardada.
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => location.reload()} style={{
+              padding: '8px 16px', background: '#E87420', color: '#fff', border: 'none',
+              borderRadius: 8, cursor: 'pointer', fontFamily: 'Barlow Condensed', fontWeight: 700,
+              fontSize: '.78rem', letterSpacing: '.08em', textTransform: 'uppercase'
+            }}>Recargar</button>
+            <button onClick={() => {
+              try {
+                Object.keys(localStorage).forEach(k => { if (k.startsWith('sb-')) localStorage.removeItem(k) })
+              } catch { /* noop */ }
+              location.reload()
+            }} style={{
+              padding: '8px 16px', background: 'transparent', color: '#1A2F4A',
+              border: '1.5px solid rgba(26,47,74,.3)', borderRadius: 8, cursor: 'pointer',
+              fontFamily: 'Barlow Condensed', fontWeight: 700, fontSize: '.78rem',
+              letterSpacing: '.08em', textTransform: 'uppercase'
+            }}>Limpiar sesión</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
