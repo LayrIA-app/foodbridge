@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos } from '../../hooks'
+import { usePedidos, useCotizaciones } from '../../hooks'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -512,59 +512,124 @@ function CpedidosScreen({ act }) {
 }
 
 function CcotizaScreen({ act }) {
+  const { profile } = useApp()
+  const { cotizaciones, loading, acceptCotizacion, rejectCotizacion } = useCotizaciones({ profile })
+  const [busyId, setBusyId] = useState(null)
+
+  const kpis = useMemo(() => {
+    const pendientes = cotizaciones.filter(c => c.status === 'sent').length
+    const aceptadas = cotizaciones.filter(c => c.status === 'accepted').length
+    const total = cotizaciones.filter(c => ['sent','accepted','rejected'].includes(c.status)).length
+    const ratio = total > 0 ? Math.round((aceptadas / total) * 100) : null
+    const borrador = cotizaciones.filter(c => c.status === 'draft').length
+    return {
+      pendientes: String(pendientes),
+      aceptadas: String(aceptadas),
+      ratio: ratio !== null ? `${ratio}%` : '—',
+      borrador: String(borrador),
+    }
+  }, [cotizaciones])
+
+  const onAccept = async (id) => {
+    setBusyId(id)
+    const { error, data } = await acceptCotizacion(id)
+    setBusyId(null)
+    if (error) { act('toast', `Error al aceptar: ${error.message || error}`); return }
+    act('toast', `✓ Aceptada y pedido ${data?.pedidoRef || ''} creado`)
+  }
+
+  const onReject = async (id) => {
+    setBusyId(id)
+    const { error } = await rejectCotizacion(id)
+    setBusyId(null)
+    if (error) { act('toast', `Error: ${error.message || error}`); return }
+    act('toast', 'Cotización rechazada')
+  }
+
+  const empty = !loading && cotizaciones.length === 0
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Cotizaciones" subtitle="La IA compara proveedores, precios y certificaciones" />
-      <SearchBar placeholder="Buscar cotización o proveedor..." />
+      <PageHdr title="Mis Cotizaciones" subtitle="Recibidas de tus comerciales — acepta para generar pedido" />
+      <SearchBar placeholder="Buscar cotización o producto..." />
 
-      <Card style={{ marginBottom:13 }}>
-        <CardTitle>Comparativa IA — Margarina -18°C <IaBadge /></CardTitle>
-        <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', width:'100%', display:'block' }}>
-          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.6rem', minWidth:360 }}>
-            <thead>
-              <tr style={{ background:'#F8FAFC' }}>
-                {['Proveedor','Precio/kg','Cert.','Score'].map(h=><th key={h} style={{ padding:'8px', textAlign: h==='Proveedor'?'left':'center', borderBottom:'2px solid #E2E8F0', color:'#64748B', fontSize:'.58rem' }}>{h}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ background:'#FFF8F0', borderLeft:`3px solid ${ACCENT}` }}>
-                <td style={{ padding:8, fontWeight:700, color:NAVY }}>Grasas Industriales <span style={{ fontSize:'.45rem', background:ACCENT, color:'#fff', padding:'2px 5px', borderRadius:10 }}>TOP</span></td>
-                <td style={{ padding:8, textAlign:'center', fontWeight:700, color:'#2D8A30' }}>2,48€</td>
-                <td style={{ padding:8, textAlign:'center' }}>IFS 7.0</td>
-                <td style={{ padding:8, textAlign:'center', color:ACCENT, fontWeight:700 }}>94</td>
-              </tr>
-              <tr>
-                <td style={{ padding:8, fontWeight:600, color:NAVY }}>MargaPro Europe</td>
-                <td style={{ padding:8, textAlign:'center' }}>2,62€</td>
-                <td style={{ padding:8, textAlign:'center' }}>IFS 6.1</td>
-                <td style={{ padding:8, textAlign:'center', color:'#1A78FF', fontWeight:700 }}>87</td>
-              </tr>
-              <tr style={{ background:'#F8FAFC' }}>
-                <td style={{ padding:8, fontWeight:600, color:NAVY }}>Congelados Navarra</td>
-                <td style={{ padding:8, textAlign:'center' }}>2,71€</td>
-                <td style={{ padding:8, textAlign:'center' }}>ISO 22000</td>
-                <td style={{ padding:8, textAlign:'center', color:'#1A78FF', fontWeight:700 }}>82</td>
-              </tr>
-            </tbody>
-          </table>
+      <div className="grid-4 mb14">
+        <div style={{ padding:12, borderRadius:10, background:'#FFF3CD', border:'1px solid rgba(232,160,16,.25)', textAlign:'center' }}>
+          <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:'#e8a010' }}>{kpis.pendientes}</div>
+          <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:2 }}>Pendientes respuesta</div>
         </div>
-        <div style={{ display:'flex', gap:6, marginTop:10 }}>
-          <BtnSm onClick={()=>act('pedido_directo','Margarina PF42 — Grasas Industriales')}>Solicitar</BtnSm>
-          <BtnSm outline onClick={()=>act('exportar','Comparativa Margarina -18°C')}>PDF</BtnSm>
+        <div style={{ padding:12, borderRadius:10, background:'#F0FFF4', border:'1px solid #C6F6D5', textAlign:'center' }}>
+          <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:'#2D8A30' }}>{kpis.aceptadas}</div>
+          <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:2 }}>Aceptadas</div>
         </div>
-        <IABox text="<strong>IA recomienda Grasas Industriales:</strong> Mejor precio (2,48€/kg) + certificación IFS 7.0. Ahorro anual estimado vs. MargaPro: <strong>14.880€</strong>." />
-      </Card>
+        <div style={{ padding:12, borderRadius:10, background:'#EEF5FF', border:'1px solid #C4DEFF', textAlign:'center' }}>
+          <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:'#1A78FF' }}>{kpis.ratio}</div>
+          <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:2 }}>Aceptación</div>
+        </div>
+        <div style={{ padding:12, borderRadius:10, background:'#FFF8F0', border:'1px solid rgba(232,116,32,.15)', textAlign:'center' }}>
+          <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.4rem', fontWeight:900, color:ACCENT }}>{kpis.borrador}</div>
+          <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:2 }}>En borrador</div>
+        </div>
+      </div>
 
       <Card>
-        <CardTitle>Simulador de costes <IaBadge /></CardTitle>
-        <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-          {[{val:'-12%',label:'vs. manual',color:'#2D8A30',bg:'#F0FFF4',border:'#C6F6D5'},{val:'14.880€',label:'Ahorro anual',color:'#1A78FF',bg:'#EEF5FF',border:'#C4DEFF'},{val:'3,2d',label:'Resp. media',color:ACCENT,bg:'#FFF8F0',border:'rgba(232,116,32,.15)'}].map((k,i)=>(
-            <div key={i} style={{ flex:'1 1 80px', padding:10, borderRadius:8, background:k.bg, border:`1px solid ${k.border}`, textAlign:'center' }}>
-              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.1rem', fontWeight:900, color:k.color }}>{k.val}</div>
-              <div style={{ fontSize:'.55rem', color:'#7a8899', marginTop:2 }}>{k.label}</div>
+        <CardTitle>Cotizaciones recibidas <IaBadge /></CardTitle>
+
+        {loading && (
+          <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando cotizaciones…</div>
+        )}
+
+        {empty && (
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>
+              Sin cotizaciones recibidas
             </div>
-          ))}
-        </div>
+            <div style={{ fontSize:'.72rem', color:'#7a8899', lineHeight:1.5 }}>
+              Cuando un comercial te envíe una cotización, aparecerá aquí con los detalles del producto y precio.
+            </div>
+          </div>
+        )}
+
+        {!loading && !empty && (
+          <ScrollTable>
+            <Thead cols={['Ref.','Producto','Cantidad','Precio','Margen','Estado','Acción']}/>
+            <tbody>
+              {cotizaciones.map(c => {
+                const meta = {
+                  draft:    { type:'amber', label:'Borrador' },
+                  sent:     { type:'blue',  label:'Recibida' },
+                  accepted: { type:'ok',    label:'Aceptada' },
+                  rejected: { type:'red',   label:'Rechazada'},
+                  expired:  { type:'red',   label:'Expirada' },
+                }[c.status] || { type:'amber', label:c.status }
+                const total = c.total_price != null ? `${Number(c.total_price).toLocaleString('es-ES', { minimumFractionDigits:2, maximumFractionDigits:2 })}€` : '—'
+                const mrg = c.margin_pct != null ? `${Number(c.margin_pct).toFixed(1)}%` : '—'
+                const canDecide = c.status === 'sent'
+                const busy = busyId === c.id
+                return (
+                  <tr key={c.id} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{c.ref}</td>
+                    <td style={{ padding:'8px 10px', color:NAVY, fontWeight:600 }}>{c.product_name || '—'}</td>
+                    <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{Number(c.quantity).toLocaleString('es-ES')}{c.unit}</td>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{total}</td>
+                    <td style={{ padding:'8px 10px', color:'#2D8A30', fontWeight:700 }}>{mrg}</td>
+                    <td style={{ padding:'8px 10px' }}><Badge type={meta.type} text={meta.label}/></td>
+                    <td style={{ padding:'8px 10px' }}>
+                      {canDecide ? (
+                        <div style={{ display:'flex', gap:4 }}>
+                          <button disabled={busy} onClick={()=>onAccept(c.id)} style={{ padding:'4px 10px', background:busy?'#aaa':'#2D8A30', color:'#fff', border:'none', borderRadius:6, fontSize:'.6rem', fontWeight:700, cursor:busy?'not-allowed':'pointer' }}>Aceptar</button>
+                          <button disabled={busy} onClick={()=>onReject(c.id)} style={{ padding:'4px 10px', background:'transparent', color:'#e03030', border:'1px solid rgba(224,48,48,.4)', borderRadius:6, fontSize:'.6rem', fontWeight:700, cursor:busy?'not-allowed':'pointer' }}>Rechazar</button>
+                        </div>
+                      ) : (
+                        <TblBtn type="orange" onClick={()=>act('ver', c.ref)}>Ver</TblBtn>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </ScrollTable>
+        )}
       </Card>
     </div>
   )

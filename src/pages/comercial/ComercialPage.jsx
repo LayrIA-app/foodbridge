@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizacionClientesMap } from '../../hooks'
+import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts } from '../../hooks'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
 const ACCENT = '#E87420'
@@ -955,79 +955,208 @@ function TarifasScreen({ act }) {
 }
 
 /* ══ SCREEN 8: COTIZACIONES IA ══ */
+const COT_STATUS_META = {
+  draft:    { type:'amber', label:'Borrador' },
+  sent:     { type:'blue',  label:'Enviada'  },
+  accepted: { type:'ok',    label:'Aceptada' },
+  rejected: { type:'red',   label:'Rechazada'},
+  expired:  { type:'red',   label:'Expirada' },
+}
+
+function NuevaCotModal({ open, onClose, profile, products, onCreate }) {
+  const [clienteName, setClienteName] = useState('')
+  const [productId, setProductId] = useState('')
+  const [productName, setProductName] = useState('')
+  const [quantity, setQuantity] = useState(1000)
+  const [unitPrice, setUnitPrice] = useState(1.00)
+  const [marginPct, setMarginPct] = useState(18)
+  const [notes, setNotes] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [err, setErr] = useState(null)
+  if (!open) return null
+
+  const pickProduct = (id) => {
+    setProductId(id)
+    const p = products.find(x => x.id === id)
+    if (p) { setProductName(p.name); setUnitPrice(Number(p.price_current)) }
+  }
+
+  const submit = async () => {
+    setErr(null)
+    if (!clienteName.trim() || !productName.trim() || !quantity || !unitPrice) {
+      setErr('Rellena cliente, producto, cantidad y precio.')
+      return
+    }
+    setSubmitting(true)
+    const year = new Date().getFullYear()
+    const suffix = Math.floor(Math.random() * 90000 + 10000)
+    const ref = `COT-${year}-${suffix}`
+    const p = products.find(x => x.id === productId)
+    const { error } = await onCreate({
+      ref,
+      cliente_name: clienteName.trim(),
+      product_id: productId || null,
+      product_name: productName.trim(),
+      fabricante_id: p?.fabricante_id || null,
+      quantity: Number(quantity),
+      unit: p?.unit || 'kg',
+      unit_price: Number(unitPrice),
+      margin_pct: Number(marginPct),
+      notes: notes || null,
+      status: 'draft',
+    })
+    setSubmitting(false)
+    if (error) { setErr(error.message); return }
+    onClose()
+  }
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(26,47,74,.6)', backdropFilter:'blur(4px)', zIndex:9000 }}/>
+      <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:9001, padding:'0 16px' }}>
+        <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(26,47,74,.3)', animation:'modalIn .25s ease both' }}>
+          <div style={{ background:'linear-gradient(135deg,#1A2F4A,#2A4A6A)', borderRadius:'16px 16px 0 0', padding:'16px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:900, color:'#fff', letterSpacing:'.04em', textTransform:'uppercase' }}>Nueva cotización</div>
+            <button onClick={onClose} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,.12)', border:'none', color:'#fff', cursor:'pointer' }}>✕</button>
+          </div>
+          <div style={{ padding:'18px 22px' }}>
+            <Field label="Cliente (nombre comercial)"><input value={clienteName} onChange={e=>setClienteName(e.target.value)} placeholder="Panaderías Leopold" style={inputStyle()} /></Field>
+            {products.length > 0 ? (
+              <Field label="Producto del catálogo">
+                <select value={productId} onChange={e=>pickProduct(e.target.value)} style={inputStyle()}>
+                  <option value="">— Selecciona —</option>
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name} · {p.price_current}€/{p.unit}</option>)}
+                </select>
+              </Field>
+            ) : null}
+            <Field label="Nombre del producto"><input value={productName} onChange={e=>setProductName(e.target.value)} placeholder="Harina W-280" style={inputStyle()} /></Field>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+              <Field label="Cantidad"><input type="number" min="1" value={quantity} onChange={e=>setQuantity(e.target.value)} style={inputStyle()} /></Field>
+              <Field label="Precio unit. (€)"><input type="number" step="0.01" value={unitPrice} onChange={e=>setUnitPrice(e.target.value)} style={inputStyle()} /></Field>
+              <Field label="Margen %"><input type="number" step="0.1" value={marginPct} onChange={e=>setMarginPct(e.target.value)} style={inputStyle()} /></Field>
+            </div>
+            <Field label="Notas (opcional)"><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows="2" style={{...inputStyle(), resize:'vertical'}} /></Field>
+            {err && <div style={{ color:'#c03030', fontSize:'.7rem', marginBottom:8, fontWeight:600 }}>{err}</div>}
+            <div style={{ display:'flex', gap:8, marginTop:6 }}>
+              <button disabled={submitting} onClick={submit} style={{ flex:1, padding:'11px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, border:'none', borderRadius:8, color:'#fff', fontWeight:800, cursor:submitting?'not-allowed':'pointer', fontFamily:'Barlow Condensed', letterSpacing:'.1em', textTransform:'uppercase', fontSize:'.82rem' }}>{submitting?'Creando…':'Crear borrador'}</button>
+              <button disabled={submitting} onClick={onClose} style={{ padding:'11px 18px', background:'#F5F6F8', border:'1px solid #E8D5C0', borderRadius:8, color:NAVY, fontWeight:700, cursor:'pointer', fontSize:'.75rem' }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+function Field({ label, children }) {
+  return (
+    <div style={{ marginBottom:10 }}>
+      <div style={{ fontSize:'.58rem', fontWeight:700, color:'#8A9BB0', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:4 }}>{label}</div>
+      {children}
+    </div>
+  )
+}
+function inputStyle() {
+  return { width:'100%', padding:'9px 11px', background:'#FFF8F0', border:'1.5px solid #E8D5C0', borderRadius:6, fontSize:'.78rem', color:NAVY, fontFamily:'DM Sans', outline:'none', boxSizing:'border-box' }
+}
+
 function CotizacionesScreen({ act }) {
+  const { profile } = useApp()
+  const { cotizaciones, loading, createCotizacion, sendCotizacion } = useCotizaciones({ profile })
+  const { products } = useProducts({ profile, onlyActive: true })
+  const [open, setOpen] = useState(false)
+
+  const kpis = useMemo(() => {
+    const q1Start = new Date(new Date().getFullYear(), 0, 1).toISOString()
+    const q1 = cotizaciones.filter(c => c.created_at >= q1Start)
+    const aceptadas = q1.filter(c => c.status === 'accepted').length
+    const enviadas = q1.filter(c => ['sent','accepted','rejected'].includes(c.status)).length
+    const conv = enviadas > 0 ? Math.round((aceptadas / enviadas) * 100) : null
+    const volumen = q1.reduce((s,c) => s + (Number(c.total_price) || 0), 0)
+    const margenes = q1.filter(c => c.margin_pct != null).map(c => Number(c.margin_pct))
+    const margenMedio = margenes.length ? (margenes.reduce((a,b)=>a+b,0)/margenes.length).toFixed(1) : '—'
+    return {
+      total: String(q1.length),
+      conv: conv !== null ? `${conv}%` : '—',
+      volumen: volumen > 0 ? `${Math.round(volumen/1000)}k€` : '0€',
+      margen: margenMedio !== '—' ? `${margenMedio}%` : '—',
+    }
+  }, [cotizaciones])
+
+  const empty = !loading && cotizaciones.length === 0
+
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Cotizaciones IA" subtitle="Genera cotizaciones hablando — la IA calcula precios, márgenes y transporte automáticamente" />
+      <PageHdr title="Cotizaciones" subtitle="Crea, envía y sigue cotizaciones con cálculo de margen automático" />
       <SearchBar placeholder="Buscar cotización o cliente..." />
       <div className="grid-4 mb14">
-        <KPI val="67" label="Cotizaciones Q1" delta="▲ +34% vs Q1 2025" up color={ACCENT}/>
-        <KPI val="82%" label="Tasa conversión" delta="▲ +12pp con IA" up color="#2D8A30"/>
-        <KPI val="234k€" label="Volumen cotizado" delta="▲ Margen medio 18%" up color="#1A78FF"/>
-        <KPI val="2.4h" label="Tiempo medio resp." delta="▲ Antes: 5-7 días" up color="#e8a010"/>
+        <KPI val={kpis.total} label="Cotizaciones este año" delta="→ Q1 + Q2" color={ACCENT}/>
+        <KPI val={kpis.conv} label="Tasa conversión" delta="aceptadas / enviadas" up color="#2D8A30"/>
+        <KPI val={kpis.volumen} label="Volumen cotizado" delta={`Margen medio ${kpis.margen}`} up color="#1A78FF"/>
+        <KPI val={String(cotizaciones.filter(c=>c.status==='sent').length)} label="Pendientes respuesta" delta="estado 'enviada'" color="#e8a010"/>
       </div>
 
-      <Card style={{ marginBottom:13, border:`2px solid rgba(232,116,32,.3)`, background:'linear-gradient(135deg,#FFFBF5,#FFF3E8)' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-          <CardTitle style={{ margin:0 }}>Cotizar por voz <IaBadge /></CardTitle>
-          <span style={{ fontSize:'.5rem', fontWeight:800, letterSpacing:'.12em', textTransform:'uppercase', padding:'4px 10px', borderRadius:12, background:`linear-gradient(135deg,${ACCENT},#F5A623)`, color:'#fff' }}>0 FORMULARIOS</span>
+      <Card>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8, marginBottom:10 }}>
+          <CardTitle style={{ margin:0 }}>Cotizaciones recientes <IaBadge /></CardTitle>
+          <button onClick={()=>setOpen(true)} style={{ padding:'8px 16px', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:'.72rem', cursor:'pointer', fontFamily:'DM Sans' }}>
+            + Nueva cotización
+          </button>
         </div>
-        <div className="grid-2">
-          <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1px solid #E8D5C0', textAlign:'center' }}>
-            <div title="Disponible en Fase 3 · Voz IA" style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'not-allowed', boxShadow:'0 4px 15px rgba(232,116,32,.3)', opacity:.5, pointerEvents:'none' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2"/></svg>
+
+        {loading && (
+          <div style={{ padding:28, textAlign:'center', color:'#7a8899', fontSize:'.72rem' }}>Cargando cotizaciones…</div>
+        )}
+
+        {empty && (
+          <div style={{ padding:'32px 20px', textAlign:'center' }}>
+            <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:NAVY, marginBottom:6, letterSpacing:'.04em', textTransform:'uppercase' }}>
+              Aún no has creado cotizaciones
             </div>
-            <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY, marginBottom:4 }}>Dicta tu cotización</div>
-            <div style={{ fontSize:'.6rem', color:'#7a8899', marginBottom:10 }}>Di el cliente, producto y cantidad</div>
-            <div style={{ padding:10, background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)' }}>
-              <div style={{ fontSize:'.58rem', fontStyle:'italic', color:'#3a4a5a', lineHeight:1.5 }}>"Leopold quiere 3.000 kilos de harina W-280 para el viernes, con entrega en Valencia centro. Margen normal."</div>
+            <div style={{ fontSize:'.72rem', color:'#7a8899', lineHeight:1.5, marginBottom:12 }}>
+              Crea tu primera cotización desde el botón arriba. Calcula margen y precio total automáticamente.
             </div>
           </div>
-          <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1.5px solid rgba(45,138,48,.3)' }}>
-            <div style={{ fontSize:'.6rem', fontWeight:800, color:'#2D8A30', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:10 }}>IA HA GENERADO COTIZACIÓN</div>
-            <div style={{ fontFamily:'Barlow Condensed', fontSize:'.78rem', fontWeight:800, color:ACCENT, marginBottom:8 }}>COT-2026-094</div>
-            <table style={{ width:'100%', fontSize:'.62rem', borderCollapse:'collapse' }}>
-              {[['Cliente','Panaderías Leopold S.L.'],['Producto','Harina Panadera W-280'],['Fabricante','Harinas del Mediterráneo'],['Cantidad','3.000 kg'],['Coste fábrica','2.550€ (0,85€/kg)'],['Transporte','190€ (Valencia centro)'],['Margen 18%','493€']].map(([k,v])=>(
-                <tr key={k} style={{ borderBottom:'1px solid #f0e6d9' }}>
-                  <td style={{ padding:'4px 0', color:'#7a8899', width:'35%' }}>{k}</td>
-                  <td style={{ padding:'4px 0', color:NAVY, fontWeight:600 }}>{v}</td>
-                </tr>
-              ))}
-              <tr>
-                <td style={{ padding:'6px 0', fontWeight:700, color:NAVY, fontSize:'.68rem' }}>PVP TOTAL</td>
-                <td style={{ padding:'6px 0', fontFamily:'Barlow Condensed', fontSize:'.82rem', fontWeight:800, color:ACCENT }}>3.233€</td>
-              </tr>
-            </table>
-            <div style={{ display:'flex', gap:6, marginTop:10 }}>
-              <BtnSm onClick={()=>act('enviar_cot',{ref:'COT-2026-094',prod:'Harina Panadera W-280',fab:'Harinas del Mediterráneo',qty:'3.000 kg',pvp:'3.233€',margen:'18%'})}>→ Enviar a cliente</BtnSm>
-              <BtnSm outline onClick={()=>act('ajustar','COT-2026-094')}>Ajustar</BtnSm>
-            </div>
-          </div>
-        </div>
+        )}
+
+        {!loading && !empty && (
+          <ScrollTable>
+            <Thead cols={['Ref.','Cliente','Producto','Importe','Margen','Estado','Acción']}/>
+            <tbody>
+              {cotizaciones.map(c => {
+                const meta = COT_STATUS_META[c.status] || { type:'amber', label:c.status }
+                const imp = c.total_price != null ? `${Number(c.total_price).toLocaleString('es-ES', { minimumFractionDigits:2, maximumFractionDigits:2 })}€` : '—'
+                const mrg = c.margin_pct != null ? `${Number(c.margin_pct).toFixed(1)}%` : '—'
+                const canSend = c.status === 'draft'
+                return (
+                  <tr key={c.id} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{c.ref}</td>
+                    <td style={{ padding:'8px 10px', color:NAVY }}>{c.cliente_name || '—'}</td>
+                    <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{c.product_name || '—'} ({Number(c.quantity).toLocaleString('es-ES')}{c.unit})</td>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{imp}</td>
+                    <td style={{ padding:'8px 10px', fontWeight:700, color:'#2D8A30' }}>{mrg}</td>
+                    <td style={{ padding:'8px 10px' }}><Badge type={meta.type} text={meta.label}/></td>
+                    <td style={{ padding:'8px 10px' }}>
+                      {canSend ? (
+                        <TblBtn type="orange" onClick={async ()=>{ await sendCotizacion(c.id); act('toast','Cotización marcada como enviada') }}>Enviar</TblBtn>
+                      ) : (
+                        <TblBtn type="orange" onClick={()=>act('ver',c.ref)}>Ver</TblBtn>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </ScrollTable>
+        )}
       </Card>
 
-      <Card>
-        <CardTitle>Cotizaciones recientes <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Ref.','Cliente','Productos','Importe','Margen','Estado','Acción']}/>
-          <tbody>
-            {[['COT-094','Panaderías Leopold','Harina W-280 (3.000kg)','3.233€','18%','amber:Pendiente'],['COT-093','Bollería Lux','Mantequilla 82% + T-45','6.200€','17%','blue:Enviada'],['COT-092','Agrudispa','Margarina PF42 + Aceite','8.900€','19%','ok:Aceptada'],['COT-091','Congelados Martz','Masa hojaldre -18°C','31.200€','15%','ok:Aceptada'],['COT-090','Dulces Iberia','Cobertura 55% + Cacao','22.400€','21%','blue:Enviada']].map(([ref,cli,prod,imp,mrg,st],i)=>{const[tt,tv]=st.split(':');return(
-              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{ref}</td>
-                <td style={{ padding:'8px 10px', color:NAVY }}>{cli}</td>
-                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{prod}</td>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{imp}</td>
-                <td style={{ padding:'8px 10px', fontWeight:700, color:'#2D8A30' }}>{mrg}</td>
-                <td style={{ padding:'8px 10px' }}><Badge type={tt} text={tv}/></td>
-                <td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>tt==='amber'
-  ? act('enviar_cot',{ref,prod:'Ver detalle',fab:'FoodBridge IA',qty:'—',pvp:imp,margen:mrg})
-  : act('ver',ref)}>{tt==='amber'?'Enviar':'Ver'}</TblBtn></td>
-              </tr>
-            )})}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>IA Cotizaciones:</strong> Tiempo medio de respuesta con voz: <strong>47 segundos</strong>. Sin IA: 5-7 días. Tasa de conversión +12pp porque el cliente recibe la cotización <strong>antes de que salgas de su oficina</strong>." />
-      </Card>
+      <NuevaCotModal
+        open={open}
+        onClose={()=>setOpen(false)}
+        profile={profile}
+        products={products}
+        onCreate={createCotizacion}
+      />
     </div>
   )
 }
