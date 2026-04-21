@@ -9,6 +9,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--cream);
@@ -17,6 +18,13 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
+/* Tipografia legible en movil (regla obligatoria COAXIONIA):
+   en breakpoints 480px y 768px los rem se escalan ~15-20% para que el texto
+   sea legible sin zoom. Al usar html { font-size } todo lo que use rem en
+   JSX inline se agranda proporcionalmente sin tocar cada style. */
+@media (max-width: 768px) { html { font-size: 18.5px; } }  /* +15.6% */
+@media (max-width: 480px) { html { font-size: 19.2px; } }  /* +20% */
 
 @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -93,8 +101,8 @@ body {
   .grid-2 { grid-template-columns: 1fr !important; }
 
   /* Tablas — texto se parte, scroll solo vertical */
-  table { font-size: .6rem !important; width: 100% !important; }
-  td, th { padding: 5px 6px !important; white-space: normal !important; word-break: break-word !important; }
+  table { font-size: .72rem !important; width: 100% !important; }
+  td, th { padding: 6px 7px !important; white-space: normal !important; word-break: break-word !important; }
 
   /* Contenedores de tabla — sin scroll horizontal */
   .scrollable { overflow-x: hidden !important; }
