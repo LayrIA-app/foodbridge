@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas } from '../../hooks'
+import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas, useAlertasIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
 
@@ -2063,7 +2063,7 @@ const SCREENS = {
 
 /* ══ MAIN ══ */
 export default function ComercialPage() {
-  const { goHome } = useApp()
+  const { goHome, profile } = useApp()
   const [active, setActive] = useState('dash')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modal, setModal] = useState(null)
@@ -2074,7 +2074,26 @@ export default function ComercialPage() {
   const { toast, showToast } = useToast()
   const contentRef = useRef(null)
 
-  const unreadCount = ALERTS.filter((_,i)=>!readAlerts.has(i)).length
+  const { pedidos: comPedidos } = usePedidos({ profile })
+  const { cotizaciones: comCotiz } = useCotizaciones({ profile })
+  const { visitas: comVisitas } = useVisitas({ profile })
+  const { alertas: aiAlerts } = useAlertasIa({
+    role: 'comercial',
+    data: {
+      pedidos_activos: comPedidos.filter(p => ['placed','confirmed','in_transit'].includes(p.status)).length,
+      pedidos_retrasados: comPedidos.filter(p => p.expected_date && new Date(p.expected_date) < new Date() && p.status!=='delivered' && p.status!=='cancelled').length,
+      cotizaciones_sent: comCotiz.filter(c => c.status === 'sent').length,
+      cotizaciones_draft: comCotiz.filter(c => c.status === 'draft').length,
+      cotizaciones_accepted_q1: comCotiz.filter(c => c.status === 'accepted').length,
+      visitas_hoy: comVisitas.filter(v => {
+        const d = new Date(v.scheduled_at); const t = new Date()
+        return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate()
+      }).length,
+      visitas_atrasadas: comVisitas.filter(v => v.status === 'scheduled' && new Date(v.scheduled_at) < new Date()).length,
+    },
+  })
+  const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
+  const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
   const closeModal = useCallback(()=>setModal(null),[])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
   const act = useCallback((type,detail)=>{
@@ -2181,7 +2200,7 @@ export default function ComercialPage() {
       <EnviarCotizModal cot={sendCot} onClose={()=>setSendCot(null)}/>
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
-      {alertsOpen&&<AlertsModal alerts={ALERTS} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
+      {alertsOpen&&<AlertsModal alerts={displayAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
     </div>
   )
 }

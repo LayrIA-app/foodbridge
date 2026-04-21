@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
-import { usePedidos, useCotizaciones } from '../../hooks'
+import { usePedidos, useCotizaciones, useAlertasIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
@@ -853,7 +853,7 @@ const SCREENS = {cdash:CdashScreen,cbuscar:CbuscarScreen,cpedidos:CpedidosScreen
 
 /* ══ MAIN ══ */
 export default function ClientePage() {
-  const { goHome } = useApp()
+  const { goHome, profile } = useApp()
   const [active, setActive] = useState('cdash')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modal, setModal] = useState(null)
@@ -863,7 +863,20 @@ export default function ClientePage() {
   const { toast, showToast } = useToast()
   const contentRef = useRef(null)
 
-  const unreadCount = ALERTS.filter((_,i)=>!readAlerts.has(i)).length
+  const { pedidos: cliPedidos } = usePedidos({ profile })
+  const { cotizaciones: cliCotiz } = useCotizaciones({ profile })
+  const { alertas: aiAlerts } = useAlertasIa({
+    role: 'cliente',
+    data: {
+      pedidos: cliPedidos.length,
+      pedidos_en_transito: cliPedidos.filter(p=>p.status==='in_transit').length,
+      pedidos_retrasados: cliPedidos.filter(p=>p.expected_date && new Date(p.expected_date) < new Date() && p.status!=='delivered' && p.status!=='cancelled').length,
+      cotizaciones_pendientes: cliCotiz.filter(c=>c.status==='sent').length,
+      cotizaciones_recientes: cliCotiz.slice(0,4).map(c=>({ ref:c.ref, status:c.status, producto:c.product_name })),
+    },
+  })
+  const displayAlerts = aiAlerts.length > 0 ? aiAlerts : ALERTS
+  const unreadCount = displayAlerts.filter((_,i)=>!readAlerts.has(i)).length
   const closeModal = useCallback(()=>setModal(null),[])
   const act = useCallback((type,detail)=>{ if(type==='goto'){changeSection(detail);return} setModal(buildModal(type,detail,showToast)) },[showToast,changeSection])
   const changeSection = useCallback((id)=>{setActive(id);setSidebarOpen(false);setTimeout(()=>{if(contentRef.current)contentRef.current.scrollTop=0},0)},[])
@@ -965,7 +978,7 @@ export default function ClientePage() {
       <Modal modal={modal} onClose={closeModal}/>
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
-      {alertsOpen&&<AlertsModal alerts={ALERTS} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
+      {alertsOpen&&<AlertsModal alerts={displayAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
     </div>
   )
 }

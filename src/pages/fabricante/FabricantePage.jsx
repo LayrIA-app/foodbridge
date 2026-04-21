@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pdfTrazabilidad } from '../../utils/generatePDF'
 import { useApp } from '../../context/AppContext'
-import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente } from '../../hooks'
+import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente, useAlertasIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 
 const ACCENT = '#E87420'
@@ -1303,7 +1303,7 @@ function AlertsModal({ alerts, onClose, onMarkRead, readSet }) {
 }
 
 export default function FabricantePage() {
-  const { goHome, fabProfile } = useApp()
+  const { goHome, fabProfile, profile } = useApp()
   const isOps = fabProfile === 'operaciones'
   const currentNav = isOps ? NAV_OPS : NAV
   const currentScreens = isOps ? SCREENS_OPS : SCREENS
@@ -1316,7 +1316,23 @@ export default function FabricantePage() {
   const [push, setPush] = useState(null)
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [readAlerts, setReadAlerts] = useState(new Set())
-  const currentAlerts = isOps ? ALERTS_OPS : ALERTS_DIR
+
+  const { kpis: fabKpis } = useFabricanteKpis({ profile })
+  const { products: fabProducts } = useProducts({ profile, onlyActive: false })
+  const { alertas: aiAlerts } = useAlertasIa({
+    role: 'fabricante',
+    data: {
+      productos_total: fabProducts.length,
+      productos_activos: fabProducts.filter(p => p.active).length,
+      pedidos_activos: fabKpis.pedidos_activos,
+      pedidos_retrasados: fabKpis.pedidos_retrasados,
+      pedidos_delivered: fabKpis.pedidos_delivered,
+      clientes_unicos: fabKpis.clientes_unicos,
+      facturacion_delivered: Number(fabKpis.facturacion_delivered),
+    },
+  })
+  const fallbackAlerts = isOps ? ALERTS_OPS : ALERTS_DIR
+  const currentAlerts = aiAlerts.length > 0 ? aiAlerts : fallbackAlerts
   const unreadCount = currentAlerts.filter((_,i) => !readAlerts.has(i)).length
   const { toast, showToast } = useToast()
   const contentRef = useRef(null)
