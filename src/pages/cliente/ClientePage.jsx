@@ -753,6 +753,64 @@ function CcotizaScreen({ act }) {
           style={{ marginBottom:14 }}
         />
       )}
+
+      {/* Comparativa IA 3 proveedores — HTML v5 l.3897 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Comparativa IA — Margarina -18°C <IaBadge /></CardTitle>
+        <div style={{ overflowX:'auto' }}>
+          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'.6rem', minWidth:420 }}>
+            <thead>
+              <tr style={{ background:'#F8FAFC' }}>
+                {['Proveedor','Precio/kg','Cert.','Score'].map(h=>(
+                  <th key={h} style={{ padding:8, textAlign: h==='Proveedor'?'left':'center', borderBottom:'2px solid #E2E8F0', color:'#64748B', fontSize:'.58rem' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ background:'#FFF8F0', borderLeft:`3px solid ${ACCENT}` }}>
+                <td style={{ padding:8, fontWeight:700, color:NAVY }}>Grasas Industriales <span style={{ fontSize:'.45rem', background:ACCENT, color:'#fff', padding:'2px 5px', borderRadius:10, marginLeft:4 }}>TOP</span></td>
+                <td style={{ padding:8, textAlign:'center', fontWeight:700, color:'#2D8A30' }}>2,48€</td>
+                <td style={{ padding:8, textAlign:'center', color:'#3a4a5a' }}>IFS 7.0</td>
+                <td style={{ padding:8, textAlign:'center', color:ACCENT, fontWeight:700 }}>94</td>
+              </tr>
+              <tr>
+                <td style={{ padding:8, fontWeight:600, color:NAVY }}>MargaPro Europe</td>
+                <td style={{ padding:8, textAlign:'center' }}>2,62€</td>
+                <td style={{ padding:8, textAlign:'center', color:'#3a4a5a' }}>IFS 6.1</td>
+                <td style={{ padding:8, textAlign:'center', color:'#1A78FF', fontWeight:700 }}>87</td>
+              </tr>
+              <tr style={{ background:'#F8FAFC' }}>
+                <td style={{ padding:8, fontWeight:600, color:NAVY }}>Congelados Navarra</td>
+                <td style={{ padding:8, textAlign:'center' }}>2,71€</td>
+                <td style={{ padding:8, textAlign:'center', color:'#3a4a5a' }}>ISO 22000</td>
+                <td style={{ padding:8, textAlign:'center', color:'#1A78FF', fontWeight:700 }}>82</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
+          <BtnSm onClick={()=>act('cotizar','Margarina -18°C Grasas Industriales')}>Solicitar pedido</BtnSm>
+          <BtnSm outline onClick={()=>act('ver_pdf','Comparativa Margarina -18°C')}>PDF</BtnSm>
+        </div>
+      </Card>
+
+      {/* Simulador de costes — HTML v5 l.3898 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Simulador de costes <IaBadge /></CardTitle>
+        <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+          {[
+            { val:'-12%', sub:'vs. manual', color:'#2D8A30', bg:'#F0FFF4', border:'#C6F6D5' },
+            { val:'14.880€', sub:'Ahorro anual', color:'#1A78FF', bg:'#F0F7FF', border:'#C4DEFF' },
+            { val:'3,2d', sub:'Respuesta', color:ACCENT, bg:'#FFF8F0', border:'rgba(232,116,32,.15)' },
+          ].map((t,i)=>(
+            <div key={i} style={{ flex:'1 1 110px', padding:10, borderRadius:8, background:t.bg, border:`1px solid ${t.border}`, textAlign:'center' }}>
+              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1.2rem', fontWeight:900, color:t.color }}>{t.val}</div>
+              <div style={{ fontSize:'.55rem', color:'#7a8899', marginTop:2 }}>{t.sub}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
       <Card>
         <CardTitle>Cotizaciones recibidas <IaBadge /></CardTitle>
 
