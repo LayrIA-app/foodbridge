@@ -116,6 +116,9 @@ input, textarea, select, button { max-width: 100%; }
   .fab-topbar-tagline    { display: none !important; }
   .fab-topbar-rolebadge  { display: none !important; }
   .fab-topbar-user-name  { display: none !important; }
+  /* BottomNav móvil: visible solo en ≤768px con padding-bottom para no tapar contenido */
+  .fb-bottomnav          { display: flex !important; }
+  .fb-content-pad        { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0) + 20px) !important; }
 }
 
 /* ≤ 900px · oculta tagline del topbar en tablet portrait */
