@@ -761,6 +761,35 @@ function Catalogo({ act }) {
         <KPI val={kpis.nuevos} label="Nuevos este mes" delta="▲ añadidos" up color="#e8a010"/>
       </div>
 
+      {/* Productos por categoria — HTML v5 l.3056-3067 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Productos por categoría</CardTitle>
+        <ScrollTable>
+          <Thead cols={['Categoría','Productos','Con ficha IA','Solicitudes Q1','Acción']}/>
+          <tbody>
+            {[
+              ['Harinas panificación','342','ok:342','1.240'],
+              ['Harinas repostería','198','ok:198','670'],
+              ['Harinas ecológicas','87','ok:87','480'],
+              ['Sémolas','156','ok:156','320'],
+              ['Mezclas y mejorantes','234','blue:228','510'],
+              ['Otros (salvados, copos)','230','blue:224','180'],
+            ].map(([cat,prods,ficha,sol],i)=>{
+              const [ft,fv] = ficha.split(':')
+              return (
+                <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cat}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{prods}</td>
+                  <td style={{ padding:'8px 10px' }}><Badge type={ft} text={fv}/></td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{sol}</td>
+                  <td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={()=>act('ver',`Categoría ${cat}`)}>Ver</TblBtn></td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </ScrollTable>
+      </Card>
+
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Todos los productos</CardTitle>
 
