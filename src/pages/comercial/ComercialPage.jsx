@@ -1408,7 +1408,7 @@ function CotizacionesScreen({ act }) {
 
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Cotizaciones" subtitle="Crea, envía y sigue cotizaciones con cálculo de margen automático" />
+      <PageHdr title="Cotizaciones IA" subtitle="Genera cotizaciones hablando — la IA calcula precios, márgenes y transporte automáticamente" />
       <SearchBar placeholder="Buscar cotización o cliente..." />
       <div className="grid-4 mb14">
         <KPI val={kpis.total} label="Cotizaciones este año" delta="→ Q1 + Q2" color={ACCENT}/>
@@ -1416,6 +1416,61 @@ function CotizacionesScreen({ act }) {
         <KPI val={kpis.volumen} label="Volumen cotizado" delta={`Margen medio ${kpis.margen}`} up color="#1A78FF"/>
         <KPI val={String(cotizaciones.filter(c=>c.status==='sent').length)} label="Pendientes respuesta" delta="estado 'enviada'" color="#e8a010"/>
       </div>
+
+      {/* Card 'Cotizar por voz — 0 FORMULARIOS' — HTML v5 l.2266-2296 */}
+      <Card style={{ marginBottom:13, border:`2px solid rgba(232,116,32,.3)`, background:'linear-gradient(135deg,#FFFBF5,#FFF3E8)' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, flexWrap:'wrap', gap:6 }}>
+          <CardTitle style={{ margin:0 }}>Cotizar por voz <IaBadge /></CardTitle>
+          <span style={{ fontSize:'.5rem', fontWeight:800, letterSpacing:'.12em', textTransform:'uppercase', padding:'4px 10px', borderRadius:12, background:`linear-gradient(135deg,${ACCENT},#F5A623)`, color:'#fff' }}>0 FORMULARIOS</span>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14 }}>
+          {/* Panel izquierdo: mic + ejemplo dictado */}
+          <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1px solid #E8D5C0', textAlign:'center' }}>
+            <div title="Próximamente" style={{ width:56, height:56, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 10px', cursor:'not-allowed', boxShadow:'0 4px 15px rgba(232,116,32,.3)', opacity:.5, pointerEvents:'none' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2"/></svg>
+            </div>
+            <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY, marginBottom:4 }}>Dicta tu cotización</div>
+            <div style={{ fontSize:'.6rem', color:'#7a8899', marginBottom:10 }}>Di el cliente, producto y cantidad</div>
+            <div style={{ padding:10, background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)' }}>
+              <div style={{ fontSize:'.58rem', fontStyle:'italic', color:'#3a4a5a', lineHeight:1.5 }}>"Leopold quiere 3.000 kilos de harina W-280 para el viernes, con entrega en Valencia centro. Margen normal."</div>
+            </div>
+          </div>
+          {/* Panel derecho: cotización generada preview */}
+          <div style={{ background:'#fff', borderRadius:10, padding:16, border:'1.5px solid rgba(45,138,48,.3)' }}>
+            <div style={{ fontSize:'.6rem', fontWeight:800, color:'#2D8A30', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:10 }}>IA HA GENERADO COTIZACIÓN</div>
+            <div style={{ fontSize:'.78rem', fontWeight:800, color:ACCENT, marginBottom:8 }}>COT-2026-094</div>
+            <table style={{ width:'100%', fontSize:'.62rem', borderCollapse:'collapse' }}>
+              <tbody>
+                {[
+                  ['Cliente','Panaderías Leopold S.L.'],
+                  ['Producto','Harina Panadera W-280'],
+                  ['Fabricante','Harinas del Mediterráneo'],
+                  ['Cantidad','3.000 kg'],
+                  ['Coste fábrica','2.550€ (0,85€/kg)'],
+                  ['Transporte','190€ (Valencia centro)'],
+                ].map(([k,v],i)=>(
+                  <tr key={i} style={{ borderBottom:'1px solid #f0e6d9' }}>
+                    <td style={{ padding:'4px 0', color:'#7a8899', width:'38%' }}>{k}</td>
+                    <td style={{ padding:'4px 0', color:NAVY, fontWeight:600 }}>{v}</td>
+                  </tr>
+                ))}
+                <tr style={{ borderBottom:'1px solid #f0e6d9' }}>
+                  <td style={{ padding:'4px 0', color:'#7a8899' }}>Margen 18%</td>
+                  <td style={{ padding:'4px 0', color:'#2D8A30', fontWeight:700 }}>493€</td>
+                </tr>
+                <tr>
+                  <td style={{ padding:'6px 0', color:'#7a8899', fontWeight:700 }}>PVP TOTAL</td>
+                  <td style={{ padding:'6px 0', fontSize:'.8rem', fontWeight:800, color:ACCENT }}>3.233€</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style={{ display:'flex', gap:6, marginTop:10, flexWrap:'wrap' }}>
+              <BtnSm onClick={()=>act('comunicar','Panaderías Leopold S.L.')}>Enviar a Leopold</BtnSm>
+              <BtnSm outline onClick={()=>act('ajustar','COT-2026-094')}>Ajustar</BtnSm>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <IaBoxLive
         context="comercial_cotizaciones"
