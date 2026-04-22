@@ -471,7 +471,20 @@ function SimuladorIA({ act }) {
   const margen = Math.round(22 + pct)
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Simulador IA" subtitle="Simula escenarios de negocio y obtén proyecciones en segundos" />
+      <PageHdr title="Simulador Proyectivo IA" subtitle="Proyecta el impacto de cualquier decisión estratégica antes de ejecutarla — IA calcula escenarios en tiempo real" badge="4ª Generación" />
+      <SearchBar placeholder="Buscar escenario..." />
+
+      {/* Banner Motor Predictivo — HTML v5 l.3175-3178 */}
+      <div style={{ background:'linear-gradient(135deg,rgba(155,89,182,.08),rgba(232,116,32,.06))', borderRadius:10, padding:'12px 16px', marginBottom:16, border:'1px solid rgba(155,89,182,.2)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+          <div className="animate-dotPulse" style={{ width:8, height:8, borderRadius:'50%', background:'#9B59B6' }} />
+          <span style={{ fontSize:'.6rem', fontWeight:800, color:'#9B59B6', letterSpacing:'.1em', textTransform:'uppercase' }}>Motor Predictivo Activo</span>
+        </div>
+        <div style={{ fontSize:'.68rem', color:'#3a4a5a', lineHeight:1.6 }}>
+          FoodBridge IA analiza <strong>18 variables en tiempo real</strong>: tendencias de mercado, comportamiento de agentes, estacionalidad, márgenes por SKU, cobertura geográfica, riesgo de certificaciones y pipeline abierto. El simulador proyecta el impacto de cada decisión antes de ejecutarla.
+        </div>
+      </div>
+
       <div className="grid-2 mb14">
         <Card>
           <CardTitle>¿Qué pasa si añado 3 agentes nuevos? <IaBadge /></CardTitle>
