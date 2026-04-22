@@ -829,16 +829,6 @@ function BusquedaScreen({ act }) {
     {ico:'🧈',color:'linear-gradient(135deg,#1A78FF,#378ADD)',colorText:'#1A78FF',bg:'#EEF5FF',border:'rgba(26,120,255,.15)',nombre:'GRASAS, ACEITES Y MARGARINAS',norma:'Codex CXS 32-1981 (Margarina) | 7 tipologías',fichas:'312 fichas',tipos:[['Mantequilla','≥ 82% MG | Laminar'],['Margarina Hojaldre','PF 40-44°C | ≥ 80% MG'],['Margarina Croissant','PF 36-40°C | Plástica'],['Manteca Vegetal','Palma/Coco | RSPO'],['Aceites','Girasol/Oliva/Colza'],['Grasa Fritura','Alto PF | Estabilidad'],['Desmoldeantes','Spray/Líquido']]},
     {ico:'🍫',color:'linear-gradient(135deg,#8B4513,#A0522D)',colorText:'#8B4513',bg:'#FBF5EF',border:'rgba(139,69,19,.15)',nombre:'CACAO, CHOCOLATE Y COBERTURAS',norma:'Codex CXS 87-1981 | R.D. 1055/2003 | 6 tipologías',fichas:'198 fichas',tipos:[['Cacao en Polvo','10-24% MG | pH 5-8'],['Cobertura Negra','≥ 45% cacao'],['Cobertura Leche','≥ 25% cacao'],['Cobertura Blanca','≥ 20% MC'],['Manteca Cacao','Deodorizada/Natural'],['Pasta/Licor Cacao','100% cacao']]},
     {ico:'🍬',color:'linear-gradient(135deg,#e8a010,#c98a00)',colorText:'#e8a010',bg:'#FFFDF5',border:'rgba(232,160,16,.15)',nombre:'AZÚCARES Y EDULCORANTES',norma:'Codex CXS 212-1999 | Reg. CE 1333/2008 | 8 tipologías',fichas:'156 fichas',tipos:[['Blanco Refinado','Sacarosa ≥ 99.7%'],['Glass / Lustre','Molido fino + almidón'],['Invertido','Glucosa+Fructosa'],['Glucosa','Líquida/Atomizada DE 38-42'],['Dextrosa','Monohidrato | Maíz'],['Isomalt','Azúcar artístico'],['Fructosa','Cristalina']]},
-    {ico:'🥛',color:'linear-gradient(135deg,#2D8A30,#1B6B1E)',colorText:'#2D8A30',bg:'#F0FAF0',border:'rgba(45,138,48,.15)',nombre:'LÁCTEOS INDUSTRIALES',norma:'Reg. CE 1308/2013 | Codex CXS 279-1971 | 7 tipologías',fichas:'178 fichas',tipos:[['Mantequilla','≥ 82% MG | Bloque/Lámina'],['Nata','18-36% MG | UHT/Fresca'],['Leche Polvo','Entera/Desnatada'],['Condensada','Azucarada/Sin azúcar'],['Queso/Crema','Mascarpone/Crema/Fundido'],['Yogur','Natural/Griego/Líquido'],['Suero Lácteo','WPC/WPI | Polvo']]},
-    {ico:'🥚',color:'linear-gradient(135deg,#9b59b6,#8e44ad)',colorText:'#9b59b6',bg:'#F8F0FF',border:'rgba(155,89,182,.15)',nombre:'OVOPRODUCTOS',norma:'Reg. CE 853/2004 | R.D. 1254/1991 | 5 tipologías',fichas:'94 fichas',tipos:[['Huevo Líquido','Pasteurizado entero'],['Yema Líquida','Pasteurizada'],['Clara Líquida','Pasteurizada'],['Huevo Polvo','Deshidratado | Larga vida'],['Huevo Cocido','Pelado | Listo']]},
-    {ico:'🦠',color:'linear-gradient(135deg,#e03030,#c02020)',colorText:'#e03030',bg:'#FFF5F5',border:'rgba(224,48,48,.15)',nombre:'LEVADURAS, MEJORANTES Y ADITIVOS',norma:'Reg. CE 1333/2008 (Aditivos) | Codex GSFA | 6 tipologías',fichas:'124 fichas',tipos:[['Levadura Fresca','Prensada | 1-4°C'],['Levadura Seca','Instantánea/Activa | 2 años'],['Masa Madre','Natural/Deshidratada'],['Mejorantes','DATA/Lecitina | E471/E472'],['Emulsionantes','E471/E472/E322/E481'],['Química/Impulsores','Polvo hornear | E500']]},
-    {ico:'❄️',color:'linear-gradient(135deg,#0096C8,#007AA3)',colorText:'#0096C8',bg:'#F0FAFF',border:'rgba(0,150,200,.15)',nombre:'CONGELADOS, MASAS Y SEMIPREPARADOS',norma:'R.D. 1202/2002 | Codex CXS 1-1969 | 6 tipologías',fichas:'98 fichas',tipos:[['Masa Hojaldre','Cruda congelada | -18°C'],['Bollería Precocida','Croissant/Pain au chocolat'],['Pan Precocido','Baguette/Chapata/Molde'],['Rellenos','Crema/Fruta/Compota'],['Bases Tarta','Bizcocho/Hojaldre/Brisa'],['Masas Pizza','Fermentada/Precocida']]},
-  ]
-  const ALERGENOS_14 = ['Gluten','Lácteos','Huevos','Soja','Frutos cáscara','Cacahuete','Sésamo','Sulfitos','Mostaza','Altramuz','Crustáceos','Pescado','Apio','Moluscos']
-  const CERTIFICACIONES_GFSI = ['IFS Food','BRC/BRCGS','FSSC 22000','ISO 22000','Ecológico UE','RSPO','Halal','Kosher','Sin Palma','Vegano']
-  const ORIGEN_LOGISTICA = [
-    { label:'España', type:'pais' },{ label:'Portugal', type:'pais' },{ label:'Francia', type:'pais' },{ label:'Bélgica', type:'pais' },{ label:'Alemania', type:'pais' },
-    { label:'Entrega 24h', type:'logistica' },{ label:'Stock inmediato', type:'logistica' },{ label:'Temp. controlada', type:'logistica' },
   ]
 
   const [openFam, setOpenFam] = useState(null)
@@ -937,60 +927,6 @@ function BusquedaScreen({ act }) {
           </div>
         ))}
       </Card>
-
-      {/* Capa 3: Filtros avanzados — HTML v5 l.2032-2088 */}
-      <Card style={{ marginBottom:13 }}>
-        <CardTitle>
-          <span style={{ display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            Capa 3: Especificaciones técnicas y filtros avanzados
-          </span>
-        </CardTitle>
-
-        {/* ALÉRGENOS 14 EU */}
-        <div style={{ marginBottom:12 }}>
-          <div style={{ fontSize:'.55rem', fontWeight:800, color:'#e03030', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#e03030" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            ALÉRGENOS (14 obligatorios — Reg. UE 1169/2011)
-          </div>
-          <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-            {ALERGENOS_14.map(a=>(
-              <span key={a} onClick={()=>act('filtro',`Sin ${a.toLowerCase()}`)} style={{ padding:'3px 8px', borderRadius:10, fontSize:'.5rem', fontWeight:600, background:'#FFEBEE', color:'#e03030', border:'1px solid rgba(224,48,48,.2)', cursor:'pointer' }}>{a}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* CERTIFICACIONES GFSI */}
-        <div style={{ marginBottom:12 }}>
-          <div style={{ fontSize:'.55rem', fontWeight:800, color:'#2D8A30', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2D8A30" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            CERTIFICACIONES SEGURIDAD ALIMENTARIA (GFSI)
-          </div>
-          <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-            {CERTIFICACIONES_GFSI.map(c=>(
-              <span key={c} onClick={()=>act('filtro',c)} style={{ padding:'3px 8px', borderRadius:10, fontSize:'.5rem', fontWeight:600, background:'#E8F5E9', color:'#2D8A30', border:'1px solid rgba(45,138,48,.2)', cursor:'pointer' }}>{c}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* ORIGEN Y LOGÍSTICA */}
-        <div>
-          <div style={{ fontSize:'.55rem', fontWeight:800, color:'#1A78FF', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1A78FF" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            ORIGEN Y LOGÍSTICA
-          </div>
-          <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-            {ORIGEN_LOGISTICA.map(o=>{
-              const isPais = o.type === 'pais'
-              return (
-                <span key={o.label} onClick={()=>act('filtro',o.label)} style={{ padding:'3px 8px', borderRadius:10, fontSize:'.5rem', fontWeight:600, background: isPais?'#E8F0FE':'#FFF8F0', color: isPais?'#1A78FF':ACCENT, border:`1px solid ${isPais?'rgba(26,120,255,.2)':'rgba(232,116,32,.2)'}`, cursor:'pointer' }}>{o.label}</span>
-              )
-            })}
-          </div>
-        </div>
-      </Card>
-
-      <IABox text="<strong>Motor IA 3 capas:</strong> La IA entiende el lenguaje natural del sector y mapea a taxonomía oficial. Cuando el comercial dice 'necesito algo para hojaldre que aguante frío', la IA traduce a: <strong>Familia: Grasas</strong> → <strong>Tipo: Margarina hojaldre</strong> → <strong>Specs: PF 40-44°C, trabajo -18°C</strong>. Cruza catálogos de 23 fabricantes con nomenclaturas distintas." />
     </div>
   )
 }
