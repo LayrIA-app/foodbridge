@@ -522,6 +522,48 @@ function Rentabilidad({ act }) {
           <BtnSm outline onClick={()=>act('exportar','Informe rentabilidad')}>Exportar PDF</BtnSm>
         </div>
       </Card>
+
+      {/* g2: Coste vs precio por canal + ROI por agente — HTML v5 l.3144-3164 */}
+      <div className="grid-2 mb14">
+        <Card>
+          <CardTitle>Coste vs. precio por canal <IaBadge /></CardTitle>
+          <div style={{ display:'flex', flexDirection:'column', gap:10, marginTop:6 }}>
+            {[
+              { canal:'Canal B2B — Agentes', margen:'Margen: 26%', color:'#2D8A30', bg:'#F0FFF4', border:'#C6F6D5', pct:78, barFrom:'#2D8A30', barTo:'#38A838', sub:'Precio medio: 1,42€/kg · Coste medio: 1,05€/kg · Transporte incluido' },
+              { canal:'Venta directa', margen:'Margen: 31%', color:'#1A78FF', bg:'#F0F7FF', border:'#C4DEFF', pct:88, barFrom:'#1A78FF', barTo:'#378ADD', sub:'Precio medio: 1,58€/kg · Sin intermediario · Mayor margen unitario' },
+              { canal:'Marketplace FoodBridge', margen:'Margen: 18%', color:ACCENT, bg:'#FFF8F0', border:'rgba(232,116,32,.15)', pct:52, barFrom:ACCENT, barTo:'#F5A623', sub:'Comisión plataforma 8% · Mayor volumen · Menor margen unitario' },
+            ].map((c,i)=>(
+              <div key={i} style={{ padding:10, borderRadius:8, background:c.bg, border:`1px solid ${c.border}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6, flexWrap:'wrap', gap:6 }}>
+                  <span style={{ fontSize:'.7rem', fontWeight:700, color:NAVY }}>{c.canal}</span>
+                  <span style={{ fontSize:'.7rem', fontWeight:700, color:c.color }}>{c.margen}</span>
+                </div>
+                <div style={{ height:5, background:'rgba(0,0,0,.05)', borderRadius:3, overflow:'hidden', marginBottom:4 }}>
+                  <div style={{ height:'100%', borderRadius:3, width:`${c.pct}%`, background:`linear-gradient(90deg,${c.barFrom},${c.barTo})`, transition:'width 1.2s cubic-bezier(.4,0,.2,1)' }}/>
+                </div>
+                <div style={{ fontSize:'.58rem', color:'#7a8899', marginTop:4 }}>{c.sub}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card>
+          <CardTitle>ROI por agente activo <IaBadge /></CardTitle>
+          <ScrollTable>
+            <Thead cols={['Agente','Ventas','Coste','ROI']}/>
+            <tbody>
+              {[['J.L. Martínez','124.8k€','18.2k€','6.9x','#2D8A30'],['Ana G. Pérez','98.4k€','16.8k€','5.9x','#2D8A30'],['Carlos R. López','72.3k€','14.4k€','5.0x','#1A78FF'],['María Santos','56.2k€','12.1k€','4.6x','#1A78FF'],['Pedro Almeida','34.1k€','10.8k€','3.2x','#e8a010']].map(([a,v,c,r,rc],i)=>(
+                <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{a}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{v}</td>
+                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{c}</td>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:rc }}>{r}</td>
+                </tr>
+              ))}
+            </tbody>
+          </ScrollTable>
+          <IABox text="<strong>IA calcula:</strong> Un agente adicional en zona Centro (Madrid) generaría un ROI estimado de <strong>5,2x en 12 meses</strong> según el modelo de penetración IA." />
+        </Card>
+      </div>
     </div>
   )
 }
