@@ -1346,30 +1346,13 @@ function OproduccionScreen({ act }) {
       </div>
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Estado de líneas de producción <IaBadge /></CardTitle>
-        {/* Tarjetas con barra de progreso + narrativa IA — fidelidad HTML v5 l.3591-3595 */}
-        <div style={{ display:'flex', flexDirection:'column', gap:10, marginTop:8 }}>
-          {[
-            { nom:'Línea A — Harina W-280', badge:'ok:Activa', bg:'#F0FFF4', border:'#C6F6D5', pct:92, barFrom:'#2D8A30', barTo:'#38A838', sub:'25.000 kg/turno · Ocupación 92% · Sin incidencias' },
-            { nom:'Línea B — Harina Eco T-110', badge:'ok:Activa', bg:'#F0FFF4', border:'#C6F6D5', pct:78, barFrom:'#2D8A30', barTo:'#38A838', sub:'8.000 kg/turno · Ocupación 78% · Demanda +48%: IA sugiere 2º turno' },
-            { nom:'Línea C — Sémola Trigo Duro', badge:'ok:Activa', bg:'#F0FFF4', border:'#C6F6D5', pct:55, barFrom:ACCENT, barTo:'#F5A623', sub:'15.000 kg/turno · Ocupación 55% · Infrautilizada' },
-            { nom:'Línea D — Mejorantes', badge:'amber:Mantenimiento', bg:'#FFF8F0', border:'rgba(232,116,32,.15)', pct:0, barFrom:'#e8a010', barTo:'#F0C040', sub:'Revisión preventiva programada · Retorno 18/04 · Sin impacto en pedidos' },
-          ].map((l,i)=>{
-            const[et,ev] = l.badge.split(':')
-            return (
-              <div key={i} style={{ padding:10, borderRadius:8, background:l.bg, border:`1px solid ${l.border}` }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6, flexWrap:'wrap', gap:6 }}>
-                  <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{l.nom}</span>
-                  <Badge type={et} text={ev}/>
-                </div>
-                <div style={{ height:5, background:'rgba(0,0,0,.05)', borderRadius:3, overflow:'hidden', marginBottom:4 }}>
-                  <div style={{ height:'100%', borderRadius:3, width:`${l.pct}%`, background:`linear-gradient(90deg,${l.barFrom},${l.barTo})`, transition:'width 1.2s cubic-bezier(.4,0,.2,1)' }}/>
-                </div>
-                <div style={{ fontSize:'.58rem', color:'#7a8899' }}>{l.sub}</div>
-              </div>
-            )
-          })}
-        </div>
-        <IABox text="<strong>IA recomienda:</strong> Reasignar Línea C (55% ocupación) a producción de Harina Eco T-110 cuando Línea D vuelva el 18/04. Impacto: <strong>+12.000 kg/turno de ecológica para cubrir demanda +48%</strong>." />
+        <ScrollTable>
+          <Thead cols={['Línea','Producto actual','Velocidad','Ocupación','Estado','Acción']}/>
+          <tbody>
+            {[['Línea 1','Harina W-280','2.800 kg/h','92%','ok:Activa'],['Línea 2','Harina Eco T-110','1.200 kg/h','78%','ok:Activa'],['Línea 3','Sémola Trigo Duro','2.100 kg/h','85%','ok:Activa'],['Línea 4','—','—','0%','red:Mantenimiento']].map(([lin,prod,vel,ocu,st],i)=>{const[et,ev]=st.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{lin}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{prod}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{vel}</td><td style={{ padding:'8px 10px', fontWeight:700, color:et==='ok'?'#2D8A30':'#e03030' }}>{ocu}</td><td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={et==='red'?'blue':'green'} onClick={()=>act('ver',lin)}>{et==='red'?'Estado':'Registro'}</TblBtn></td></tr>)})}
+          </tbody>
+        </ScrollTable>
+        <IABox text="<strong>IA optimiza producción:</strong> La demanda de Harina Ecológica T-110 ha subido +48%. Recomendación: reasignar Línea 4 (cuando termine mantenimiento) a producción ecológica para cubrir pedidos Q2." />
       </Card>
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Plan de producción semana 16 <IaBadge /></CardTitle>
