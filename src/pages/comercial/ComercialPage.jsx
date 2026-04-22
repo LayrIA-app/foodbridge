@@ -479,29 +479,9 @@ function RutaScreen({ act }) {
       <PageHdr title="Mi Ruta de Hoy" subtitle="Agenda del día — check-in con GPS al llegar" badge={`${visitas.length} visita${visitas.length===1?'':'s'}`} />
       <SearchBar placeholder="Buscar cliente, dirección, zona..." />
 
-      <Card style={{ marginBottom:13, borderLeft:`4px solid ${ACCENT}` }}>
-        <CardTitle>
-          <span style={{ display:'flex', alignItems:'center', gap:6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2D8A30" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            Resumen de ruta <IaBadge />
-          </span>
-        </CardTitle>
-        {/* KPIs HTML v5 l.1633-1638 */}
-        <div className="grid-4" style={{ marginBottom:12 }}>
-          {[
-            { val:'287 km', sub:'Distancia total', color:ACCENT },
-            { val:'4h 12min', sub:'Tiempo conducción', color:NAVY },
-            { val:'52 km', sub:'Ahorro IA vs manual', color:'#2D8A30' },
-            { val:'78.400€', sub:'Potencial en ruta', color:'#1A78FF' },
-          ].map((k,i)=>(
-            <div key={i} style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
-              <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:k.color }}>{k.val}</div>
-              <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>{k.sub}</div>
-            </div>
-          ))}
-        </div>
-        {/* KPIs dinámicos Supabase (Fase 3) */}
-        <div className="grid-4">
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Resumen de ruta <IaBadge /></CardTitle>
+        <div className="grid-4 mb14">
           <div style={{ textAlign:'center', padding:10, background:'#FFFBF5', borderRadius:8, border:'1px solid #E8D5C0' }}>
             <div style={{ fontFamily:'Barlow Condensed', fontSize:'1rem', fontWeight:800, color:ACCENT }}>{visitas.length}</div>
             <div style={{ fontSize:'.55rem', color:'#7a8899', fontWeight:600, marginTop:2 }}>Visitas hoy</div>
@@ -550,64 +530,26 @@ function RutaScreen({ act }) {
         {!loading && !empty && (
           <div style={{ padding:'16px 18px', position:'relative' }}>
             <div style={{ position:'absolute', left:54, top:16, bottom:16, width:3, background:'linear-gradient(to bottom,#2D8A30,#E87420,#1A78FF,#e8a010)', borderRadius:2, opacity:.3 }}/>
-            {/* Mock travel legs — HTML v5 l.1673, 1695, 1719, 1740 */}
-            {(() => {
-              const TRAVEL_LEGS = [
-                { time:'35 min conducción', km:'28 km', via:'AP-7' },
-                { time:'25 min conducción', km:'12 km', via:'V-30' },
-                { time:'20 min conducción', km:'15 km', via:'CV-36' },
-                { time:'40 min conducción', km:'45 km', via:'A-7' },
-              ]
-              const out = []
-              visitas.forEach((v, i) => {
-                const color = VISIT_COLORS[i % VISIT_COLORS.length]
-                const bg = `linear-gradient(135deg,${color}14,${color}06)`
-                const border = `${color}40`
-                out.push(
-                  <VisitCard
-                    key={v.id}
-                    num={i+1}
-                    hour={formatHour(v.scheduled_at)}
-                    color={color}
-                    border={border}
-                    bg={bg}
-                    name={v.cliente_name || 'Cliente'}
-                    loc={v.location || ''}
-                    badge={v.status === 'checked_in' ? 'Check-in hecho' : v.status === 'completed' ? 'Completada' : 'Programada'}
-                    amount=""
-                    act={act}
-                  />
-                )
-                // Marker de pausa comida tras la 3a visita — HTML v5 l.1715-1716
-                if (i === 2 && visitas.length > 3) {
-                  out.push(
-                    <div key={`lunch-${i}`} style={{ display:'flex', gap:14, marginBottom:6 }}>
-                      <div style={{ width:36, textAlign:'center' }}>
-                        <div style={{ fontSize:'.6rem', fontWeight:700, color:'#7a8899', marginTop:4 }}>13:30</div>
-                      </div>
-                      <div style={{ width:18, display:'flex', justifyContent:'center', paddingTop:6 }}>
-                        <div style={{ width:12, height:12, borderRadius:'50%', background:'#f0f4f8', border:'2px solid #dce3eb', zIndex:1 }}/>
-                      </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, background:'linear-gradient(135deg,rgba(122,136,153,.04),rgba(122,136,153,.08))', border:'1px dashed rgba(122,136,153,.2)' }}>
-                        <span style={{ fontSize:'.7rem' }}>🍴</span>
-                        <span style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899' }}>Pausa comida · 1h 30min</span>
-                      </div>
-                    </div>
-                  )
-                }
-                // Travel indicator entre visitas (no despues de la ultima)
-                if (i < visitas.length - 1) {
-                  const legIdx = i >= 2 ? i - (visitas.length > 3 ? 0 : 0) : i
-                  const leg = TRAVEL_LEGS[legIdx % TRAVEL_LEGS.length]
-                  out.push(<TravelIndicator key={`leg-${i}`} time={leg.time} km={leg.km} via={leg.via}/>)
-                }
-              })
-              return out
-            })()}
-            {/* IA box final — HTML v5 l.1761 */}
-            <div style={{ marginTop:10 }}>
-              <IABox text="<strong>IA Ruta:</strong> Orden optimizado por proximidad y urgencia. Congelados Martz adelantado a las 10:30 por pedido urgente. Si Agrudispa no confirma antes de las 13h, IA recomienda sustituir por <strong>Pasteleros del Sur</strong> (misma zona, cotización pendiente)." />
-            </div>
+            {visitas.map((v, i) => {
+              const color = VISIT_COLORS[i % VISIT_COLORS.length]
+              const bg = `linear-gradient(135deg,${color}14,${color}06)`
+              const border = `${color}40`
+              return (
+                <VisitCard
+                  key={v.id}
+                  num={i+1}
+                  hour={formatHour(v.scheduled_at)}
+                  color={color}
+                  border={border}
+                  bg={bg}
+                  name={v.cliente_name || 'Cliente'}
+                  loc={v.location || ''}
+                  badge={v.status === 'checked_in' ? 'Check-in hecho' : v.status === 'completed' ? 'Completada' : 'Programada'}
+                  amount=""
+                  act={act}
+                />
+              )
+            })}
           </div>
         )}
       </Card>
