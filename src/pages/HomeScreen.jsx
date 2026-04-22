@@ -35,7 +35,7 @@ function Typewriter() {
 function Counter() {
   const [n, setN] = useState(0)
   useEffect(() => {
-    const target = 1647
+    const target = 2847
     const step = Math.ceil(target / 60)
     const t = setInterval(() => setN(v => { if (v + step >= target) { clearInterval(t); return target } return v + step }), 20)
     return () => clearInterval(t)
