@@ -3,6 +3,7 @@ import { pdfInformeCEO, pdfFichaTecnica, pdfRentabilidad, pdfCertificaciones, pd
 import { useApp } from '../../context/AppContext'
 import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
+import FichaModal from '../../components/FichaModal'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -1300,6 +1301,7 @@ function OsubirScreen({ act }) {
 
 function OfichasScreen({ act }) {
   const [filter, setFilter] = useState('todas')
+  const [ficha, setFicha] = useState(null)
   const FILTERS = [['todas','Todas (1.247)'],['panificacion','Panificación (342)'],['ecologica','Ecológica (87)'],['semola','Sémolas (156)'],['mezclas','Mezclas (234)'],['otros','Otros (428)']]
   return (
     <div className="animate-fadeIn">
@@ -1332,11 +1334,25 @@ function OfichasScreen({ act }) {
         <ScrollTable>
           <Thead cols={['Producto','Ref.','Fecha','Alérgenos','Estado','Acción']}/>
           <tbody>
-            {[['Harina Eco T-110','HM-ECO-110','16/04','Gluten','ok:Publicada'],['Sémola Trigo Duro','HM-STD-25','15/04','Gluten','amber:Revisión'],['Harina W-280','HM-W280-25','14/04','Gluten','ok:Publicada'],['Harina W-380','HM-W380-25','12/04','Gluten','ok:Publicada']].map(([p,ref,f,al,st],i)=>{const[ct,cv]=st.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('PDF',p)}><td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{p}</td><td style={{ padding:'8px 10px', color:'#7a8899', fontSize:'.62rem' }}>{ref}</td><td style={{ padding:'8px 10px', color:'#7a8899' }}>{f}</td><td style={{ padding:'8px 10px', color:'#e03030', fontSize:'.62rem', fontWeight:600 }}>{al}</td><td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td><td style={{ padding:'8px 10px' }}><TblBtn type={ct==='amber'?'orange':'green'} onClick={e=>{e.stopPropagation();act(ct==='amber'?'revisar':'PDF',p)}}>{ct==='amber'?'Revisar':'PDF'}</TblBtn></td></tr>)})}
+            {[['Harina Eco T-110','HM-ECO-110','16/04','Gluten','ok:Publicada'],['Sémola Trigo Duro','HM-STD-25','15/04','Gluten','amber:Revisión'],['Harina W-280','HM-W280-25','14/04','Gluten','ok:Publicada'],['Harina W-380','HM-W380-25','12/04','Gluten','ok:Publicada']].map(([p,ref,f,al,st],i)=>{
+              const [ct,cv] = st.split(':')
+              const openFicha = () => setFicha({ nombre:p, ref, fabricante:'Harinas Mediterráneo S.L.', categoria:al, estado: ct==='amber'?'parcial':'ok', certs:['14/14 alérg.','Reg. 1169/2011','Reg. 178/2002', ct==='amber'?'Revisión':'Publicada'] })
+              return (
+                <tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={openFicha}>
+                  <td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{p}</td>
+                  <td style={{ padding:'8px 10px', color:'#7a8899', fontSize:'.62rem' }}>{ref}</td>
+                  <td style={{ padding:'8px 10px', color:'#7a8899' }}>{f}</td>
+                  <td style={{ padding:'8px 10px', color:'#e03030', fontSize:'.62rem', fontWeight:600 }}>{al}</td>
+                  <td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td>
+                  <td style={{ padding:'8px 10px' }}><TblBtn type={ct==='amber'?'orange':'green'} onClick={e=>{e.stopPropagation();ct==='amber'?act('revisar',p):openFicha()}}>{ct==='amber'?'Revisar':'Ver ficha'}</TblBtn></td>
+                </tr>
+              )
+            })}
           </tbody>
         </ScrollTable>
         <IABox text="<strong>FoodBridge IA:</strong> Todas las fichas incluyen 14 alérgenos (Reg. 1169/2011), valores nutricionales, parámetros microbiológicos y trazabilidad de lote." />
       </Card>
+      <FichaModal ficha={ficha} onClose={()=>setFicha(null)} />
     </div>
   )
 }
