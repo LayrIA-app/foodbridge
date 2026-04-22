@@ -874,7 +874,8 @@ function FichasScreen({ act }) {
     {ref:'RGSEAA 26.00086/A',tipo:'Registro Sanitario · 18/02/2010',st:'Vigente',stColor:'#2D8A30'},
     {ref:'RGSEAA 31.00015/A',tipo:'Registro Sanitario · 19/02/2010',st:'Vigente',stColor:'#2D8A30'},
     {ref:'RGSEAA 40.20102/A',tipo:'Adaptación Administrativa · 22/06/2015',st:'Vigente',stColor:'#2D8A30'},
-    {ref:'RGSEAA 20.045203/A',tipo:'Notificación Inscripción · 08/09/2014',st:'Vigente',stColor:'#2D8A30'},
+    {ref:'RGSEAA 20.045203/A',tipo:'Notificación de Inscripción · 08/09/2014',st:'Vigente',stColor:'#2D8A30'},
+    {ref:'RGSEAA 20.046236/A',tipo:'Cambio de Titularidad · 05/04/2024',st:'Vigente',stColor:'#2D8A30'},
     {ref:'Acta Inspección APPCC',tipo:'Control Oficial AESAN · 25/02/2026',st:'Conforme',stColor:'#1A78FF'},
   ]
   return (
