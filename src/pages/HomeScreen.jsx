@@ -43,13 +43,7 @@ function Counter() {
   return <span style={{ color: '#E87420' }}>{n.toLocaleString('es-ES')}</span>
 }
 
-const BG_WORDS = [
-  'Ficha Técnica #2847','Cacao 22% MG','14 alérgenos','IFS Food v8','Harina W-280',
-  'Reg. 1169/2011','APPCC validado','Trazabilidad lote','ISO 22000','Punto fusión 34°C',
-  'Proteína 11.2%','BRC Grade A','pH 5.8','Humedad 14%','RGSEAA 26.04812/M',
-  'Gluten <20ppm','Shelf life 18m','Aw 0.65','Cenizas 0.55%','Salmonella ausencia/25g',
-  'E.coli <10 ufc/g',
-]
+const BG_WORDS = ['LÁCTEOS','CONSERVAS','CEREALES','CÁRNICO','ACEITES','VINOS','FRUTAS','VERDURAS','PESCA','ECOLÓGICO','BIO','DOP','IGP']
 
 export default function HomeScreen() {
   const { enterAs } = useApp()
@@ -65,27 +59,20 @@ export default function HomeScreen() {
       {/* Diagonal line */}
       <div style={{ position: 'absolute', top: 0, bottom: 0, left: '55%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(232,120,18,.4),transparent)' }} />
 
-      {/* Floating background items — tecnico/regulatorio HTML v5 l.721-730 */}
+      {/* Floating background words */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {Array.from({ length: 22 }).map((_, i) => {
-          const w = BG_WORDS[i % BG_WORDS.length]
-          return (
-            <span key={i} style={{
-              position: 'absolute',
-              fontFamily: 'DM Sans, sans-serif', fontWeight: 700,
-              color: 'rgba(26,47,74,.04)',
-              fontSize: `${10 + ((i * 7) % 10)}px`,
-              whiteSpace: 'nowrap',
-              maxWidth: 120,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              left: `${((i * 17) + 3) % 70}%`,
-              top: `${((i * 13) + 5) % 90}%`,
-              animation: `drift ${18 + ((i * 11) % 22)}s linear infinite`,
-              animationDelay: `-${(i * 3) % 22}s`,
-            }}>{w}</span>
-          )
-        })}
+        {BG_WORDS.map((w, i) => (
+          <span key={i} style={{
+            position: 'absolute',
+            fontFamily: 'DM Sans', fontWeight: 700,
+            color: 'rgba(26,47,74,.04)',
+            fontSize: `${0.7 + (i % 3) * 0.4}rem`,
+            whiteSpace: 'nowrap',
+            left: `${(i * 7 + 3) % 90}%`,
+            top: `${(i * 11 + 5) % 85}%`,
+            animation: `drift ${14 + i * 2}s linear infinite`,
+          }}>{w}</span>
+        ))}
       </div>
 
       {/* Content */}
