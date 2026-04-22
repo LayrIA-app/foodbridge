@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
+import FichaModal from '../../components/FichaModal'
 import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
@@ -1082,6 +1083,7 @@ function BusquedaScreen({ act }) {
 /* ══ SCREEN 5: FICHAS TÉCNICAS ══ */
 function FichasScreen({ act }) {
   const [openFab, setOpenFab] = useState('harinasmed')
+  const [ficha, setFicha] = useState(null)
   const FABRICANTES = [
     { id:'harinasmed', ini:'HM', color:`linear-gradient(135deg,${ACCENT},#D06A1C)`, badgeType:'orange', nom:'Harinas Mediterráneo', loc:'Valencia · IFS 7.0 · BRC A+', total:'234 fichas',
       fichas:[['Harina Panadera W-280','REF-001','14/14 alérg.','IFS 7.0'],['Harina Ecológica T-110','REF-ECO-001','14/14 alérg.','Eco EU'],['Harina Gran Fuerza W-380','REF-002','14/14 alérg.','IFS 7.0'],['Sémola Trigo Duro','REF-SEM-001','14/14 alérg.','ISO 22000']] },
@@ -1150,21 +1152,24 @@ function FichasScreen({ act }) {
             </div>
             {openFab===f.id && (
               <div style={{ borderTop:'1px solid #F0E4D6' }}>
-                {f.fichas.length>0 ? f.fichas.map(([prod,ref,alerg,cert])=>(
-                  <div key={ref} onClick={()=>act('goto','fichas')} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderBottom:'1px solid #F8FAFC', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{prod}</div>
-                      <div style={{ fontSize:'.55rem', color:'#7a8899' }}>{ref}</div>
+                {f.fichas.length>0 ? f.fichas.map(([prod,ref,alerg,cert])=>{
+                  const openFicha = () => setFicha({ nombre:prod, ref, fabricante:f.nom, categoria:cert, estado:'ok', certs:[cert,'14/14 alérg.','Reg. 1169/2011','Reg. 178/2002'] })
+                  return (
+                    <div key={ref} onClick={openFicha} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderBottom:'1px solid #F8FAFC', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:'.72rem', fontWeight:700, color:NAVY }}>{prod}</div>
+                        <div style={{ fontSize:'.55rem', color:'#7a8899' }}>{ref}</div>
+                      </div>
+                      <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+                        {[alerg,cert].map(b=><span key={b} style={{ fontSize:'.48rem', padding:'2px 6px', borderRadius:10, background:'#EBF5EF', color:'#2D8A30', border:'1px solid #C6F6D5', fontWeight:700 }}>{b}</span>)}
+                      </div>
+                      <div style={{ display:'flex', gap:4 }}>
+                        <button onClick={e=>{e.stopPropagation();openFicha()}} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid rgba(232,116,32,.25)', cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:'rgba(232,116,32,.1)', color:ACCENT, fontFamily:'DM Sans' }}>Ver</button>
+                        <button onClick={e=>{e.stopPropagation();import('../../utils/generatePDF').then(m=>m.pdfFichaTecnica({ nombre:prod, ref }))}} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid rgba(45,138,48,.25)', cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:'rgba(45,138,48,.08)', color:'#2D8A30', fontFamily:'DM Sans' }}>PDF</button>
+                      </div>
                     </div>
-                    <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-                      {[alerg,cert].map(b=><span key={b} style={{ fontSize:'.48rem', padding:'2px 6px', borderRadius:10, background:'#EBF5EF', color:'#2D8A30', border:'1px solid #C6F6D5', fontWeight:700 }}>{b}</span>)}
-                    </div>
-                    <div style={{ display:'flex', gap:4 }}>
-                      <TblBtn type="orange" onClick={e=>{e.stopPropagation();act('goto','fichas')}}>Ver</TblBtn>
-                      <TblBtn type="green" onClick={e=>{e.stopPropagation();act('exportar',prod)}}>PDF</TblBtn>
-                    </div>
-                  </div>
-                )) : (
+                  )
+                }) : (
                   <div style={{ padding:'12px 16px', fontSize:'.65rem', color:'#7a8899', textAlign:'center' }}>Usa el buscador para encontrar fichas de cualquiera de los 23 fabricantes</div>
                 )}
                 {f.fichas.length>0 && <div onClick={()=>act('ver_todas',f.nom)} style={{ padding:'8px 16px', fontSize:'.6rem', color:'#7a8899', textAlign:'center', cursor:'pointer' }}>+ {parseInt(f.total)-f.fichas.length} fichas más — Ver todas →</div>}
@@ -1173,6 +1178,7 @@ function FichasScreen({ act }) {
           </Card>
         ))}
       </div>
+      <FichaModal ficha={ficha} onClose={()=>setFicha(null)} />
     </div>
   )
 }
