@@ -398,16 +398,33 @@ function DashScreen({ act }) {
       {/* TOP FABRICANTES */}
       <div className="grid-2 mb14">
         <Card>
-          <CardTitle>Operaciones mensuales 2026 <IaBadge /></CardTitle>
-          {[{m:'Enero',v:82,c:'#2D8A30'},{m:'Febrero',v:96,c:'#2D8A30'},{m:'Marzo',v:124,c:ACCENT},{m:'Abril',v:42,c:'#1A78FF',sub:'en curso'}].map((r,i)=>(
-            <div key={i} style={{ marginBottom:8 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', fontSize:'.68rem', marginBottom:3 }}>
-                <span style={{ fontWeight:600, color:NAVY }}>{r.m}</span>
-                <span style={{ color:r.c, fontWeight:700 }}>{r.v}{r.sub?` (${r.sub})`:''}</span>
-              </div>
-              <Pbar pct={Math.round(r.v/1.3)} color={r.c} height={6}/>
-            </div>
-          ))}
+          <CardTitle>Operaciones mensuales 2026 vs 2025 <IaBadge /></CardTitle>
+          {/* Bar chart 12 meses 2026 vs 2025 — fidelidad HTML v5 l.2700-2730 (Chart.js bar) */}
+          {(() => {
+            const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+            const V26 = [98,112,130,42,null,null,null,null,null,null,null,null]
+            const V25 = [64,71,88,82,76,91,68,54,95,102,87,93]
+            const MAX = 140
+            return (
+              <>
+                <div style={{ display:'flex', alignItems:'flex-end', gap:4, height:180, padding:'4px 2px', borderLeft:'1px solid rgba(26,47,74,.08)', borderBottom:'1px solid rgba(26,47,74,.08)' }}>
+                  {MONTHS.map((m,i)=>(
+                    <div key={m} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3, height:'100%' }}>
+                      <div style={{ flex:1, display:'flex', alignItems:'flex-end', gap:2, width:'100%', justifyContent:'center' }}>
+                        <div title={`Operaciones 2026: ${V26[i] ?? '—'}`} style={{ width:'42%', height:`${(V26[i]||0)/MAX*100}%`, background: V26[i]!=null ? (i<=2 ? ACCENT : 'rgba(232,116,32,.4)') : 'rgba(232,116,32,.08)', borderRadius:'3px 3px 0 0', minHeight: V26[i]!=null?2:0, transition:'height .8s cubic-bezier(.4,0,.2,1)' }}/>
+                        <div title={`Operaciones 2025: ${V25[i]}`} style={{ width:'42%', height:`${V25[i]/MAX*100}%`, background:'rgba(26,47,74,.25)', borderRadius:'3px 3px 0 0', minHeight:2, transition:'height .8s cubic-bezier(.4,0,.2,1)' }}/>
+                      </div>
+                      <div style={{ fontSize:'.5rem', color:'#7a8899', fontWeight:600 }}>{m}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display:'flex', justifyContent:'center', gap:14, marginTop:8, fontSize:'.58rem', color:'#7a8899' }}>
+                  <span style={{ display:'flex', alignItems:'center', gap:4 }}><span style={{ width:10, height:10, background:ACCENT, borderRadius:2, display:'inline-block' }}/>Operaciones 2026</span>
+                  <span style={{ display:'flex', alignItems:'center', gap:4 }}><span style={{ width:10, height:10, background:'rgba(26,47,74,.25)', borderRadius:2, display:'inline-block' }}/>Operaciones 2025</span>
+                </div>
+              </>
+            )
+          })()}
           <IABox text="<strong>Proyección IA:</strong> Al ritmo actual, cerrarás 2026 con <strong>~1.580 operaciones</strong> — un 52% más que 2025." />
         </Card>
         <Card>
