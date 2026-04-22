@@ -1391,14 +1391,47 @@ function OproduccionScreen({ act }) {
 function OtrazabilidadScreen({ act }) {
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Trazabilidad" subtitle="Trazabilidad completa hacia atrás y hacia adelante — Reg. 178/2002" />
+      <PageHdr title="Trazabilidad Avanzada" subtitle="Rastreo completo hacia atrás y hacia adelante de cada lote — IA localiza cualquier producto en segundos" badge="Reg. 178/2002" />
       <SearchBar placeholder="Buscar lote, producto o cliente..." />
       <div className="grid-4 mb14">
-        <KPI val="100%" label="Trazabilidad completa" delta="▲ Reg. 178/2002" up color="#2D8A30"/>
-        <KPI val="1.247" label="Lotes rastreables" delta="▲ Todos con ficha" up color={ACCENT}/>
-        <KPI val="0" label="Alertas trazabilidad" delta="▲ Sin incidencias" up color="#1A78FF"/>
-        <KPI val="48h" label="Tiempo max. rastreo" delta="→ IA en minutos" color="#9B59B6"/>
+        <KPI val="100%" label="Lotes trazados" delta="▲ Reg. 178/2002" up color="#2D8A30"/>
+        <KPI val="4.2s" label="Tiempo localiz. IA" delta="▲ vs 48h manual" up color={ACCENT}/>
+        <KPI val="312" label="Lotes activos" delta="▲ Q1+Q2 2026" up color="#1A78FF"/>
+        <KPI val="0" label="Alertas de retirada" delta="▲ Sin incidencias" up color="#9B59B6"/>
       </div>
+
+      {/* Busqueda rapida de lote + desglose L-2026-0415 — HTML v5 l.3621-3634 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Búsqueda rápida de lote <IaBadge /></CardTitle>
+        <div style={{ position:'relative', marginBottom:14 }}>
+          <input type="text" placeholder="Introduce número de lote o producto..." style={{ width:'100%', padding:'12px 46px 12px 14px', border:'2px solid rgba(232,116,32,.2)', borderRadius:10, fontSize:'.72rem', fontFamily:'DM Sans,sans-serif', outline:'none', boxSizing:'border-box', color:NAVY }}
+            onFocus={e=>e.target.style.borderColor=ACCENT} onBlur={e=>e.target.style.borderColor='rgba(232,116,32,.2)'} />
+          <button onClick={()=>act('ver','Búsqueda lote L-2026-0415')} style={{ position:'absolute', right:6, top:'50%', transform:'translateY(-50%)', width:34, height:34, borderRadius:8, border:'none', background:`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div style={{ padding:14, borderRadius:8, background:'linear-gradient(135deg,rgba(45,138,48,.06),rgba(45,138,48,.02))', border:'1px solid rgba(45,138,48,.15)' }}>
+          <div style={{ fontSize:'.6rem', fontWeight:800, color:'#2D8A30', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:10 }}>Lote L-2026-0415 — Harina Ecológica T-110</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:8, marginBottom:10 }}>
+            {[
+              { label:'ORIGEN MATERIA PRIMA', title:'Trigo BIO — Coop. Castilla', sub:'Partida: TBC-2026-0082 · Cert. ECO-ES-023' },
+              { label:'PRODUCCIÓN', title:'15/04/2026 — Línea B', sub:'Cantidad: 8.000 kg · Responsable: Carmen V.' },
+              { label:'ANÁLISIS', title:'Aprobado — Laboratorio SGS', sub:'Micro OK · Humedad 12.4% · Gluten declarado', green:true },
+              { label:'DESTINO', title:'Panaderías Leopold · Valencia', sub:'Pedido PED-2026-415 · Entrega: 17/04' },
+            ].map((t,i)=>(
+              <div key={i} style={{ padding:8, borderRadius:6, background:'#fff', border:'1px solid rgba(45,138,48,.12)' }}>
+                <div style={{ fontSize:'.55rem', color:'#7a8899', marginBottom:2 }}>{t.label}</div>
+                <div style={{ fontSize:'.65rem', fontWeight:700, color: t.green ? '#2D8A30' : NAVY }}>{t.title}</div>
+                <div style={{ fontSize:'.55rem', color:'#7a8899' }}>{t.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+            <BtnSm onClick={()=>act('exportar','Trazabilidad L-2026-0415')}>Exportar PDF</BtnSm>
+            <BtnSm outline onClick={()=>act('comunicar','Trazabilidad cliente')}>Enviar al cliente</BtnSm>
+          </div>
+        </div>
+      </Card>
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Cadena de trazabilidad — L-2026-0416 <IaBadge /></CardTitle>
         {[{color:'#2D8A30',bg:'#F0FFF4',border:'#C6F6D5',step:'1. Recepción MP',det:'Trigo duro — Origen: Castilla-La Mancha · Proveedor: Cereales Alcarria · Lote MP: CA-2026-112',fecha:'10/04/2026',ok:true},{color:'#1A78FF',bg:'#EEF5FF',border:'#B5D4F4',step:'2. Producción',det:'Molienda Línea 1 · Velocidad: 2.800 kg/h · Temperatura: 38°C · PCC validados: 7/7',fecha:'16/04/2026',ok:true},{color:ACCENT,bg:'#FFF8F0',border:'rgba(232,116,32,.15)',step:'3. Control calidad',det:'Análisis laboratorio: Humedad 13.8% · Proteína 11.4% · Cenizas 0.54% · Salmonella: ausencia',fecha:'16/04/2026',ok:true},{color:'#9B59B6',bg:'#F8F0FF',border:'rgba(155,89,182,.15)',step:'4. Expedición',det:'Destino: Panaderías Leopold (Valencia) · Transportista: Trans Iberia · Temperatura: 16°C',fecha:'17/04/2026',ok:true}].map((s,i)=>(
