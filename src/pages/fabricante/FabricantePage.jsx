@@ -1303,7 +1303,48 @@ function OsubirScreen({ act }) {
 function OfichasScreen({ act }) {
   const [filter, setFilter] = useState('todas')
   const [ficha, setFicha] = useState(null)
+  const [openCat, setOpenCat] = useState('panificacion')
   const FILTERS = [['todas','Todas (1.247)'],['panificacion','Panificación (342)'],['ecologica','Ecológica (87)'],['semola','Sémolas (156)'],['mezclas','Mezclas (234)'],['otros','Otros (428)']]
+  /* Acordeón biblioteca por categoría — fidelidad HTML v5 l.3352-3409 */
+  const FICHA_CATS = [
+    {
+      id:'panificacion', nombre:'Harinas Panificación', dot:'#E87420', badgeType:'orange', badge:'342 fichas', sub:'341 completas',
+      items: [
+        { nombre:'Harina Panadera W-280', ref:'REF-001', alerg:'14/14 alérg.', cert:'IFS 7.0', estado:'ok' },
+        { nombre:'Harina Gran Fuerza W-380', ref:'REF-002', alerg:'14/14 alérg.', cert:'Micro pend.', estado:'parcial' },
+        { nombre:'Harina Repostería W-180', ref:'REF-003', alerg:'14/14 alérg.', cert:'BRC A+', estado:'ok' },
+      ],
+      more: 339,
+    },
+    {
+      id:'ecologica', nombre:'Harinas Ecológicas', dot:'#2D8A30', badgeType:'ok', badge:'87 fichas', sub:'87 completas',
+      items: [
+        { nombre:'Harina Ecológica T-110', ref:'REF-ECO-001', alerg:'14/14 alérg.', cert:'Eco EU', estado:'ok' },
+        { nombre:'Harina Espelta BIO', ref:'REF-ECO-002', alerg:'14/14 alérg.', cert:'Eco EU', estado:'ok' },
+      ],
+      more: 85,
+    },
+    {
+      id:'semola', nombre:'Sémolas', dot:'#1A78FF', badgeType:'blue', badge:'156 fichas', sub:'156 completas',
+      items: [
+        { nombre:'Sémola Trigo Duro', ref:'REF-SEM-001', alerg:'14/14 alérg.', cert:'ISO 22000', estado:'ok' },
+      ],
+      more: 155,
+    },
+    {
+      id:'mezclas', nombre:'Mezclas y Mejorantes', dot:'#9B59B6', badgeType:'blue', badge:'234 fichas', sub:'6 en proceso',
+      items: [
+        { nombre:'Catálogo Mejorantes 2026', ref:'REF-MEZ-CAT', alerg:'IA procesando', cert:'34 productos', estado:'parcial' },
+      ],
+      more: 233,
+    },
+    {
+      id:'otros', nombre:'Otros (Salvados, Copos, Especiales)', dot:'#7a8899', badgeType:'amber', badge:'428 fichas', sub:'usa el buscador',
+      items: [],
+      more: 0,
+      note:'428 fichas disponibles — usa el buscador para encontrar productos específicos',
+    },
+  ]
   return (
     <div className="animate-fadeIn">
       <PageHdr title="Fichas Técnicas" subtitle="1.247 fichas generadas por IA — Reg. 1169/2011" />
@@ -1329,6 +1370,56 @@ function OfichasScreen({ act }) {
             {[['Harinas panificación','342','ok:342','0'],['Harinas repostería','198','ok:198','0'],['Harinas ecológicas','87','ok:87','0'],['Sémolas','156','amber:151','5'],['Mezclas y mejorantes','234','amber:228','6'],['Otros','230','amber:224','6']].map(([cat,tot,pub,rev],i)=>{const[pt,pv]=pub.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''} onClick={()=>act('ver',`Categoría ${cat} · ${tot} fichas`)}><td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{cat}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{tot}</td><td style={{ padding:'8px 10px' }}><Badge type={pt} text={pv}/></td><td style={{ padding:'8px 10px', color:rev==='0'?'#2D8A30':'#e8a010', fontWeight:700 }}>{rev}</td><td style={{ padding:'8px 10px' }}><TblBtn type="orange" onClick={e=>{e.stopPropagation();act('ver',`Fichas ${cat}`)}}>Ver fichas</TblBtn></td></tr>)})}
           </tbody>
         </ScrollTable>
+      </Card>
+
+      {/* Biblioteca acordeón por categoría con ficha-items individuales — HTML v5 l.3352-3409 */}
+      <Card style={{ marginBottom:13, padding:0, overflow:'hidden' }}>
+        <div style={{ padding:'14px 16px', borderBottom:'1px solid #F0E4D6' }}>
+          <CardTitle>Biblioteca de fichas <IaBadge /></CardTitle>
+        </div>
+        {FICHA_CATS.map(cat => {
+          const isOpen = openCat === cat.id
+          return (
+            <div key={cat.id} style={{ borderBottom:'1px solid #F0E4D6' }}>
+              <div onClick={()=>setOpenCat(isOpen?null:cat.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: isOpen?'rgba(232,116,32,.03)':'transparent', flexWrap:'wrap' }} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#FFF8F0'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='transparent'}}>
+                <div style={{ width:10, height:10, borderRadius:'50%', background:cat.dot, flexShrink:0 }}/>
+                <span style={{ fontSize:'.72rem', fontWeight:700, color:NAVY, flex:'1 1 auto', minWidth:120 }}>{cat.nombre}</span>
+                <Badge type={cat.badgeType} text={cat.badge}/>
+                <span style={{ fontSize:'.5rem', fontWeight:700, padding:'2px 7px', borderRadius:10, background:'rgba(45,138,48,.1)', color:'#2D8A30', border:'1px solid rgba(45,138,48,.2)' }}>{cat.sub}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a8899" strokeWidth="2" style={{ transform: isOpen?'rotate(180deg)':'', transition:'transform .2s', flexShrink:0, marginLeft:'auto' }}><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              {isOpen && (
+                <div style={{ background:'#fff', paddingBottom:8 }}>
+                  {cat.note && (
+                    <div style={{ padding:'12px 16px', fontSize:'.65rem', color:'#7a8899', textAlign:'center' }}>{cat.note}</div>
+                  )}
+                  {cat.items.map(item => {
+                    const openFicha = () => setFicha({ nombre:item.nombre, ref:item.ref, fabricante:'Harinas Mediterráneo S.L.', categoria:cat.nombre, estado:item.estado, certs:[item.alerg, item.cert, 'Reg. 1169/2011', 'Reg. 178/2002'] })
+                    return (
+                      <div key={item.ref} onClick={openFicha} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderTop:'1px solid #F8FAFC', cursor:'pointer', flexWrap:'wrap' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                        <div style={{ flex:'1 1 200px', minWidth:0 }}>
+                          <div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY }}>{item.nombre}</div>
+                          <div style={{ fontSize:'.55rem', color:'#7a8899' }}>{item.ref}</div>
+                        </div>
+                        <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+                          <span style={{ fontSize:'.48rem', padding:'2px 6px', borderRadius:10, background: item.estado==='parcial'?'#FDF3E7':'#EBF5EF', color: item.estado==='parcial'?'#e8a010':'#2D8A30', border:`1px solid ${item.estado==='parcial'?'rgba(232,160,16,.3)':'#C6F6D5'}`, fontWeight:700 }}>{item.alerg}</span>
+                          <span style={{ fontSize:'.48rem', padding:'2px 6px', borderRadius:10, background: item.estado==='parcial'?'#FDF3E7':'#EBF5EF', color: item.estado==='parcial'?'#e8a010':'#2D8A30', border:`1px solid ${item.estado==='parcial'?'rgba(232,160,16,.3)':'#C6F6D5'}`, fontWeight:700 }}>{item.cert}</span>
+                        </div>
+                        <div style={{ display:'flex', gap:4 }}>
+                          <button onClick={e=>{e.stopPropagation();openFicha()}} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid rgba(232,116,32,.25)', cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:'rgba(232,116,32,.1)', color:ACCENT, fontFamily:'DM Sans' }}>Ver</button>
+                          <button onClick={e=>{e.stopPropagation();pdfFichaTecnica({ nombre:item.nombre, ref:item.ref })}} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid rgba(45,138,48,.25)', cursor:'pointer', fontSize:'.58rem', fontWeight:700, background:'rgba(45,138,48,.08)', color:'#2D8A30', fontFamily:'DM Sans' }}>PDF</button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {cat.more > 0 && (
+                    <div onClick={()=>act('ver_todas', cat.nombre)} style={{ padding:'8px 16px', fontSize:'.6rem', color:'#7a8899', textAlign:'center', cursor:'pointer', borderTop:'1px solid #F8FAFC' }}>+ {cat.more} fichas más — Ver todas →</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </Card>
       <Card>
         <CardTitle>Últimas fichas generadas <IaBadge /></CardTitle>
