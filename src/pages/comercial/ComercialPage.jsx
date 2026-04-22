@@ -1016,13 +1016,25 @@ function EquivalenciasScreen({ act }) {
 function TarifasScreen({ act }) {
   return (
     <div className="animate-fadeIn">
-      <PageHdr title="Tarifas IA" subtitle="Precios actualizados automáticamente según mercado de materias primas — IA detecta cuándo actualizar" />
+      <PageHdr title="Tarifas IA" subtitle="Precios actualizados automáticamente según mercado de materias primas — IA detecta cuándo actualizar" badge="Actualización automática" />
       <SearchBar placeholder="Buscar producto o tarifa..." />
+
+      {/* Banner Motor de Precios IA — HTML v5 l.2318-2321 */}
+      <div style={{ background:'linear-gradient(135deg,rgba(155,89,182,.08),rgba(232,116,32,.06))', borderRadius:10, padding:'12px 16px', marginBottom:14, border:'1px solid rgba(155,89,182,.2)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+          <div className="animate-dotPulse" style={{ width:7, height:7, borderRadius:'50%', background:'#9B59B6' }} />
+          <span style={{ fontSize:'.6rem', fontWeight:800, color:'#9B59B6', letterSpacing:'.1em', textTransform:'uppercase' }}>Motor de Precios IA Activo</span>
+        </div>
+        <div style={{ fontSize:'.68rem', color:'#3a4a5a', lineHeight:1.6 }}>
+          FoodBridge IA monitoriza <strong>47 variables de mercado en tiempo real</strong>: cotización del trigo en MATIF (París), precio energético industrial, coste del transporte, tipo de cambio EUR/USD, índice IPC alimentario y demanda estacional. Cuando una variable supera el umbral configurado, <strong>la IA recalcula y propone la actualización de tarifa en segundos</strong>.
+        </div>
+      </div>
+
       <div className="grid-4 mb14">
-        <KPI val="6" label="Tarifas activas" delta="→ Actualizadas Q1" color={ACCENT}/>
-        <KPI val="18%" label="Margen medio" delta="▲ Objetivo: 15-22%" up color="#2D8A30"/>
-        <KPI val="2" label="Por actualizar" delta="▼ IA detectó variación" color="#e03030"/>
-        <KPI val="12 min" label="vs 3 días manual" delta="▲ con IA" up color="#1A78FF"/>
+        <KPI val="47" label="Variables monitorizadas" delta="▲ Tiempo real 24/7" up color="#9B59B6"/>
+        <KPI val="3" label="Actualizaciones Q1" delta="▲ Automáticas" up color="#2D8A30"/>
+        <KPI val="12 min" label="Tiempo medio actualiz." delta="▲ vs 3 días manual" up color={ACCENT}/>
+        <KPI val="98,4%" label="Precisión predicción" delta="▲ Modelo entrenado" up color="#1A78FF"/>
       </div>
       <Card style={{ marginBottom:13 }}>
         <CardTitle>Tabla de tarifas vigentes <IaBadge /></CardTitle>
