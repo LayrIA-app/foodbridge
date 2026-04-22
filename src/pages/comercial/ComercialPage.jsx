@@ -697,42 +697,15 @@ function VisitasScreen({ act }) {
               <span style={{ fontSize:'.55rem', fontWeight:700, color:'#2D8A30' }}>GPS DISPONIBLE</span>
             </div>
           </div>
-          {/* g2: ubicacion GPS / Resultado 1 toque + Dicta notas voz — HTML v5 l.1786-1811 */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:14 }}>
-            <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid rgba(45,138,48,.2)' }}>
-              <div style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>UBICACIÓN DETECTADA</div>
-              <div style={{ fontSize:'.82rem', fontWeight:800, color:NAVY, marginBottom:4 }}>{proximaPendiente.cliente_name || 'Cliente'}</div>
-              <div style={{ fontSize:'.62rem', color:'#7a8899', marginBottom:10 }}>{proximaPendiente.location || 'Sin ubicación'}</div>
-              <div style={{ display:'flex', gap:6, marginBottom:10, flexWrap:'wrap' }}>
-                <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 8px', borderRadius:12, background:'rgba(232,116,32,.08)', color:ACCENT, border:'1px solid rgba(232,116,32,.15)' }}>Programada: {formatHour(proximaPendiente.scheduled_at)}</span>
-              </div>
-              <button disabled={busyId===proximaPendiente.id} onClick={()=>doCheckIn(proximaPendiente.id)} style={{ width:'100%', padding:12, fontSize:'.75rem', background:busyId===proximaPendiente.id?'#aaa':`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, cursor:busyId===proximaPendiente.id?'not-allowed':'pointer', fontFamily:'DM Sans', fontWeight:700 }}>
-                {busyId===proximaPendiente.id ? 'Localizando GPS…' : '✓ Confirmar check-in'}
-              </button>
+          <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid rgba(45,138,48,.2)' }}>
+            <div style={{ fontSize:'.82rem', fontWeight:800, color:NAVY, marginBottom:4 }}>{proximaPendiente.cliente_name || 'Cliente'}</div>
+            <div style={{ fontSize:'.62rem', color:'#7a8899', marginBottom:10 }}>{proximaPendiente.location || 'Sin ubicación'}</div>
+            <div style={{ display:'flex', gap:6, marginBottom:10, flexWrap:'wrap' }}>
+              <span style={{ fontSize:'.55rem', fontWeight:700, padding:'3px 8px', borderRadius:12, background:'rgba(232,116,32,.08)', color:ACCENT, border:'1px solid rgba(232,116,32,.15)' }}>Programada: {formatHour(proximaPendiente.scheduled_at)}</span>
             </div>
-            <div style={{ background:'#fff', borderRadius:10, padding:14, border:'1px solid #E8D5C0' }}>
-              <div style={{ fontSize:'.55rem', fontWeight:700, color:'#7a8899', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>AL SALIR: RESULTADO EN 1 TOQUE</div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:10 }}>
-                {[
-                  { ico:'📦', label:'Pedido', color:'#2D8A30', bg:'rgba(45,138,48,.06)', border:'rgba(45,138,48,.2)', accion:'pedido' },
-                  { ico:'📄', label:'Cotización', color:ACCENT, bg:'rgba(232,116,32,.06)', border:'rgba(232,116,32,.2)', accion:'cotización' },
-                  { ico:'📬', label:'Muestra', color:'#1A78FF', bg:'rgba(26,120,255,.06)', border:'rgba(26,120,255,.2)', accion:'muestra' },
-                  { ico:'⏱️', label:'Seguimiento', color:'#7a8899', bg:'rgba(122,136,153,.06)', border:'rgba(122,136,153,.2)', accion:'seguimiento' },
-                ].map((r,i)=>(
-                  <div key={i} onClick={()=>act('resultado',`${r.accion} ${proximaPendiente.cliente_name||''}`.trim())} style={{ padding:10, borderRadius:8, background:r.bg, border:`1.5px solid ${r.border}`, textAlign:'center', cursor:'pointer', transition:'transform .15s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform=''}>
-                    <div style={{ fontSize:'.9rem', marginBottom:2 }}>{r.ico}</div>
-                    <div style={{ fontSize:'.62rem', fontWeight:700, color:r.color }}>{r.label}</div>
-                  </div>
-                ))}
-              </div>
-              {/* Dicta notas por voz — desactivado 🔒 Proximamente (Fase 4) */}
-              <div title="Próximamente" style={{ display:'flex', gap:8, alignItems:'center', padding:'8px 12px', background:'rgba(232,116,32,.04)', borderRadius:8, border:'1px dashed rgba(232,116,32,.2)', cursor:'not-allowed', opacity:.7 }}>
-                <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${ACCENT},#F5A623)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#fff" strokeWidth="2"/></svg>
-                </div>
-                <div style={{ fontSize:'.62rem', color:'#7a8899' }}>🔒 Próximamente — dictar notas de la visita por voz</div>
-              </div>
-            </div>
+            <button disabled={busyId===proximaPendiente.id} onClick={()=>doCheckIn(proximaPendiente.id)} style={{ width:'100%', padding:12, fontSize:'.75rem', background:busyId===proximaPendiente.id?'#aaa':`linear-gradient(135deg,${ACCENT},#D06A1C)`, color:'#fff', border:'none', borderRadius:8, cursor:busyId===proximaPendiente.id?'not-allowed':'pointer', fontFamily:'DM Sans', fontWeight:700 }}>
+              {busyId===proximaPendiente.id ? 'Localizando GPS…' : '✓ Hacer check-in ahora'}
+            </button>
           </div>
         </Card>
       ) : null}
