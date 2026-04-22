@@ -302,8 +302,70 @@ function VentasCanal({ act }) {
 
   return (
     <div className="animate-fadeIn">
+      <PageHdr title="Ventas por Canal" subtitle="Análisis detallado de rendimiento por canal de distribución" />
+      <SearchBar placeholder="Buscar canal, zona o mes..." />
+
+      {/* KPI×3 canales fijos HTML v5 l.3007-3011 */}
+      <div className="grid-3 mb14">
+        <KPI val="487k€" label="Canal B2B (Agentes)" delta="▲ 57% del total" up color="#2D8A30"/>
+        <KPI val="234k€" label="Venta directa" delta="▲ 28% del total" up color="#1A78FF"/>
+        <KPI val="126k€" label="Marketplace" delta="▲ 15% del total" up color={ACCENT}/>
+      </div>
+
+      {/* Evolución mensual por canal — HTML v5 l.3012-3021 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Evolución mensual por canal</CardTitle>
+        <ScrollTable>
+          <Thead cols={['Mes','B2B Agentes','Venta directa','Marketplace','Total']}/>
+          <tbody>
+            {[['Enero','148.000€','72.000€','38.000€','258.000€'],['Febrero','162.000€','78.000€','42.000€','282.000€'],['Marzo','177.000€','84.000€','46.000€','307.000€']].map(([m,b,d,mp,t],i)=>(
+              <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
+                <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{m}</td>
+                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{b}</td>
+                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{d}</td>
+                <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{mp}</td>
+                <td style={{ padding:'8px 10px', fontWeight:700, color:ACCENT }}>{t}</td>
+              </tr>
+            ))}
+          </tbody>
+        </ScrollTable>
+        <IABox text="<strong>Tendencia IA:</strong> Canal B2B crece un 9,8% mensual. A este ritmo, representará el 65% de ingresos en Q3. <strong>Marketplace es el canal con mayor crecimiento relativo (+10,5%/mes).</strong>" />
+      </Card>
+
+      {/* Rendimiento por zona geográfica — HTML v5 l.3022-3033 */}
+      <Card style={{ marginBottom:13 }}>
+        <CardTitle>Rendimiento por zona geográfica <IaBadge /></CardTitle>
+        <ScrollTable>
+          <Thead cols={['Zona','Agente','Q1 Real','Objetivo Q1','Cumplimiento','Estado']}/>
+          <tbody>
+            {[
+              { zona:'Levante', agente:'J.L. Martínez', real:'124.8k€', realColor:'#2D8A30', obj:'118k€', cump:'ok:105.8%', est:'ok:Top performer', rowBg:'' },
+              { zona:'Cataluña', agente:'A. García', real:'98.4k€', realColor:'#2D8A30', obj:'95k€', cump:'ok:103.6%', est:'ok:Top performer', rowBg:'' },
+              { zona:'Andalucía', agente:'C. Ruiz', real:'72.3k€', realColor:'#1A78FF', obj:'78k€', cump:'amber:92.7%', est:'amber:En objetivo', rowBg:'' },
+              { zona:'Portugal', agente:'M. Santos', real:'56.2k€', realColor:'#1A78FF', obj:'48k€', cump:'ok:117.1%', est:'ok:Nuevo mercado ★', rowBg:'' },
+              { zona:'Baleares', agente:'P. Almeida', real:'34.1k€', realColor:'#e8a010', obj:'52k€', cump:'red:65.6%', est:'red:Apoyo IA', rowBg:'' },
+              { zona:'Sin cobertura', agente:'Zona vacante', real:'—', realColor:'#7a8899', obj:'~214k€', cump:null, est:'orange:Oportunidad', rowBg:'#FFFBF5' },
+            ].map((z,i) => {
+              const [ct,cv] = z.cump ? z.cump.split(':') : [null,null]
+              const [et,ev] = z.est.split(':')
+              return (
+                <tr key={i} style={{ borderBottom:'1px solid #F0E4D6', background:z.rowBg }}>
+                  <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{z.zona}</td>
+                  <td style={{ padding:'8px 10px', color:z.agente==='Zona vacante'?'#7a8899':'#3a4a5a', fontStyle:z.agente==='Zona vacante'?'italic':'normal' }}>{z.agente}</td>
+                  <td style={{ padding:'8px 10px', color:z.realColor, fontWeight:700 }}>{z.real}</td>
+                  <td style={{ padding:'8px 10px', color: z.zona==='Sin cobertura' ? ACCENT : '#3a4a5a', fontWeight: z.zona==='Sin cobertura' ? 700 : 400 }}>{z.obj}</td>
+                  <td style={{ padding:'8px 10px' }}>{ct ? <Badge type={ct} text={cv}/> : '—'}</td>
+                  <td style={{ padding:'8px 10px' }}><Badge type={et} text={ev}/></td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </ScrollTable>
+        <IABox text="<strong>IA detecta:</strong> La zona Centro (Madrid) no tiene cobertura y concentra la mayor densidad de panaderías artesanales de España. <strong>Potencial no capturado: 214k€ anuales.</strong>" />
+      </Card>
+
+      {/* Ventas por Cliente (vista Supabase Fase 3) */}
       <PageHdr title="Ventas por Cliente" subtitle="Desglose agregado — quién compra, cuánto y cuándo" />
-      <SearchBar placeholder="Buscar cliente..." />
       <div className="grid-3 mb14">
         <KPI val={formatEur(kpis.facturacion_delivered)} label="Facturación entregada" delta={`${kpis.clientes_unicos} clientes`} up color="#2D8A30"/>
         <KPI val={String(kpis.pedidos_delivered)} label="Pedidos completados" delta={`${kpis.pedidos_activos} activos`} up color="#1A78FF"/>
