@@ -283,7 +283,7 @@ function DashboardCEO({ act }) {
           <ScrollTable>
             <Thead cols={['Producto','Sol.','Conv.','Tend.']}/>
             <tbody>
-              {[['Harina W-280','342','ok:87%','▲ +22%'],['Harina W-380','198','ok:82%','▲ +15%'],['Sémola','156','amber:74%','▼ -0.8%'],['Harina Repostería W-180','134','ok:79%','→ +2%'],['H. Integral','134','ok:91%','▲ +31%']].map(([p,s,c,t],i)=>{const[ct,cv]=c.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{p}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{s}</td><td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td><td style={{ padding:'8px 10px', color:t.includes('▲')?'#2D8A30':t.includes('→')?'#e8a010':'#e03030', fontWeight:700 }}>{t}</td></tr>)})}
+              {[['Harina W-280','342','ok:87%','▲ +22%'],['Harina W-380','198','ok:82%','▲ +15%'],['Sémola','156','amber:74%','▼ -0.8%'],['H. Integral','134','ok:91%','▲ +31%']].map(([p,s,c,t],i)=>{const[ct,cv]=c.split(':');return(<tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}><td style={{ padding:'8px 10px', fontWeight:600, color:NAVY }}>{p}</td><td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{s}</td><td style={{ padding:'8px 10px' }}><Badge type={ct} text={cv}/></td><td style={{ padding:'8px 10px', color:t.includes('▲')?'#2D8A30':'#e03030', fontWeight:700 }}>{t}</td></tr>)})}
             </tbody>
           </ScrollTable>
         </Card>
