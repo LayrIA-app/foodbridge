@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 
 const TW_TEXTS = [
-  'Conectando fabricantes con el mercado global...',
-  'IA que cruza 1.600+ fichas técnicas en segundos...',
-  'Matching inteligente en tiempo real...',
-  'Trazabilidad completa de principio a fin...',
+  'FoodBridge IA extrae datos de 1.600+ fichas técnicas automáticamente.',
+  'Cruza alérgenos, certificaciones y parámetros en segundos.',
+  'Genera cotizaciones con márgenes optimizados por inteligencia artificial.',
+  'Trazabilidad completa Reg. 178/2002 en cada operación.',
+  'Equivalencias de producto calculadas con IA de 4ª generación.',
 ]
 
 function Typewriter() {
