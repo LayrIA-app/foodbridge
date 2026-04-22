@@ -779,35 +779,6 @@ function VisitasScreen({ act }) {
         )}
       </Card>
 
-      {/* Clientes sin visita reciente — HTML v5 l.1825-1834 */}
-      <Card style={{ marginBottom:13 }}>
-        <CardTitle>Clientes sin visita reciente <IaBadge /></CardTitle>
-        <ScrollTable>
-          <Thead cols={['Cliente','Última visita','Días','Volumen 2026','Riesgo','Acción']}/>
-          <tbody>
-            {[
-              { cli:'Helados Artesanos MED', ult:'12/03', dias:'35d', diasColor:'#e03030', vol:'18.200€', riesgo:'red:Alto', btn:'red:Agendar YA' },
-              { cli:'Obrador Santa Clara', ult:'15/03', dias:'32d', diasColor:'#e8a010', vol:'12.400€', riesgo:'amber:Medio', btn:'orange:Agendar' },
-              { cli:'Catering Levante', ult:'16/03', dias:'31d', diasColor:'#e8a010', vol:'9.800€', riesgo:'amber:Medio', btn:'orange:Agendar' },
-            ].map((r,i)=>{
-              const [rt,rv] = r.riesgo.split(':')
-              const [bt,bv] = r.btn.split(':')
-              return (
-                <tr key={i} style={{ borderBottom:'1px solid #F0E4D6' }} onMouseEnter={e=>e.currentTarget.style.background='#FFF8F0'} onMouseLeave={e=>e.currentTarget.style.background=''}>
-                  <td style={{ padding:'8px 10px', fontWeight:700, color:NAVY }}>{r.cli}</td>
-                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{r.ult}</td>
-                  <td style={{ padding:'8px 10px', color:r.diasColor, fontWeight:700 }}>{r.dias}</td>
-                  <td style={{ padding:'8px 10px', color:'#3a4a5a' }}>{r.vol}</td>
-                  <td style={{ padding:'8px 10px' }}><Badge type={rt} text={rv}/></td>
-                  <td style={{ padding:'8px 10px' }}><TblBtn type={bt} onClick={()=>act('agendar', r.cli)}>{bv}</TblBtn></td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </ScrollTable>
-        <IABox text="<strong>Alerta IA:</strong> Helados Artesanos MED no recibe visita en 35 días y su volumen ha caído un 22%. <strong>Riesgo de pérdida si no se visita esta semana.</strong> IA ha añadido la visita a la ruta sugerida del jueves." />
-      </Card>
-
       <NuevaVisitaModal open={open} onClose={()=>setOpen(false)} onCreate={createVisita} />
     </div>
   )
