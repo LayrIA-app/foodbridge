@@ -902,6 +902,32 @@ function BusquedaScreen({ act }) {
                 </div>
               </div>
             ))}
+
+            {/* Productos complementarios sugeridos por IA — HTML v5 l.2803-2824 */}
+            <div style={{ marginTop:14, border:`2px solid rgba(232,116,32,.3)`, borderRadius:10, padding:14, background:'linear-gradient(135deg,#FFFBF5,#FFF3E8)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10, flexWrap:'wrap', gap:6 }}>
+                <div style={{ fontSize:'.7rem', fontWeight:800, color:ACCENT, display:'flex', alignItems:'center', gap:6 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+                  Productos complementarios sugeridos por IA
+                </div>
+                <span style={{ fontSize:'.5rem', fontWeight:800, letterSpacing:'.12em', textTransform:'uppercase', padding:'3px 8px', borderRadius:12, background:`linear-gradient(135deg,${ACCENT},#F5A623)`, color:'#fff' }}>EXCLUSIVO COAXIONIA</span>
+              </div>
+              <div style={{ fontSize:'.62rem', color:'#7a8899', marginBottom:10 }}>Basándose en el producto buscado, la IA sugiere complementarios que el cliente suele necesitar:</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:8 }}>
+                {[
+                  { nom:'Mejorante panario', ctx:'Se usa con Harina W-280 en el 87% de los pedidos', metric:'+12% margen cruzado', metricColor:'#2D8A30' },
+                  { nom:'Levadura fresca prensada', ctx:'Clientes que compran harina W-280 también piden levadura', metric:'+8% venta cruzada', metricColor:'#2D8A30' },
+                  { nom:'Sal refinada industrial', ctx:'Complemento habitual · reposición automática cada 3 meses', metric:'Reposición sugerida', metricColor:ACCENT },
+                ].map((c,i)=>(
+                  <div key={i} onClick={()=>act('cotizar',`Complementario ${c.nom}`)} style={{ background:'#fff', borderRadius:8, padding:10, border:'1px solid #E8D5C0', cursor:'pointer', transition:'transform .15s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform=''}>
+                    <div style={{ fontSize:'.68rem', fontWeight:700, color:NAVY, marginBottom:4 }}>{c.nom}</div>
+                    <div style={{ fontSize:'.55rem', color:'#7a8899', marginBottom:6 }}>{c.ctx}</div>
+                    <div style={{ fontSize:'.55rem', fontWeight:700, color:c.metricColor }}>{c.metric}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <IABox text="<strong>Motor IA 3 capas:</strong> La IA entiende el lenguaje natural del sector y mapea a taxonomía oficial. Cruza catálogos de 23 fabricantes con nomenclaturas distintas." />
           </div>
         )}
