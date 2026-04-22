@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { usePedidos, useCotizaciones, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
-import BottomNav, { BOTTOM_NAV_CLIENTE } from '../../components/BottomNav'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -1209,7 +1208,6 @@ export default function ClientePage() {
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
       {alertsOpen&&<AlertsModal alerts={displayAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
-      <BottomNav items={BOTTOM_NAV_CLIENTE} active={active} onChange={changeSection} />
     </div>
   )
 }

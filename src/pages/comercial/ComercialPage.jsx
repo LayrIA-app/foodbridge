@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import FichaModal from '../../components/FichaModal'
-import BottomNav, { BOTTOM_NAV_COMERCIAL } from '../../components/BottomNav'
 import { usePedidos, useCotizacionClientesMap, useCotizaciones, useProducts, useVisitas, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 import { pdfCotizacion, pdfFichaTecnica } from '../../utils/generatePDF'
@@ -2688,7 +2687,6 @@ export default function ComercialPage() {
       <Toast msg={toast}/>
       {push&&<PushNotif msg={push} onClose={()=>setPush(null)}/>}
       {alertsOpen&&<AlertsModal alerts={displayAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))}/>}
-      <BottomNav items={BOTTOM_NAV_COMERCIAL} active={active} onChange={changeSection} />
     </div>
   )
 }

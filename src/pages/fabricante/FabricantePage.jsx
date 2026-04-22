@@ -4,7 +4,6 @@ import { useApp } from '../../context/AppContext'
 import { useProducts, useTarifas, useFabricanteKpis, useFabricanteRentabilidad, useFabricanteVentasCliente, useAlertasIa, usePushIa } from '../../hooks'
 import IaBoxLive from '../../components/IaBoxLive'
 import FichaModal from '../../components/FichaModal'
-import BottomNav, { BOTTOM_NAV_FAB_DIR, BOTTOM_NAV_FAB_OPS } from '../../components/BottomNav'
 
 const ACCENT = '#E87420'
 const NAVY = '#1A2F4A'
@@ -1906,7 +1905,6 @@ export default function FabricantePage() {
       <Toast msg={toast} />
       {push && <PushNotif msg={push} onClose={()=>setPush(null)} />}
       {alertsOpen && <AlertsModal alerts={currentAlerts} onClose={()=>setAlertsOpen(false)} readSet={readAlerts} onMarkRead={i=>setReadAlerts(s=>new Set([...s,i]))} />}
-      <BottomNav items={isOps ? BOTTOM_NAV_FAB_OPS : BOTTOM_NAV_FAB_DIR} active={active} onChange={changeSection} />
     </div>
   )
 }
